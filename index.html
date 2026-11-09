@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEN IA Alico · Bienvenidos a la Era de la IA</title>
+<meta name="description" content="GEN IA Alico: cinco casos de inteligencia artificial conectados a las áreas de la empresa.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/al.css">
+<style>
+body{background:radial-gradient(1400px 700px at 50% 20%,#fffdf8 0%,#fbeedc 55%,#f6dfc2 100%);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+header.hub{display:flex;align-items:center;gap:.55rem;padding:.7rem 1.6rem;flex:none}
+.brand{display:flex;align-items:center;gap:.8rem}
+.brand h1{font-size:2.35rem;font-weight:800;letter-spacing:-.03em;line-height:1;background:linear-gradient(100deg,#B15E14 0%,#EE7623 30%,#00BED6 62%,#00758D 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s ease-in-out infinite}
+.brand h1 em{font-style:normal}
+@keyframes shine{50%{background-position:100% 0}}
+.brand small{white-space:nowrap;display:block;color:var(--ink);font-size:1.02rem;font-weight:700;letter-spacing:.01em;margin-top:.2rem}
+.brand small b{color:var(--or)}
+/* flujos de datos y mensajes que llegan volando */
+.fl-line{fill:none;stroke-width:3;stroke-dasharray:3 9;stroke-linecap:round;opacity:.38;animation:fdash 1.6s linear infinite;transition:opacity .25s,stroke-width .25s}
+@keyframes fdash{to{stroke-dashoffset:-24}}
+.flows.dim .fl-line{opacity:.08}.flows .fl.on .fl-line{opacity:1;stroke-width:3.2}
+.fl-lab{opacity:0;transition:opacity .25s}.flows .fl.on .fl-lab{opacity:1}
+.src rect{fill:#fff;stroke:#e8dccb;stroke-width:2;filter:drop-shadow(0 3px 5px rgba(177,94,20,.18))}.src text{font-family:Poppins,sans-serif;font-weight:700;font-size:19px;fill:#2b2e30}
+.src.on rect{stroke:var(--sc);stroke-width:3}
+.flows.off{display:none}
+.bird{pointer-events:none}.bird text{font-family:Poppins,sans-serif}
+.wing{animation:flap .32s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+.wing.r{transform-origin:50% 100%;animation-delay:.16s}
+@keyframes flap{to{transform:scaleY(-.6)}}
+.prog{display:flex;align-items:center;gap:.5rem;background:#fff;border:2px solid var(--line);border-radius:99px;padding:.35rem .9rem;font-weight:700;font-size:.85rem}
+.prog i{width:.8rem;height:.8rem;border-radius:50%;background:#e5ddd2;display:inline-block}.prog i.on{background:var(--ok)}
+.hbtn{white-space:nowrap;background:#fff;border:2px solid var(--line);border-radius:14px;padding:.45rem .9rem;font-weight:700;font-size:.82rem;display:inline-flex;gap:.4rem;align-items:center}
+.hbtn:hover{border-color:var(--or)}
+.hbtn.go{background:var(--or);border-color:var(--or);color:#fff}
+.stagewrap{flex:1;min-height:0;display:grid;grid-template-columns:14.5rem minmax(0,1fr) 14.5rem;gap:.6rem;padding:0 1.2rem 1rem}
+.center{min-width:0;min-height:0;display:flex;position:relative;z-index:2}
+#scene{width:100%;height:100%;display:block;overflow:visible}
+.col{display:flex;flex-direction:column;justify-content:space-around;gap:.9rem;padding:.6rem 0;min-height:0}
+.hint{background:#fff;border:2px dashed var(--or);border-radius:18px;padding:.7rem 1rem;font-size:.82rem}
+.hint b{display:block;font-size:1rem}.hint .h{font-size:1.6rem;display:inline-block;animation:tap 1.4s ease-in-out infinite}
+@keyframes tap{50%{transform:translate(6px,6px) scale(.9)}}
+.cc{width:100%;background:#fff;border:2px solid var(--line);border-top:7px solid var(--c);border-radius:20px;padding:.7rem .9rem .8rem;text-align:left;box-shadow:var(--sh);display:flex;flex-direction:column;gap:.15rem;transition:transform .15s,box-shadow .15s;position:relative}
+.cc:hover,.cc.hv{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.16);border-color:var(--c)}
+.cc .nn{position:absolute;top:-.95rem;left:.8rem;width:1.9rem;height:1.9rem;border-radius:50%;background:var(--c);color:#fff;font-weight:800;display:grid;place-items:center;border:3px solid #fff;font-size:.9rem}
+.cc h3{font-size:.95rem;font-weight:800;line-height:1.2;margin-top:.25rem;padding-right:3.4rem}
+.cc p{font-size:.72rem;color:var(--gr);line-height:1.3}
+.cc .go{margin-top:.2rem;font-size:.75rem;font-weight:800;color:var(--c)}
+.cc .ok{position:absolute;top:.5rem;right:.6rem;background:#e2f6ec;color:var(--ok);font-size:.65rem;font-weight:800;padding:.1rem .5rem;border-radius:99px}
+#tip{position:fixed;z-index:30;pointer-events:none;background:#fff;border:2px solid var(--c,#EE7623);border-radius:18px;padding:.8rem 1rem;box-shadow:0 16px 40px rgba(0,0,0,.22);width:21rem;font-size:.82rem;opacity:0;transform:translateY(6px);transition:opacity .15s,transform .15s}
+#tip.on{opacity:1;transform:none}
+#tip h4{font-size:1rem;font-weight:800;margin-bottom:.2rem}
+#tip .row{display:flex;gap:.4rem;margin-top:.3rem;font-size:.78rem}#tip .row b{flex:none;color:var(--gr)}
+#tip .cta{margin-top:.5rem;font-weight:800;color:var(--c)}
+.zone{cursor:pointer;outline:none}
+.zbody{transition:transform .25s cubic-bezier(.2,.8,.3,1),filter .25s}
+.zone.hv .zbody{transform:translateY(-7px);filter:drop-shadow(0 14px 10px rgba(0,0,0,.22))}
+.glow{opacity:.0;transition:opacity .2s}.zone.hv .glow,.zone.spot .glow{opacity:1}
+.zone.spot .zbody{transform:translateY(-7px)}
+.glow{animation:none}
+.pulsering{fill:none;stroke-width:3;stroke-dasharray:10 8;animation:dash 2.4s linear infinite;opacity:.55}
+.zone.hv .pulsering{opacity:1}
+@keyframes dash{to{stroke-dashoffset:-36}}
+.pin{cursor:pointer;animation:pinb 3.2s ease-in-out infinite}
+.pin .pb{transition:transform .2s}.pin.hv .pb{transform:scale(1.12)}
+@keyframes pinb{50%{transform:translate(var(--px),calc(var(--py) - 5px))}}
+.pin text{font-family:Poppins,system-ui,sans-serif;pointer-events:none}
+.bob{animation:bobp 2.4s ease-in-out infinite}
+@keyframes bobp{50%{transform:translate(var(--px),calc(var(--py) - 1.6px))}}
+.sway{animation:sway 4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes sway{50%{transform:rotate(1.6deg)}}
+.cloud{animation:cld linear infinite;opacity:.8}
+@keyframes cld{from{transform:translateX(-700px)}to{transform:translateX(900px)}}
+.smoke{animation:smk 4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes smk{0%{opacity:0;transform:translate(0,0) scale(.4)}20%{opacity:.7}100%{opacity:0;transform:translate(14px,-60px) scale(2.2)}}
+.drive{animation:drive 24s linear infinite}
+@keyframes drive{0%{transform:translate(0,0);opacity:0}4%{opacity:1}96%{opacity:1}100%{transform:translate(522px,301px);opacity:0}}
+.driveb{animation:driveb 28s linear infinite}
+@keyframes driveb{0%{transform:translate(0,0);opacity:0}4%{opacity:1}96%{opacity:1}100%{transform:translate(-522px,-301px);opacity:0}}
+.beltstripe{stroke-dasharray:6 10;animation:belt .9s linear infinite}
+@keyframes belt{to{stroke-dashoffset:-16}}
+.beam{animation:beam .9s ease-in-out infinite}
+@keyframes beam{50%{opacity:.18}}
+.cyc{opacity:0;animation:cyc 12s infinite}
+@keyframes cyc{0%{opacity:0;transform:translateY(6px)}3%,22%{opacity:1;transform:none}26%,100%{opacity:0}}
+.wave{animation:wave 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes wave{50%{transform:scaleY(.35)}}
+.fly{animation:fly 6s linear infinite;opacity:0}
+@keyframes fly{0%{opacity:0;transform:translate(70px,40px)}10%{opacity:1}70%{opacity:1}85%,100%{opacity:0;transform:translate(0,0)}}
+.rise{animation:rise 3.2s linear infinite;opacity:0}
+@keyframes rise{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-150px)}}
+.spin{animation:spinr 7s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spinr{to{transform:rotate(360deg)}}
+.ping{animation:ping 3s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ping{0%{opacity:.7;transform:scale(.3)}100%{opacity:0;transform:scale(1.6)}}
+.float{animation:flt 3.6s ease-in-out infinite}
+@keyframes flt{50%{transform:translateY(-6px)}}
+.flag{animation:flg 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:0 50%}
+@keyframes flg{50%{transform:skewY(-8deg) scaleX(.94)}}
+.blink{animation:blk 1.3s steps(2,end) infinite}@keyframes blk{50%{opacity:.25}}
+.pop{opacity:0}.pop.show{animation:popa 1.1s ease-out}
+@keyframes popa{0%{opacity:0;transform:translateY(8px) scale(.6)}15%{opacity:1;transform:none scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.sky{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+@media (max-width:1200px){body{height:auto;overflow:auto}.stagewrap{grid-template-columns:1fr;grid-template-rows:auto auto auto}.center{height:60vh}.hint{display:none}.col{flex-direction:row;flex-wrap:wrap}}
+@media (max-height:820px){.cc p{display:none}}
+</style>
+</head>
+<body>
+<header class="hub">
+  <div class="brand">
+    <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true"><line x1="32" y1="6" x2="32" y2="14" stroke="#B15E14" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="6" r="4" fill="#00BED6"/><rect x="10" y="14" width="44" height="38" rx="14" fill="#EE7623"/><rect x="16" y="21" width="32" height="22" rx="9" fill="#fff"/><circle cx="26" cy="32" r="4.5" fill="#00758D"/><circle cx="38" cy="32" r="4.5" fill="#00758D"/><path d="M26 39 q6 5 12 0" stroke="#EE7623" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="5" y="26" width="6" height="14" rx="3" fill="#E99B35"/><rect x="53" y="26" width="6" height="14" rx="3" fill="#E99B35"/></svg>
+    <div><h1>GEN IA <em>Alico</em></h1><small>Bienvenidos a la <b>Era de la Inteligencia Artificial</b></small></div>
+  </div>
+  <div class="sp"></div>
+  <div class="prog" id="prog" title="Casos que ya visitaste"></div>
+  <span id="al-ia" class="chip"></span><span id="al-cloud" class="chip" style="display:none"></span>
+  <button class="hbtn" id="btnFlow" title="Muestra de qué área sale cada dato que alimenta a cada caso">🔌 Datos: sí</button>
+  <button class="hbtn" id="btnHi" title="Bienvenida en voz alta">🔊 Bienvenida</button>
+  <button class="hbtn go" id="btnTour">▶ Recorrido con voz</button>
+  <button class="hbtn" id="btnSet">⚙️ Ajustes</button>
+</header>
+<div class="stagewrap" id="stagewrap">
+  <aside class="col" id="colL"></aside>
+  <div class="center"><svg id="scene" viewBox="-650 -290 1370 940" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vista isométrica de la planta de Alico con cinco áreas"></svg></div>
+  <aside class="col" id="colR"><div class="hint" id="hint"><span class="h">👆</span> <b>Toca un edificio para entrar</b>Las líneas muestran de qué área sale cada dato.</div></aside>
+</div>
+<div id="tip"></div>
+
+<script src="shared/al.js"></script>
+<script>
+'use strict';
+/* ============================ datos de los 5 casos ============================ */
+const Z = [
+  {n: 1, id: 'vision', corto: 'La cámara revisa cada pieza', c: '#00BED6', nombre: 'Visión artificial', pub: 'Operarios, supervisores de línea y Calidad', area: 'Operaciones · Línea de producción', ini: 'Detección automática de defectos en fundas impresas (Colombia)', txt: 'La cámara aprende qué es una funda buena y frena los defectos en tiempo real, sin detener la banda.'},
+  {n: 2, id: 'maestro', corto: 'El operario le habla a la máquina', c: '#EE7623', nombre: 'Maestro · asistente de planta', pub: 'Operarios de planta y líderes de turno', area: 'Producción · Piso de planta', ini: 'Soporte técnico en planta y traspaso de turno', txt: 'El operario habla o toca un botón, Maestro responde. Lo que uno aprende queda para todos los turnos.'},
+  {n: 3, id: 'conocimiento', corto: 'Respuestas técnicas con fuente', c: '#00758D', nombre: 'Agente de conocimiento técnico', pub: 'Técnicos, supervisores, I+D y Soporte técnico', area: 'Soporte técnico · Paraguay', ini: 'Agente de IA para soporte técnico en planta (Paraguay)', txt: 'Manuales y experiencia técnica en un agente que responde citando la fuente, las 24 horas.'},
+  {n: 4, id: 'reclamos', corto: 'Cada mensaje del cliente, atendido', c: '#E99B35', nombre: 'Centro de inteligencia del cliente', pub: 'Servicio al cliente, Calidad, Logística, Ventas y Finanzas', area: 'Calidad y servicio · Chile', ini: 'Plataforma digital de reclamos y devoluciones (Chile + Epicor)', txt: 'Del reclamo a la nota crédito: captura, triage con IA, causa raíz, Epicor y analítica de calidad.'},
+  {n: 5, id: 'torre', corto: 'Todo el negocio en una pantalla', c: '#6C7A89', nombre: 'Torre de control de negocios', pub: 'Gerencia, Ventas, Distribución y Cadena de suministro', area: 'Gerencia · Logística y despachos', ini: 'Inteligencia de negocio para decidir: ventas, distribución e inventario', txt: 'Ventas, despachos e inventario en una sola pantalla. Y puedes preguntarle a tus datos con IA.'}
+];
+const RUTA = {vision: 'casos/vision/index.html', maestro: 'casos/maestro/index.html', conocimiento: 'casos/conocimiento/index.html', reclamos: 'casos/reclamos/index.html', torre: 'casos/torre/index.html'};
+
+/* ============================ geometría isométrica ============================ */
+const CW = 36, CH = 20.8, ZU = 26;
+const P = (x, y, z = 0) => [(x - y) * CW, (x + y) * CH - z * ZU];
+const pts = a => a.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+function sh(c, k) { const v = [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const f = k > 0 ? t => Math.round(t + (255 - t) * k) : t => Math.round(t * (1 + k)); return '#' + v.map(f).map(t => Math.max(0, Math.min(255, t)).toString(16).padStart(2, '0')).join(''); }
+function box(x, y, z, w, d, h, c, o = {}) {
+  const top = o.top || sh(c, .2), L = o.l || c, R = o.r || sh(c, -.2), st = o.stroke ? `stroke="${o.stroke}" stroke-width="${o.sw || .6}" stroke-linejoin="round"` : '';
+  const op = o.op != null ? ` opacity="${o.op}"` : '';
+  let s = '';
+  if (!o.noL) s += `<polygon points="${pts([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)])}" fill="${L}" ${st}${op}/>`;
+  if (!o.noR) s += `<polygon points="${pts([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)])}" fill="${R}" ${st}${op}/>`;
+  if (!o.noT) s += `<polygon points="${pts([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)])}" fill="${top}" ${st}${op}/>`;
+  return s;
+}
+function flat(x, y, z, w, d, fill, extra = '') { return `<polygon points="${pts([P(x, y, z), P(x + w, y, z), P(x + w, y + d, z), P(x, y + d, z)])}" fill="${fill}" ${extra}/>`; }
+function cyl(cx, cy, z, r, h, c, o = {}) {
+  const [bx, by] = P(cx, cy, z), [, ty] = P(cx, cy, z + h), rx = r * CW * 1.414, ry = r * CH * 1.414;
+  return `<path d="M${bx - rx},${ty} L${bx - rx},${by} A${rx},${ry} 0 0 0 ${bx + rx},${by} L${bx + rx},${ty} Z" fill="${c}"/>
+  <path d="M${bx + rx * .25},${ty} L${bx + rx * .25},${by + ry * .97} A${rx},${ry} 0 0 0 ${bx + rx},${by} L${bx + rx},${ty} Z" fill="#000" opacity=".13"/>
+  <ellipse cx="${bx}" cy="${ty}" rx="${rx}" ry="${ry}" fill="${o.top || sh(c, .25)}"/>`;
+}
+function person(x, y, z, o = {}) {
+  const [px, py] = P(x, y, z), s = (o.s || 1) * 1.3, sk = o.skin || '#E8B58F', sh1 = o.shirt || '#00758D', pa = o.pants || '#3b4a5a';
+  let hat = '';
+  if (o.hat === 'hard') hat = `<path d="M-7,-39 a7,7 0 0 1 14,0 z" fill="${o.hc || '#E99B35'}"/><rect x="-8.2" y="-39.6" width="16.4" height="2.6" rx="1.3" fill="${o.hc || '#E99B35'}"/>`;
+  else if (o.hat === 'net') hat = `<path d="M-6.4,-39 a6.4,6.4 0 0 1 12.8,0 z" fill="#fff" opacity=".95"/>`;
+  else hat = `<path d="M-6.4,-39.5 a6.6,6.6 0 0 1 13.2,0 q-3,-2.6 -6.6,-2.6 q-3.6,0 -6.6,2.6z" fill="${o.hair || '#3a2a20'}"/>`;
+  const head = o.headset ? `<path d="M-7,-38 a7,7 0 0 1 14,0" fill="none" stroke="#222" stroke-width="2"/><rect x="-8.6" y="-39" width="3" height="6" rx="1.5" fill="#222"/><rect x="5.6" y="-39" width="3" height="6" rx="1.5" fill="#222"/><path d="M-7,-34 q-1,5 5,5" fill="none" stroke="#222" stroke-width="1.4"/>` : '';
+  const arms = o.arm === 'up' ? `<rect x="-11" y="-31" width="4" height="13" rx="2" fill="${sh1}"/><rect x="6.5" y="-44" width="4" height="15" rx="2" fill="${sh1}" transform="rotate(20 8 -30)" class="wv"/>` : `<rect x="-11" y="-31" width="4" height="14" rx="2" fill="${sh1}"/><rect x="7" y="-31" width="4" height="14" rx="2" fill="${sh1}"/>`;
+  return `<g class="bob" style="--px:${px}px;--py:${py}px;animation-delay:${o.dl || 0}s;transform:translate(${px}px,${py}px)"><g transform="scale(${s})">
+  <ellipse cx="0" cy="1" rx="9" ry="3.6" fill="#000" opacity=".16"/>
+  <rect x="-5" y="-14" width="4.4" height="14" rx="2" fill="${pa}"/><rect x="0.6" y="-14" width="4.4" height="14" rx="2" fill="${pa}"/>
+  ${arms}<rect x="-7" y="-31" width="14" height="19" rx="6" fill="${sh1}"/>
+  ${o.badge ? `<rect x="-3" y="-27" width="6" height="4" rx="1" fill="#fff" opacity=".85"/>` : ''}
+  <circle cx="0" cy="-37" r="6.2" fill="${sk}"/>${hat}${head}</g></g>`;
+}
+function tree(x, y, s = 1, c = '#6FAE6B') { const [px, py] = P(x, y, 0); return `<g transform="translate(${px},${py}) scale(${s})"><ellipse cx="0" cy="2" rx="12" ry="5" fill="#000" opacity=".14"/><rect x="-2" y="-16" width="4" height="17" fill="#8a6a4a"/><circle cx="0" cy="-28" r="13" fill="${c}"/><circle cx="-7" cy="-21" r="9" fill="${sh(c, -.1)}"/><circle cx="7" cy="-22" r="9" fill="${sh(c, .12)}"/></g>`; }
+function skewL(x, y, z, inner) { const [px, py] = P(x, y, z); return `<g transform="translate(${px},${py}) skewY(30)">${inner}</g>`; }
+function skewR(x, y, z, inner) { const [px, py] = P(x, y, z); return `<g transform="translate(${px},${py}) skewY(-30)">${inner}</g>`; }
+function truck(x, y, c = '#fff', cab = '#EE7623') {
+  return box(x, y, 0.12, 1.55, 0.78, 0.85, c) + box(x + 1.58, y + .04, 0.12, 0.55, 0.7, 0.62, cab) + box(x + 1.66, y + .1, .5, .3, .62, .3, '#BDE9F2', {noT: false}) +
+    cyl(x + .35, y + .8, 0, .16, .14, '#222') + cyl(x + 1.3, y + .8, 0, .16, .14, '#222') + cyl(x + 1.85, y + .78, 0, .16, .14, '#222') + skewL(x + .15, y + .78, .62, `<rect x="2" y="-12" width="30" height="7" rx="2" fill="${cab}" opacity=".9"/>`);
+}
+function car(x, y, c) { return box(x, y, .1, .95, .5, .32, c) + box(x + .22, y + .05, .42, .5, .4, .26, sh(c, .35)) + cyl(x + .2, y + .52, 0, .1, .1, '#222') + cyl(x + .78, y + .52, 0, .1, .1, '#222'); }
+function pin(z, x, y) {
+  return `<g class="pin" data-z="${z.id}" style="--px:${x}px;--py:${y}px;transform:translate(${x}px,${y}px)"><g class="pb">
+  <ellipse cx="0" cy="26" rx="9" ry="3.5" fill="#000" opacity=".2"/><path d="M-8,13 L0,26 L8,13 Z" fill="${z.c}"/>
+  <circle cx="0" cy="0" r="19" fill="${z.c}" stroke="#fff" stroke-width="4"/>
+  <text x="0" y="6.5" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">${z.n}</text></g></g>`;
+}
+
+/* ============================ construcción de la escena ============================ */
+function shell(x0, y0, w, d, c, o = {}) {
+  const wall = o.wall || '#F5F0E8', h = o.h || 1.35, floor = o.floor || '#C9D0D6';
+  let s = box(x0, y0, 0, w, d, .16, floor, {top: o.ftop || sh(floor, .15), l: sh(floor, -.08), r: sh(floor, -.18)});
+  s += box(x0, y0, .16, w, .24, h, wall, {l: sh(wall, .5), r: sh(wall, -.12)}) + box(x0, y0, .16 + h, w, .24, .2, c, {top: sh(c, .3)});
+  s += box(x0, y0 + .24, .16, .24, d - .24, h, wall, {l: sh(wall, .5), r: sh(wall, -.06)}) + box(x0, y0 + .24, .16 + h, .24, d - .24, .2, c, {top: sh(c, .3)});
+  s += box(x0, y0 + d - .2, .16, w, .2, .28, sh(wall, -.04), {l: sh(wall, .3)});
+  s += box(x0 + w - .2, y0 + .24, .16, .2, d - .44, .28, sh(wall, -.04), {l: sh(wall, .3)});
+  if (o.sign) {
+    const sw = o.signW || 210, zb = .16 + h + .2;
+    s += box(x0 + .5, y0 + .05, zb, .1, .1, .5, '#8a949c', {noT: true}) + box(x0 + .5 + sw / CW - .3, y0 + .05, zb, .1, .1, .5, '#8a949c', {noT: true});
+    s += skewL(x0 + .35, y0 + .1, zb + .5, `<rect x="0" y="-40" width="${sw}" height="36" rx="9" fill="${c}"/><rect x="3" y="-37" width="${sw - 6}" height="30" rx="7" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.5"/><text x="${sw / 2}" y="-16.5" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="800" font-size="${o.fs || 17}" fill="#fff" letter-spacing="1.1">${o.sign}</text>`);
+  }
+  return s;
+}
+function shell(x0, y0, w, d, c, o = {}) {
+  const wall = o.wall || '#F5F0E8', h = o.h || 1.5, floor = o.floor || '#C9D0D6';
+  let s = box(x0, y0, 0, w, d, .16, floor, {top: o.ftop || sh(floor, .15), l: sh(floor, -.08), r: sh(floor, -.18)});
+  s += box(x0, y0, .16, w, .24, h, wall, {l: sh(wall, .5), r: sh(wall, -.12)}) + box(x0, y0, .16 + h, w, .24, .2, c, {top: sh(c, .3)});
+  s += box(x0, y0 + .24, .16, .24, d - .24, h, wall, {l: sh(wall, .5), r: sh(wall, -.06)}) + box(x0, y0 + .24, .16 + h, .24, d - .24, .2, c, {top: sh(c, .3)});
+  s += box(x0, y0 + d - .2, .16, w, .2, .28, sh(wall, -.04), {l: sh(wall, .3)});
+  s += box(x0 + w - .2, y0 + .24, .16, .2, d - .44, .28, sh(wall, -.04), {l: sh(wall, .3)});
+  if (o.sign) {
+    const sw = o.signW || 210;
+    s += skewL(x0 + .4, y0 + .25, .5, `<rect x="0" y="-26" width="${sw}" height="23" rx="7" fill="${c}"/><rect x="2.5" y="-23.5" width="${sw - 5}" height="18" rx="5" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/><text x="${sw / 2}" y="-10" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="800" font-size="${o.fs || 13.5}" fill="#fff" letter-spacing="1">${o.sign}</text>`);
+  }
+  return s;
+}
+function buildScene() {
+  const AC = {vision: '#00BED6', maestro: '#EE7623', conoc: '#00758D', cliente: '#E99B35', torre: '#6C7A89'};
+  let s = `<defs>
+    <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9f6fb"/><stop offset="1" stop-color="#8fd7e6"/></linearGradient>
+    <linearGradient id="gScr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f2a33"/><stop offset="1" stop-color="#143b46"/></linearGradient>
+    <filter id="fSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter></defs>`;
+  /* ---------- suelo, calles, plazas ---------- */
+  s += `<polygon points="${pts([P(-.5, -.5, 0), P(14.6, -.5, 0), P(14.6, 12.5, 0), P(-.5, 12.5, 0)])}" fill="#000" opacity=".16" filter="url(#fSoft)" transform="translate(0,34)"/>`;
+  s += box(-.5, -.5, -.7, 15.1, 13, .7, '#B9C7A8', {top: '#DCE9D2', l: '#B5A183', r: '#9C8A6E'});
+  s += flat(-.2, -.2, .01, 14.5, 12.4, '#E3EEDA');
+  s += flat(-.2, 1.5, .02, 14.5, .85, '#8E959B') + flat(-.2, 7.4, .02, 14.5, .9, '#8E959B') + flat(6.95, 2.35, .02, .5, 5.05, '#8E959B');
+  s += flat(-.2, 2.35, .02, 14.5, 1.15, '#EFE9DC') + flat(-.2, 8.3, .02, 14.5, .8, '#EFE9DC');
+  const lane = (x0, x1, y) => `<polyline points="${pts([P(x0, y, .03), P(x1, y, .03)])}" stroke="#fff" stroke-width="2" stroke-dasharray="10 9" opacity=".85" fill="none"/>`;
+  s += lane(-.1, 14.2, 1.92) + lane(-.1, 14.2, 7.85) + `<polyline points="${pts([P(7.2, 2.4, .03), P(7.2, 7.4, .03)])}" stroke="#fff" stroke-width="2" stroke-dasharray="10 9" opacity=".85" fill="none"/>`;
+  s += cyl(13.95, 1.0, 0, .5, 2.8, '#D7DDE2') + cyl(13.95, 1.9, 0, .5, 2.2, '#D7DDE2') + cyl(13.95, 1.0, 2.8, .5, .22, '#aab3bb');
+
+  /* ================= ZONA 5 · TORRE + DOCK ================= */
+  let z5 = '';
+  const tc = P(2.1, .8, 0);
+  z5 += `<ellipse class="ping" cx="${tc[0]}" cy="${tc[1] + 8}" rx="200" ry="105" fill="none" stroke="${AC.torre}" stroke-width="2.5"/><ellipse class="ping" style="animation-delay:1.5s" cx="${tc[0]}" cy="${tc[1] + 8}" rx="200" ry="105" fill="none" stroke="#00BED6" stroke-width="2.5"/>`;
+  z5 += `<polygon class="pulsering" points="${pts([P(.7, -.15, .04), P(3.7, -.15, .04), P(3.7, 1.7, .04), P(.7, 1.7, .04)])}" stroke="${AC.torre}"/><polygon class="pulsering" points="${pts([P(5.4, 0, .04), P(13.7, 0, .04), P(13.7, 1.5, .04), P(5.4, 1.5, .04)])}" stroke="${AC.torre}"/><g class="zbody">`;
+  const TH = 6.4;
+  z5 += box(1, .1, 0, 2.2, 1.4, TH, '#E4E9EE', {l: '#EEF2F5', r: '#C9D1D8'});
+  for (let k = 0; k < 6; k++) z5 += box(.97, .07, .45 + k, 2.26, 1.46, .07, '#9AA7B3', {noT: true, op: .95});
+  for (let k = 0; k < 6; k++) {
+    z5 += `<polygon points="${pts([P(1.15, 1.5, .65 + k), P(3.05, 1.5, .65 + k), P(3.05, 1.5, 1.15 + k), P(1.15, 1.5, 1.15 + k)])}" fill="url(#gGlass)" opacity=".95"/>`;
+    z5 += `<polygon points="${pts([P(3.2, .25, .65 + k), P(3.2, 1.35, .65 + k), P(3.2, 1.35, 1.15 + k), P(3.2, .25, 1.15 + k)])}" fill="#7bc4d6" opacity=".95"/>`;
+  }
+  const CR = TH + .15;
+  z5 += box(.8, -.05, CR, 2.6, 1.7, 1.35, '#2f3b46', {top: '#4a5b69'});
+  z5 += `<polygon points="${pts([P(.9, 1.65, CR + .15), P(3.3, 1.65, CR + .15), P(3.3, 1.65, CR + 1.2), P(.9, 1.65, CR + 1.2)])}" fill="url(#gScr)"/>`;
+  z5 += skewL(.9, 1.65, CR + .15, `<g transform="translate(6,-35)"><rect x="0" y="0" width="22" height="13" rx="2" fill="#00BED6" opacity=".9"/><rect x="26" y="0" width="22" height="13" rx="2" fill="#EE7623" opacity=".9"/><rect x="52" y="0" width="22" height="13" rx="2" fill="#2BD67B" opacity=".9"/><polyline points="3,10 8,6 13,8 19,3" fill="none" stroke="#fff" stroke-width="1.4"/><rect x="29" y="5" width="3" height="6" fill="#fff"/><rect x="34" y="3" width="3" height="8" fill="#fff"/><rect x="39" y="6" width="3" height="5" fill="#fff"/><circle cx="63" cy="6.5" r="4.5" fill="none" stroke="#fff" stroke-width="1.6"/></g><g transform="translate(4,-17)"><rect x="0" y="0" width="70" height="6" rx="3" fill="#ffffff22"/><rect x="0" y="0" width="46" height="6" rx="3" fill="#00BED6"/></g>`);
+  z5 += box(.8, -.05, CR + 1.35, 2.6, 1.7, .14, '#EE7623');
+  const [mx, my] = P(1.6, .6, CR + 1.5);
+  z5 += `<line x1="${mx}" y1="${my}" x2="${mx}" y2="${my - 46}" stroke="#53575A" stroke-width="3"/><circle cx="${mx}" cy="${my - 48}" r="4" fill="#EE7623" class="blink"/>`;
+  z5 += `<g transform="translate(${mx + 40},${my - 4})"><line x1="0" y1="0" x2="0" y2="-24" stroke="#53575A" stroke-width="3"/><g class="spin"><ellipse cx="0" cy="-26" rx="22" ry="7" fill="#dfe6ec" stroke="#53575A" stroke-width="1.6"/><line x1="0" y1="-26" x2="22" y2="-26" stroke="#EE7623" stroke-width="3"/></g></g>`;
+  for (let k = 0; k < 6; k++) { const [dx, dy] = P(3.2, 1.4, 0); z5 += `<circle class="rise" style="animation-delay:${k * .55}s" cx="${dx - 8 - k * 10}" cy="${dy + 4 - k * 5}" r="3.2" fill="#00BED6"/>`; }
+  // dock / bodega
+  z5 += box(5.6, .2, 0, 7.8, 1.2, 1.9, '#F3EEE5', {l: '#FAF6EF', r: '#DAD3C7'});
+  z5 += box(5.55, .15, 1.9, 7.9, 1.3, .2, '#8FA0AE', {top: '#C6D1DA'});
+  for (let k = 0; k < 6; k++) z5 += `<polygon points="${pts([P(6.0 + k * 1.2, 1.4, 0), P(6.9 + k * 1.2, 1.4, 0), P(6.9 + k * 1.2, 1.4, 1.4), P(6.0 + k * 1.2, 1.4, 1.4)])}" fill="#4a5560"/><polygon points="${pts([P(6.0 + k * 1.2, 1.4, .85), P(6.9 + k * 1.2, 1.4, .85), P(6.9 + k * 1.2, 1.4, 1.4), P(6.0 + k * 1.2, 1.4, 1.4)])}" fill="#7a8793"/>`;
+  z5 += skewL(5.9, 1.4, 1.7, `<rect x="0" y="-22" width="${1.4 * CW * 1}" height="16" rx="4" fill="#6C7A89"/><text x="${.7 * CW}" y="-10" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="700" font-size="9.5" fill="#fff">DESPACHOS</text>`);
+  z5 += `<g class="drive" style="animation-delay:-3s">` + truck(-.6, 1.55, '#fff', '#EE7623') + `</g><g class="drive" style="animation-delay:-11s">` + truck(-.6, 1.55, '#F3EEE5', '#6C7A89') + `</g><g class="drive" style="animation-delay:-18s">` + truck(-.6, 1.55, '#fff', '#00BED6') + `</g>`;
+  for (let k = 0; k < 3; k++) z5 += box(12.2 + k * .42, 2.5 + (k % 2) * .08, .03, .36, .36, .3, '#E1B778');
+  const kp = (x, y, id, t, c, dl) => `<g class="float" style="animation-delay:${dl}s"><g transform="translate(${x},${y})"><rect x="-62" y="-15" width="124" height="30" rx="15" fill="#1f2326" opacity=".93"/><circle cx="-46" cy="0" r="8" fill="${c}"/><text id="${id}" x="-32" y="5" font-family="Poppins,sans-serif" font-size="12.5" font-weight="700" fill="#fff">${t}</text></g></g>`;
+  z5 += kp(-135, -118, 'kp1', 'OTIF 94%', '#2BD67B', 0) + kp(150, -70, 'kp2', 'Ventas ▲8%', '#00BED6', 1.2) + kp(-150, -30, 'kp3', 'Stock 23 d', '#E99B35', 2.1);
+  z5 += `</g>`;
+  s += `<g class="zone" data-z="torre" tabindex="0" role="link" aria-label="5 Torre de control de negocios">${z5}</g>`;
+
+  /* ================= ZONA 1 · VISIÓN ARTIFICIAL ================= */
+  let z1 = `<polygon class="pulsering" points="${pts([P(.2, 3.3, .04), P(7.1, 3.3, .04), P(7.1, 7.4, .04), P(.2, 7.4, .04)])}" stroke="${AC.vision}"/><g class="zbody">`;
+  z1 += shell(.4, 3.5, 6.5, 3.7, AC.vision, {sign: 'VISIÓN ARTIFICIAL', signW: 215, floor: '#C9D0D6'});
+  z1 += `<polyline points="${pts([P(.7, 6.95, .17), P(6.5, 6.95, .17), P(6.5, 3.9, .17)])}" fill="none" stroke="#F2C230" stroke-width="3" stroke-dasharray="14 8" opacity=".9"/>`;
+  for (let k = 0; k < 3; k++) z1 += skewL(3.9 + k * 1.05, 3.74, .9, `<rect x="0" y="-28" width="30" height="24" rx="3" fill="url(#gGlass)" stroke="#fff" stroke-width="2"/>`);
+  z1 += box(.9, 4.95, .34, 5.5, .9, .08, '#2d343a', {top: '#3b4248', stroke: '#1d2226', sw: .5});
+  z1 += box(.9, 4.9, .3, 5.5, .06, .16, '#C8D0D6') + box(.9, 5.84, .3, 5.5, .06, .16, '#C8D0D6');
+  for (let k = 0; k < 6; k++) z1 += box(1.1 + k * 1.0, 5.05, .16, .12, .12, .18, '#8c969e', {noT: true}) + box(1.1 + k * 1.0, 5.7, .16, .12, .12, .18, '#8c969e', {noT: true});
+  z1 += `<polyline class="beltstripe" points="${pts([P(.9, 5.4, .43), P(6.4, 5.4, .43)])}" stroke="#7d8890" stroke-width="2.2" fill="none"/>`;
+  const gx = 3.55;
+  z1 += box(gx, 4.55, .16, .16, .16, 2.0, '#4a5560') + box(gx, 6.1, .16, .16, .16, 2.0, '#4a5560') + box(gx, 4.55, 2.0, .16, 1.71, .16, '#4a5560');
+  z1 += box(gx - .12, 5.18, 1.55, .4, .42, .45, '#1f2326', {top: '#3a4249'}) + `<circle cx="${P(gx + .28, 5.62, 1.72)[0]}" cy="${P(gx + .28, 5.62, 1.72)[1]}" r="4" fill="#00BED6" class="blink"/>`;
+  z1 += `<polygon class="beam" points="${pts([P(gx + .1, 5.4, 1.6), P(gx - .15, 5.0, .46), P(gx + .55, 5.0, .46), P(gx + .55, 5.82, .46), P(gx - .15, 5.82, .46)])}" fill="#00BED6" opacity=".35"/>`;
+  const gx2 = 5.25;
+  z1 += box(gx2, 4.55, .16, .16, .16, 1.7, '#4a5560') + box(gx2, 6.1, .16, .16, .16, 1.7, '#4a5560') + box(gx2, 4.55, 1.7, .16, 1.71, .16, '#4a5560') + box(gx2 - .1, 5.2, 1.3, .36, .36, .4, '#1f2326');
+  z1 += `<polygon class="beam" style="animation-delay:.4s" points="${pts([P(gx2 + .08, 5.38, 1.3), P(gx2 - .12, 5.0, .46), P(gx2 + .45, 5.0, .46), P(gx2 + .45, 5.82, .46), P(gx2 - .12, 5.82, .46)])}" fill="#00BED6" opacity=".3"/>`;
+  z1 += `<g id="belt"></g>`;
+  z1 += box(1.5, 6.25, .16, .12, .12, .6, '#5b6670', {noT: true}) + box(1.0, 6.25, .72, 1.2, .1, .8, '#1f2326', {top: '#2c343a'});
+  z1 += skewL(1.0, 6.35, .72, `<rect x="3" y="-27" width="${1.2 * CW - 6}" height="21" rx="2" fill="#0d2a33"/><text id="scrTxt" x="${1.2 * CW / 2}" y="-12" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9.5" font-weight="700" fill="#2BD67B">OK 128 · ✖ 3</text>`);
+  const vp = P(gx + .2, 5.4, 2.7);
+  z1 += `<g id="verdict" class="pop" transform="translate(${vp[0]},${vp[1]})"><rect x="-54" y="-16" width="108" height="30" rx="15" id="vBg" fill="#2BD67B"/><text id="vTx" x="0" y="5" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="800" font-size="14" fill="#fff">✔ CONFORME</text></g>`;
+  z1 += person(2.5, 6.55, .16, {shirt: '#00758D', hat: 'hard', hc: '#F2C230', badge: 1, dl: 0}) + person(6.15, 6.3, .16, {shirt: '#E99B35', hat: 'hard', hc: '#fff', skin: '#C98F6B', dl: .8}) + person(4.4, 4.45, .16, {shirt: '#EE7623', hat: 'net', skin: '#F0C6A4', dl: 1.5});
+  z1 += `</g>`;
+  s += `<g class="zone" data-z="vision" tabindex="0" role="link" aria-label="1 Visión artificial">${z1}</g>`;
+
+  /* ================= ZONA 2 · MAESTRO ================= */
+  let z2 = `<polygon class="pulsering" points="${pts([P(7.35, 3.3, .04), P(13.8, 3.3, .04), P(13.8, 7.4, .04), P(7.35, 7.4, .04)])}" stroke="${AC.maestro}"/><g class="zbody">`;
+  z2 += shell(7.5, 3.5, 6.1, 3.7, AC.maestro, {sign: 'ASISTENTE DE PLANTA', signW: 240, floor: '#D9CDBE', wall: '#F7EFE6'});
+  z2 += cyl(13.1, 3.8, 1.7, .2, 1.5, '#b9b0a3');
+  const [cx2, cy2] = P(13.1, 3.8, 3.3);
+  for (let k = 0; k < 4; k++) z2 += `<circle class="smoke" style="animation-delay:${k}s" cx="${cx2}" cy="${cy2}" r="9" fill="#fff" opacity="0"/>`;
+  z2 += box(8.0, 3.95, .16, 1.1, 1.0, 2.1, '#8FA3B0', {top: '#B0C2CD'}) + cyl(8.55, 4.45, 2.26, .3, .5, '#E99B35') + box(8.1, 5.0, .16, .9, .1, .9, '#2c343a', {noT: true});
+  z2 += box(9.5, 3.9, .16, 2.5, 1.15, 1.15, AC.maestro, {top: sh(AC.maestro, .25)});
+  for (let k = 0; k < 3; k++) z2 += cyl(9.95 + k * .75, 4.48, 1.31, .27, .28, '#d8dde1', {top: '#EEF1F3'});
+  z2 += skewL(9.5, 5.05, 1.15, `<rect x="6" y="-22" width="26" height="8" rx="2" fill="#fff" opacity=".9"/><circle cx="48" cy="-18" r="3" fill="#2BD67B" class="blink"/><rect x="58" y="-22" width="22" height="8" rx="2" fill="#ffffff55"/>`);
+  z2 += box(12.2, 3.95, .16, 1.15, 1.7, 1.35, '#8AA19B', {top: '#A9C0BA'}) + box(12.3, 4.05, 1.5, .95, .6, .4, '#2c343a');
+  for (let k = 0; k < 3; k++) z2 += cyl(8.25 + k * .6, 6.5, .16, .27, .65, '#EAF1F4') + cyl(8.25 + k * .6, 6.5, .16, .1, .66, '#c9d3d8', {top: '#8FA3B0'});
+  z2 += person(10.4, 5.7, .16, {shirt: '#EE7623', hat: 'hair', hair: '#2a1d16', headset: 1, skin: '#E0A27E', dl: .2, arm: 'up'}) + person(8.8, 5.45, .16, {shirt: '#00758D', hat: 'hard', hc: '#E99B35', skin: '#C98F6B', dl: .9}) + person(12.1, 6.1, .16, {shirt: '#53575A', hat: 'net', skin: '#F0C6A4', dl: 1.4});
+  const [bx, by] = P(10.4, 5.7, .16);
+  const bub = (i, who, txt, col, tc) => `<g class="cyc" style="animation-delay:${i * 3}s" transform="translate(${bx + (who ? 74 : -66)},${by - 110})"><rect x="-74" y="-17" width="148" height="34" rx="14" fill="${col}"/><path d="M${who ? -56 : 44},16 l${who ? -8 : 8},12 l${who ? 20 : -20},-12z" fill="${col}"/><text x="0" y="5" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="700" font-size="12" fill="${tc}">${txt}</text></g>`;
+  z2 += bub(0, 0, '🎤 «¿Sello abierto?»', '#fff', '#2b2e30') + bub(1, 1, '🤖 Revisa la temperatura', '#25D366', '#06361c') + bub(2, 1, '🤖 Limpia la barra', '#25D366', '#06361c') + bub(3, 0, '👍 ¡Ya funcionó!', '#fff', '#2b2e30');
+  z2 += `<g transform="translate(${bx - 40},${by - 44})">` + [0, 1, 2, 3, 4].map(i => `<rect class="wave" style="animation-delay:${i * .15}s" x="${i * 6}" y="-${[6, 11, 16, 11, 6][i]}" width="3" height="${[6, 11, 16, 11, 6][i]}" rx="1.5" fill="#EE7623"/>`).join('') + `</g></g>`;
+  s += `<g class="zone" data-z="maestro" tabindex="0" role="link" aria-label="2 Maestro, asistente de planta">${z2}</g>`;
+
+  s += `<g class="driveb" style="animation-delay:-6s">${car(13.6, 7.5, '#E99B35')}</g><g class="driveb" style="animation-delay:-18s">${car(13.6, 7.5, '#00BED6')}</g><g class="drive" style="animation-delay:-9s;animation-duration:30s">${car(-.5, 7.8, '#EE7623')}</g>`;
+  /* ================= ZONA 3 · SOPORTE TÉCNICO (PARAGUAY) ================= */
+  let z3 = `<polygon class="pulsering" points="${pts([P(.3, 9.0, .04), P(6.5, 9.0, .04), P(6.5, 12.1, .04), P(.3, 12.1, .04)])}" stroke="${AC.conoc}"/><g class="zbody">`;
+  z3 += shell(.6, 9.1, 5.6, 2.9, AC.conoc, {sign: 'SOPORTE TÉCNICO', signW: 205, floor: '#CFE0E3', wall: '#F2F6F6', fs: 16});
+  const cols = ['#EE7623', '#00BED6', '#E99B35', '#008AAB', '#B15E14', '#53575A', '#2BD67B', '#EE7623', '#00BED6'];
+  let sh1 = '';
+  for (let r = 0; r < 2; r++) { sh1 += `<rect x="0" y="${-6 - r * 24}" width="${2.9 * CW}" height="3" fill="#8a6a4a"/>`; for (let b = 0; b < 16; b++) sh1 += `<rect x="${4 + b * 6.2}" y="${-6 - r * 24 - 20 + (b % 3)}" width="5" height="${19 - (b % 3)}" rx="1" fill="${cols[(b + r * 2) % cols.length]}"/>`; }
+  z3 += skewL(.95, 9.34, .3, sh1);
+  z3 += skewL(4.2, 9.34, .3, `<rect x="0" y="-42" width="${1.9 * CW}" height="42" rx="4" fill="#0d2a33" stroke="#2c343a" stroke-width="2"/><rect x="5" y="-37" width="48" height="8" rx="4" fill="#fff" opacity=".9"/><rect x="${1.9 * CW - 56}" y="-26" width="52" height="8" rx="4" fill="#00BED6"/><text x="6" y="-8" font-family="Poppins,sans-serif" font-size="7.5" font-weight="700" fill="#E99B35">📖 Manual de extrusión §3.2</text>`);
+  z3 += box(1.5, 10.3, .16, 2.6, .95, .85, '#B88B5A', {top: '#D1A674'}) + box(1.8, 10.5, 1.01, .7, .5, .06, '#222') + box(3.0, 10.55, 1.01, .5, .4, .05, '#2c343a');
+  const [hx, hy] = P(2.9, 10.6, 2.4);
+  z3 += `<g class="float"><g transform="translate(${hx},${hy})"><polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" fill="${AC.conoc}" opacity=".2" stroke="${AC.conoc}" stroke-width="2"/><g class="spin"><circle r="11" fill="none" stroke="#00BED6" stroke-width="2.4" stroke-dasharray="5 4"/></g><text y="6" text-anchor="middle" font-size="20">🧠</text></g></g>`;
+  z3 += person(2.2, 10.05, .16, {shirt: '#FFFFFF', pants: '#4a5560', hat: 'hair', hair: '#5a3a24', skin: '#C98F6B', dl: .3}) + person(4.9, 10.9, .16, {shirt: '#00758D', hat: 'hard', hc: '#F2C230', dl: 1, skin: '#E8B58F'}) + person(3.7, 11.55, .16, {shirt: '#E99B35', hat: 'hair', hair: '#222', skin: '#F0C6A4', dl: 1.7, headset: 1});
+  const [fx, fy] = P(.85, 11.85, .16);
+  z3 += `<g transform="translate(${fx},${fy})"><line x1="0" y1="0" x2="0" y2="-76" stroke="#53575A" stroke-width="3"/><g class="flag"><rect x="2" y="-74" width="36" height="8" fill="#D52B1E"/><rect x="2" y="-66" width="36" height="8" fill="#fff"/><rect x="2" y="-58" width="36" height="8" fill="#0038A8"/></g></g>`;
+  z3 += `</g>`;
+  s += `<g class="zone" data-z="conocimiento" tabindex="0" role="link" aria-label="3 Agente de conocimiento técnico">${z3}</g>`;
+
+  /* ================= ZONA 4 · CENTRO DEL CLIENTE (CHILE) ================= */
+  let z4 = `<polygon class="pulsering" points="${pts([P(7.6, 9.0, .04), P(13.8, 9.0, .04), P(13.8, 12.1, .04), P(7.6, 12.1, .04)])}" stroke="${AC.cliente}"/><g class="zbody">`;
+  z4 += shell(7.8, 9.1, 5.6, 2.9, AC.cliente, {sign: 'CENTRO DEL CLIENTE', signW: 235, floor: '#E9DCC5', wall: '#FBF6EC', fs: 16});
+  z4 += skewL(9.6, 9.34, .3, `<rect x="0" y="-48" width="${2.9 * CW}" height="48" rx="4" fill="#fff" stroke="#d8c7a8" stroke-width="2"/>` + [0, 1, 2].map(c => `<rect x="${6 + c * 34}" y="-44" width="30" height="7" rx="2" fill="${['#00BED6', '#E99B35', '#2BD67B'][c]}"/>` + [0, 1].map(r => `<rect x="${7 + c * 34}" y="${-33 + r * 15}" width="28" height="12" rx="2" fill="${['#e6f9fc', '#fff3da', '#e2f6ec'][c]}" stroke="${['#00BED6', '#E99B35', '#2BD67B'][c]}" stroke-width="1"/>`).join('')).join(''));
+  for (let k = 0; k < 3; k++) { const x0 = 8.4 + k * 1.5; z4 += box(x0, 10.5, .16, 1.15, .7, .7, '#C9A877', {top: '#E0C394'}) + box(x0 + .35, 10.65, .87, .5, .06, .4, '#1f2326') + `<circle cx="${P(x0 + .6, 11.05, 1.1)[0]}" cy="${P(x0 + .6, 11.05, 1.1)[1]}" r="2" fill="#2BD67B"/>`; }
+  z4 += person(8.9, 10.4, .16, {shirt: '#E99B35', hat: 'hair', hair: '#2a1d16', headset: 1, dl: 0, skin: '#E0A27E'}) + person(10.4, 10.4, .16, {shirt: '#00758D', hat: 'hair', hair: '#7a4a2a', headset: 1, dl: .8, skin: '#F0C6A4'}) + person(11.9, 10.4, .16, {shirt: '#B15E14', hat: 'hair', hair: '#111', headset: 1, dl: 1.5, skin: '#C98F6B', arm: 'up'});
+  z4 += box(12.2, 11.3, .16, .5, .5, .45, '#D9B77A') + box(12.35, 11.4, .61, .4, .4, .35, '#E3C48D') + box(12.75, 11.15, .16, .5, .5, .4, '#D9B77A');
+  const [ex, ey] = P(13.6, 10.9, 1.7);
+  for (let k = 0; k < 3; k++) z4 += `<g class="fly" style="animation-delay:${k * 2}s"><g transform="translate(${ex - 70},${ey - 40})"><rect x="-10" y="-7" width="20" height="14" rx="2" fill="#fff" stroke="${AC.cliente}" stroke-width="1.6"/><polyline points="-10,-7 0,1 10,-7" fill="none" stroke="${AC.cliente}" stroke-width="1.4"/></g></g>`;
+  const [tx, ty] = P(11.8, 9.2, 3.7);
+  z4 += `<g class="float"><g transform="translate(${tx},${ty})"><rect x="-62" y="-15" width="124" height="30" rx="15" fill="#1f2326" opacity=".93"/><text id="tkt" x="0" y="5" text-anchor="middle" font-family="Poppins,sans-serif" font-size="12.5" font-weight="700" fill="#fff">🎫 12 reclamos hoy</text></g></g>`;
+  const [fx2, fy2] = P(13.2, 11.85, .16);
+  z4 += `<g transform="translate(${fx2},${fy2})"><line x1="0" y1="0" x2="0" y2="-76" stroke="#53575A" stroke-width="3"/><g class="flag"><rect x="2" y="-74" width="36" height="12" fill="#fff"/><rect x="2" y="-62" width="36" height="12" fill="#D52B1E"/><rect x="2" y="-74" width="14" height="12" fill="#0039A6"/><circle cx="9" cy="-68" r="2.2" fill="#fff"/></g></g>`;
+  z4 += `</g>`;
+  s += `<g class="zone" data-z="reclamos" tabindex="0" role="link" aria-label="4 Centro de inteligencia del cliente">${z4}</g>`;
+
+  /* ---------- ambiente ---------- */
+  let amb = '';
+  [[-.1, 3.3], [-.1, 7.2], [.1, 12.1], [6.7, 12.2], [7.1, 8.8], [13.9, 8.7], [14.1, 12.1], [14.1, 5], [14.1, 6.5]].forEach(([x, y], i) => amb += tree(x, y, .85 + (i % 3) * .1, ['#6FAE6B', '#7DBA73', '#5E9E64'][i % 3]));
+  s += amb;
+  const pn = (z, x, y, z0) => { const q = P(x, y, z0); return pin(z, q[0] - 22, q[1] - 14); };
+  s += `<g id="pins">` + pn(Z[4], 2.2, .1, 10.3) + pn(Z[0], .4, 3.75, 1.2) + pn(Z[1], 7.5, 3.75, 1.2) + pn(Z[2], .6, 9.35, 1.2) + pn(Z[3], 7.8, 9.35, 1.2) + `</g>`;
+  return s;
+}
+
+/* ============================ montaje e interacción ============================ */
+const svg = document.getElementById('scene');
+svg.innerHTML = buildScene();
+const sky = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+sky.innerHTML = [[-420, -250, 1], [-300, -170, .7], [300, -230, .9]].map(([x, y, s], i) => `<g class="cloud" style="animation-duration:${70 + i * 25}s;animation-delay:-${i * 30}s"><g transform="translate(${x},${y}) scale(${s})"><ellipse cx="0" cy="0" rx="60" ry="16" fill="#fff"/><ellipse cx="-24" cy="-12" rx="30" ry="16" fill="#fff"/><ellipse cx="18" cy="-16" rx="34" ry="18" fill="#fff"/></g></g>`).join('');
+svg.insertBefore(sky, svg.firstChild);
+
+const tip = document.getElementById('tip');
+const dock = document.querySelector('.stagewrap');
+const visited = () => AL.LS.get('al_visited', {});
+function renderDock() {
+  const v = visited();
+  const card = z => `<button class="cc" data-z="${z.id}" style="--c:${z.c}"><span class="nn">${z.n}</span>${v[z.id] ? '<span class="ok">✓ visitado</span>' : ''}<h3>${z.nombre}</h3><p style="font-size:.8rem">${z.corto}</p><span class="go">Entrar →</span></button>`;
+  document.getElementById('colL').innerHTML = [Z[4], Z[0], Z[2]].map(card).join('');
+  document.querySelectorAll('#colR .cc').forEach(e => e.remove());
+  document.getElementById('colR').insertAdjacentHTML('beforeend', [Z[1], Z[3]].map(card).join(''));
+  document.getElementById('prog').innerHTML = '🏁 ' + Z.map(z => `<i class="${v[z.id] ? 'on' : ''}"></i>`).join('') + ` <span>${Z.filter(z => v[z.id]).length}/5</span>`;
+}
+renderDock();
+const zEl = id => svg.querySelector(`.zone[data-z="${id}"]`), pEl = id => svg.querySelector(`.pin[data-z="${id}"]`), cEl = id => document.querySelector(`.cc[data-z="${id}"]`);
+let hvId = null, touch = matchMedia('(hover: none)').matches;
+function hover(id, on, ev) {
+  if (hvId && hvId !== id) hover(hvId, false);
+  const z = Z.find(q => q.id === id); if (!z) return;
+  [zEl(id), pEl(id), cEl(id)].forEach(e => e && e.classList.toggle('hv', on));
+  hvId = on ? id : null;
+  if (on) {
+    tip.style.setProperty('--c', z.c);
+    tip.innerHTML = `<h4>${z.n} · ${z.nombre}</h4><div>${z.txt}</div><div class="row"><b>🔌 Se alimenta de:</b><span>${FLOWS.filter(f => f[1] === z.id).map(f => SRC[f[0]].n).join(' · ')}</span></div><div class="cta">Clic para entrar →</div>`; flowsOn(z.id);
+    tip.classList.add('on'); if (ev) moveTip(ev);
+  } else { tip.classList.remove('on'); flowsOn(null); }
+}
+function moveTip(ev) { const w = 340, h = tip.offsetHeight; let x = ev.clientX + 18, y = ev.clientY + 14; if (x + w > innerWidth - 8) x = ev.clientX - w - 18; if (y + h > innerHeight - 8) y = innerHeight - h - 8; tip.style.left = x + 'px'; tip.style.top = y + 'px'; }
+const go = id => { stopTour(); location.href = RUTA[id]; };
+function bindCards() { Z.forEach(z => { const c = cEl(z.id); c.addEventListener('mouseenter', () => { zEl(z.id).classList.add('hv'); pEl(z.id).classList.add('hv'); c.classList.add('hv'); }); c.addEventListener('mouseleave', () => { zEl(z.id).classList.remove('hv'); pEl(z.id).classList.remove('hv'); c.classList.remove('hv'); }); c.addEventListener('click', () => go(z.id)); }); }
+bindCards();
+Z.forEach(z => {
+  [zEl(z.id), pEl(z.id)].forEach(e => {
+    e.addEventListener('mouseenter', ev => { if (!touch) hover(z.id, true, ev); });
+    e.addEventListener('mousemove', ev => { if (!touch && hvId === z.id) moveTip(ev); });
+    e.addEventListener('mouseleave', () => hover(z.id, false));
+    e.addEventListener('click', () => go(z.id));
+    e.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(z.id); } });
+  });
+  zEl(z.id).addEventListener('focus', () => hover(z.id, true, {clientX: innerWidth / 2, clientY: innerHeight / 3}));
+  zEl(z.id).addEventListener('blur', () => hover(z.id, false));
+});
+document.addEventListener('keydown', e => { const n = +e.key; if (n >= 1 && n <= 5 && !e.target.closest('input,textarea')) go(Z[n - 1].id); });
+document.getElementById('btnSet').onclick = AL.settings;
+AL.paint(); AL.sync();
+const chipFix = () => { document.querySelectorAll('#al-ia,#al-cloud').forEach(e => { e.className = e.className.replace('alb-chip', 'chip'); }); };
+const _p = AL.paint; AL.paint = function () { _p(); chipFix(); }; AL.paint();
+
+/* ---------- recorrido automático ---------- */
+let tour = null;
+function stopTour() { if (tour) { clearTimeout(tour.t); tour = null; } AL.shutUp(); flowsOn(null); document.getElementById('btnTour').textContent = '▶ Recorrido con voz'; svg.querySelectorAll('.zone.spot').forEach(e => e.classList.remove('spot')); tip.classList.remove('on'); }
+function spot(i) {
+  svg.querySelectorAll('.zone.spot').forEach(e => e.classList.remove('spot'));
+  const z = Z[i], el = zEl(z.id); el.classList.add('spot');
+  const r = el.getBoundingClientRect();
+  tip.style.setProperty('--c', z.c);
+  tip.innerHTML = `<h4>${z.n} · ${z.nombre}</h4><div>${z.txt}</div><div class="row"><b>🔌 Se alimenta de:</b><span>${FLOWS.filter(f => f[1] === z.id).map(f => SRC[f[0]].n).join(' · ')}</span></div>`; flowsOn(z.id);
+  tip.classList.add('on'); tip.style.left = Math.max(10, Math.min(innerWidth - 350, r.left + r.width / 2 - 170)) + 'px'; tip.style.top = Math.max(70, Math.min(innerHeight - tip.offsetHeight - 10, r.top + r.height * .25)) + 'px';
+}
+document.getElementById('btnTour').onclick = () => {
+  if (tour) { stopTour(); return; }
+  let i = 0; document.getElementById('btnTour').textContent = '⏹ Detener recorrido'; tour = {};
+  const next = () => { if (!tour) return; spot(i); const z = Z[i], txt = `Caso ${z.n}. ${z.nombre}. ${z.txt} Se alimenta de ${FLOWS.filter(f => f[1] === z.id).map(f => SRC[f[0]].n.replace(/^\S+ /, '')).join(', ')}.`;
+    AL.narrar(txt); const t0 = Date.now(); const wait = () => { if (!tour) return; if ((window.speechSynthesis && speechSynthesis.speaking && Date.now() - t0 < 30000) || Date.now() - t0 < 5200) { tour.t = setTimeout(wait, 400); return; } i = (i + 1) % Z.length; tour.t = setTimeout(next, 600); }; tour.t = setTimeout(wait, 1200); };
+  next();
+};
+
+/* ---------- de dónde sale cada dato: áreas de la empresa → casos ---------- */
+const SRC = {
+  prod: {n: '🏭 Producción', x: -545, y: 40}, ope: {n: '👷 Operarios', x: -555, y: 250}, mant: {n: '🔧 Mantenimiento', x: -520, y: 460},
+  cal: {n: '🧪 Calidad', x: -300, y: 610}, ing: {n: '📚 Ingeniería e I+D', x: -470, y: -170},
+  erp: {n: '🗄️ Epicor ERP', x: -150, y: -255}, fin: {n: '🏦 Finanzas', x: 320, y: -255},
+  com: {n: '💰 Comercial', x: 590, y: -110}, log: {n: '🚚 Logística', x: 600, y: 80}, comp: {n: '📦 Compras', x: 600, y: 270},
+  cli: {n: '🌎 Clientes', x: 460, y: 610}
+};
+const ANCH = {torre: P(2.2, .6, 6.5), vision: P(2.6, 4.6, 1.2), maestro: P(10.2, 4.4, 1.2), conocimiento: P(2.4, 10.2, 1.2), reclamos: P(10.6, 10.4, 1.2)};
+const FLOWS = [   // [área, caso, qué dato]
+  ['prod', 'vision', 'órdenes y lotes'], ['cal', 'vision', 'patrón de calidad'], ['ope', 'vision', 'piezas en línea'],
+  ['ope', 'maestro', 'voz: paros y fallas'], ['mant', 'maestro', 'rutinas y repuestos'], ['prod', 'maestro', 'turnos y máquinas'],
+  ['ing', 'conocimiento', 'fichas y manuales'], ['cal', 'conocimiento', 'procedimientos'], ['mant', 'conocimiento', 'casos resueltos'], ['comp', 'conocimiento', 'fichas de proveedores'],
+  ['cli', 'reclamos', 'pedidos y PQR'], ['com', 'reclamos', 'CRM del cliente'], ['erp', 'reclamos', 'pedidos y facturas'], ['log', 'reclamos', 'despachos'],
+  ['erp', 'torre', 'ventas e inventario'], ['fin', 'torre', 'márgenes y cartera'], ['log', 'torre', 'OTIF'], ['comp', 'torre', 'insumos y resina'], ['com', 'torre', 'metas']
+];
+const XFLOWS = [['vision', 'torre', 'defectos en vivo'], ['maestro', 'torre', 'paros'], ['reclamos', 'torre', 'reclamos'], ['vision', 'conocimiento', 'lecciones']];
+const flowG = document.createElementNS('http://www.w3.org/2000/svg', 'g'); flowG.setAttribute('class', 'flows');
+(function () {
+  const col = id => Z.find(z => z.id === id).c;
+  const curve = (a, b, k = .22) => { const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1]; return `M${a[0]},${a[1]} Q${mx - dy * k},${my + dx * k} ${b[0]},${b[1]}`; };
+  let h = '';
+  FLOWS.concat(XFLOWS.map(f => ['@' + f[0], f[1], f[2]])).forEach(([s, c, lab], i) => {
+    const a = s[0] === '@' ? ANCH[s.slice(1)] : [SRC[s].x, SRC[s].y], b = ANCH[c], k = s[0] === '@' ? -.3 : .18, d = curve(a, b, k), cc = col(c), rev = a[0] > b[0];
+    h += `<g class="fl" data-c="${c}" data-s="${s}"><path id="fp${i}" class="fl-line" d="${d}" stroke="${cc}"/>${rev ? `<path id="fq${i}" d="${curve(b, a, -k)}" fill="none" stroke="none"/>` : ''}<circle r="6" fill="${cc}"><animateMotion dur="${2.6 + (i % 5) * .5}s" repeatCount="indefinite" begin="-${i * .37}s"><mpath href="#fp${i}"/></animateMotion></circle>
+      <g class="fl-lab"><text font-size="17" font-weight="700" fill="${cc}" stroke="#fffaf2" stroke-width="4" paint-order="stroke" text-anchor="middle"><textPath href="#${rev ? 'fq' : 'fp'}${i}" startOffset="${rev ? '45%' : '55%'}">${lab}</textPath></text></g></g>`;
+  });
+  Object.entries(SRC).forEach(([k, o]) => { const w = o.n.length * 11 + 34; h += `<g class="src" data-s="${k}" transform="translate(${o.x - w / 2},${o.y - 23})"><rect width="${w}" height="46" rx="23"/><text x="${w / 2}" y="30" text-anchor="middle">${o.n}</text></g>`; });
+  flowG.innerHTML = h; svg.appendChild(flowG);
+})();
+function flowsOn(id) {
+  flowG.classList.toggle('dim', !!id);
+  flowG.querySelectorAll('.fl').forEach(e => e.classList.toggle('on', !!id && e.dataset.c === id));
+  const srcs = new Set(FLOWS.filter(f => f[1] === id).map(f => f[0]));
+  flowG.querySelectorAll('.src').forEach(e => { e.classList.toggle('on', srcs.has(e.dataset.s)); if (id) e.style.setProperty('--sc', Z.find(z => z.id === id).c); });
+}
+let flowsVis = AL.LS.get('home_flows', true);
+const paintFlowBtn = () => { flowG.classList.toggle('off', !flowsVis); document.getElementById('btnFlow').textContent = flowsVis ? '🔌 Datos: sí' : '🔌 Datos: no'; };
+document.getElementById('btnFlow').onclick = () => { flowsVis = !flowsVis; AL.LS.set('home_flows', flowsVis); paintFlowBtn(); }; paintFlowBtn();
+document.getElementById('btnHi').onclick = () => AL.narrar('Bienvenidos a GEN IA Alico, la era de la inteligencia artificial. Esta es nuestra planta. Cada edificio es un caso real de inteligencia artificial, y las líneas muestran de qué área de la empresa sale cada dato que lo alimenta: producción, calidad, mantenimiento, comercial, logística, compras, finanzas, el ERP Epicor y, por supuesto, nuestros clientes, cuyos mensajes llegan volando desde muchos países e industrias. Toquen un edificio para entrar, o inicien el recorrido con voz.');
+
+/* ---------- mensajes de clientes que llegan volando al Centro de inteligencia del cliente ---------- */
+(function () {
+  const CH = [['WhatsApp', '#25D366', '💬'], ['Facebook', '#1877F2', '👍'], ['Instagram', '#E1306C', '📷'], ['LinkedIn', '#0A66C2', '💼'], ['Correo', '#53575A', '✉️'], ['Tienda en línea', '#EE7623', '🛒']];
+  const MSG = [
+    [0, 'Pedido nuevo: 40 paq. Línea Nativa', 'Restaurante · Medellín, Colombia'], [1, '¿Tienen empaque para café de 500 g?', 'Tostadora · Huila, Colombia'],
+    [2, 'Invitación: feria de empaques', 'Evento · Santiago, Chile'], [4, 'PQR: sello abierto en 2 cajas', 'Cárnicos · Asunción, Paraguay'],
+    [3, 'Cotización 20.000 bolsas Flex Up', 'Snacks · Lima, Perú'], [0, '¿Cuándo llega mi pedido PV-7421?', 'Panadería · Bogotá, Colombia'],
+    [5, 'Compra en tienda: Bolsa QUADSEAL', 'Café de especialidad · Quito, Ecuador'], [1, '¿Hacen bolsas compostables?', 'Mascotas · Ciudad de Panamá'],
+    [4, 'Devolución: medida fuera de tolerancia', 'Lácteos · Valparaíso, Chile'], [2, '¡Nos encantó el empaque nuevo!', 'Frutas · Cali, Colombia'],
+    [0, 'Necesito factura del pedido', 'Comidas preparadas · Cartagena'], [3, 'Alianza para exportar a EE. UU.', 'Agroindustria · Miami, EE. UU.']
+  ];
+  const T = ANCH.reclamos, layer = document.createElementNS('http://www.w3.org/2000/svg', 'g'); svg.appendChild(layer);
+  const starts = [[760, 160], [760, 420], [760, 640], [520, 700], [200, 720], [760, -40]];
+  let k = 0;
+  function launch() {
+    if (document.hidden) return setTimeout(launch, 1500);
+    const [ci, txt, who] = MSG[k % MSG.length], [cn, cc, ic] = CH[ci], st = starts[k % starts.length]; k++;
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.setAttribute('class', 'bird');
+    const w = Math.max(txt.length, who.length) * 6.3 + 58;
+    g.innerHTML = `<g transform="translate(-20,-34)"><path class="wing" d="M0,10 Q-16,-8 -30,4 Q-14,2 0,14Z" fill="${cc}"/><path class="wing r" d="M0,10 Q16,-8 30,4 Q14,2 0,14Z" fill="${cc}"/><ellipse cx="0" cy="12" rx="9" ry="6" fill="${cc}"/><circle cx="7" cy="9" r="4.5" fill="${cc}"/><polygon points="11,8 17,10 11,11" fill="#E99B35"/><circle cx="8.5" cy="8" r="1.2" fill="#fff"/></g>
+      <g transform="translate(-${w / 2},-6)"><rect width="${w}" height="40" rx="12" fill="#fff" stroke="${cc}" stroke-width="2.5" filter="drop-shadow(0 4px 6px rgba(0,0,0,.18))"/><circle cx="20" cy="20" r="13" fill="${cc}"/><text x="20" y="25" font-size="13" text-anchor="middle">${ic}</text>
+      <text x="40" y="17" font-size="11.5" font-weight="700" fill="#2b2e30">${txt}</text><text x="40" y="31" font-size="9.5" fill="#53575A">${cn} · ${who}</text></g>`;
+    layer.appendChild(g);
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'), mx = (st[0] + T[0]) / 2, my = Math.min(st[1], T[1]) - 140;
+    p.setAttribute('d', `M${st[0]},${st[1]} Q${mx},${my} ${T[0]},${T[1] - 30}`); const L = p.getTotalLength(), dur = 5200, t0 = performance.now();
+    (function fr(now) { const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, q = p.getPointAtLength(e * L), sc = 1 - .45 * e;
+      g.setAttribute('transform', `translate(${q.x},${q.y}) scale(${sc})`); g.setAttribute('opacity', t > .88 ? (1 - t) / .12 : Math.min(1, t * 6));
+      g.setAttribute('transform', `translate(${q.x},${q.y}) scale(${1.55 * sc})`);
+      if (t < 1) requestAnimationFrame(fr); else { g.remove(); const z = zEl('reclamos'); z && z.classList.add('spot'); setTimeout(() => z && !tour && z.classList.remove('spot'), 500); } })(t0);
+    setTimeout(launch, 2300);
+  }
+  setTimeout(launch, 900);
+})();
+
+/* ---------- conveyor de visión artificial (dinámico) ---------- */
+(function () {
+  const g = document.getElementById('belt'); if (!g) return;
+  const N = 6, X0 = .95, X1 = 6.25, TC = 3.72, rnd = AL.rng(7);
+  const items = [];
+  for (let i = 0; i < N; i++) {
+    const wrap = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.appendChild(wrap);
+    const bad = rnd() < .3; const c = ['#FFFFFF', '#F7E3C0', '#DDF3F7'][i % 3];
+    wrap.innerHTML = box(0, 5.12, .42, .62, .62, .2, c, {stroke: '#c9c2b4'}) + flat(.08, 5.2, .63, .46, .46, '#E99B35', 'opacity=".9"') + `<polygon class="bad" points="${pts([P(.12, 5.28, .64), P(.3, 5.28, .64), P(.3, 5.4, .64), P(.12, 5.4, .64)])}" fill="#d6403a" opacity="0"/>`;
+    items.push({wrap, t: X0 + (X1 - X0) * i / N, bad, judged: false});
+  }
+  let ok = 128, bad = 3, last = performance.now(), vis = 0;
+  const scr = document.getElementById('scrTxt'), v = document.getElementById('verdict'), vBg = document.getElementById('vBg'), vTx = document.getElementById('vTx');
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    items.forEach(it => {
+      it.t += dt * .75;
+      if (it.t > X1) { it.t = X0; it.judged = false; it.bad = rnd() < .28; it.wrap.querySelector('.bad').setAttribute('opacity', 0); }
+      it.wrap.setAttribute('transform', `translate(${it.t * CW},${it.t * CH})`);
+      it.wrap.setAttribute('opacity', it.t < X0 + .25 ? (it.t - X0) / .25 : it.t > X1 - .3 ? (X1 - it.t) / .3 : 1);
+      if (!it.judged && it.t >= TC) {
+        it.judged = true;
+        if (it.bad) { bad++; it.wrap.querySelector('.bad').setAttribute('opacity', .95); vBg.setAttribute('fill', '#d6403a'); vTx.textContent = '✖ DEFECTO'; } else { ok++; vBg.setAttribute('fill', '#2BD67B'); vTx.textContent = '✔ CONFORME'; }
+        v.classList.remove('show'); void v.getBBox(); v.classList.add('show');
+        scr.textContent = `OK ${ok} · ✖ ${bad}`; scr.setAttribute('fill', it.bad ? '#FF7A7C' : '#2BD67B');
+      }
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- valores vivos en fichas flotantes ---------- */
+(function () {
+  const rnd = AL.rng(11); let tk = 12, otif = 94, ven = 8, stock = 23;
+  setInterval(() => {
+    otif = Math.max(90, Math.min(98, otif + (rnd() - .5) * 1.4)); ven = Math.max(4, Math.min(12, ven + (rnd() - .5))); stock = Math.max(19, Math.min(27, stock + (rnd() - .5) * 1.2));
+    const set = (id, t) => { const e = document.getElementById(id); if (e) e.textContent = t; };
+    set('kp1', 'OTIF ' + otif.toFixed(0) + '%'); set('kp2', 'Ventas ▲' + ven.toFixed(0) + '%'); set('kp3', 'Stock ' + stock.toFixed(0) + ' d');
+    if (rnd() < .5) { tk++; set('tkt', '🎫 ' + tk + ' reclamos hoy'); }
+  }, 2600);
+})();
+window.addEventListener('pageshow', () => { renderDock(); bindCards(); });
+</script>
+</body>
+</html>

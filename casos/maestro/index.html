@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maestro · la memoria viva de la planta</title>
+<meta name="description" content="Maestro: asistente de voz y memoria viva para operarios de planta. Demo de Softgic para Alico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#EE7623; --or2:#E99B35; --or-d:#B15E14;
+  --tl:#00BED6; --tl2:#008AAB; --tl-d:#00758D;
+  --gr:#53575A; --ink:#2b2e30; --bg:#FFF8F0; --card:#fff; --line:#f0e2d0;
+  --ok:#1c9a5b; --bad:#d6403a; --warn:#e9a100;
+  --r:22px; --sh:0 6px 22px rgba(177,94,20,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:clamp(15px,1.15vw,26px)}
+body{margin:0;font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+header.top{display:flex;align-items:center;gap:1rem;padding:.7rem 1.6rem;background:#fff;border-bottom:4px solid var(--or);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:.8rem;cursor:pointer}
+.brand b{font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
+.brand small{display:block;font-size:.7rem;color:var(--gr);font-weight:500;margin-top:-.15rem}
+.sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:99px;font-size:.78rem;font-weight:600;background:#eef6f8;color:var(--tl-d);white-space:nowrap}
+.chip.warn{background:#fff3da;color:#8a6200}.chip.bad{background:#fde6e5;color:var(--bad)}.chip.ok{background:#e2f6ec;color:var(--ok)}
+.chip.sample{background:#fff3da;color:#8a6200}
+.hbtn{background:#fff;border:2px solid var(--line);border-radius:14px;padding:.45rem .9rem;font-weight:600;font-size:.85rem;display:inline-flex;gap:.4rem;align-items:center}
+.hbtn:hover{border-color:var(--or)}
+main{flex:1;padding:1.4rem 1.8rem 2rem;max-width:1700px;width:100%;margin:0 auto}
+.guide{display:flex;align-items:center;gap:1rem;background:linear-gradient(90deg,#e6f9fc,#fff);border:2px solid #b9eaf1;border-radius:var(--r);padding:.9rem 1.3rem;margin-bottom:1.2rem}
+.guide .gi{font-size:2rem}
+.guide b{font-size:1.15rem;display:block}
+.guide span{color:var(--gr);font-size:.9rem}
+.steps-bar{display:flex;gap:.5rem;margin-left:auto}
+.steps-bar i{font-style:normal;width:2.2rem;height:2.2rem;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#fff;border:2px solid #b9eaf1;color:var(--tl-d)}
+.steps-bar i.on{background:var(--tl2);color:#fff;border-color:var(--tl2)}
+.steps-bar i.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.hero{display:flex;align-items:center;gap:1.4rem;margin-bottom:1.2rem}
+.hero h1{font-size:2.1rem;font-weight:800;letter-spacing:-.02em}
+.hero p{color:var(--gr);font-size:1.05rem;margin-top:.2rem}
+.bubble{position:relative;background:#fff;border:2px solid var(--line);border-radius:20px;padding:1rem 1.4rem;box-shadow:var(--sh)}
+.tiles{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:1.2rem}
+.tile{border-radius:28px;padding:1.8rem 1.6rem;text-align:left;color:#fff;display:flex;flex-direction:column;gap:.6rem;min-height:17rem;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.tile:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.tile:active{transform:scale(.98)}
+.tile .big{font-size:4.2rem;line-height:1}
+.tile h2{font-size:1.65rem;font-weight:800;line-height:1.15}
+.tile p{font-size:1rem;opacity:.95}
+.tile .num{position:absolute;right:1.2rem;top:1rem;font-size:.85rem;font-weight:700;background:rgba(255,255,255,.25);border-radius:99px;padding:.15rem .7rem}
+.t1{background:linear-gradient(135deg,var(--or),var(--or2))}
+.t2{background:linear-gradient(135deg,var(--tl2),var(--tl))}
+.t3{background:linear-gradient(135deg,#5b6a72,var(--gr))}
+.pulse{animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(238,118,35,.5)}70%{box-shadow:0 0 0 24px rgba(238,118,35,0)}100%{box-shadow:0 0 0 0 rgba(238,118,35,0)}}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem}
+.panelbtn{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:1.1rem 1.4rem;display:flex;align-items:center;gap:1rem;text-align:left;box-shadow:var(--sh)}
+.panelbtn:hover{border-color:var(--or)}
+.panelbtn .big{font-size:2.2rem}.panelbtn b{display:block;font-size:1.1rem}.panelbtn span{color:var(--gr);font-size:.85rem}
+.nota{background:#fff;border:2px dashed var(--tl);border-radius:var(--r);padding:1rem 1.4rem;display:flex;gap:1rem;align-items:center;margin-top:1.2rem}
+.nota .big{font-size:2.4rem}.nota b{display:block}.nota span{color:var(--gr);font-size:.92rem}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+.how div{background:#fff;border-radius:var(--r);padding:1rem 1.2rem;display:flex;gap:.9rem;align-items:center;border:2px solid var(--line)}
+.how em{font-style:normal;font-size:2rem}.how b{display:block;font-size:.95rem}.how span{font-size:.82rem;color:var(--gr)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;padding:.9rem 1.6rem;border-radius:18px;font-weight:700;font-size:1.05rem;background:var(--or);color:#fff;box-shadow:0 4px 0 var(--or-d);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--or-d)}
+.btn.tl{background:var(--tl2);box-shadow:0 4px 0 var(--tl-d)}
+.btn.gr{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.ok{background:var(--ok);box-shadow:0 4px 0 #11703f}.btn.bad{background:var(--bad);box-shadow:0 4px 0 #9d2823}.btn.warn{background:var(--warn);box-shadow:0 4px 0 #a97800}
+.btn.lg{padding:1.2rem 2.2rem;font-size:1.3rem;border-radius:22px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.back{margin-bottom:1rem}
+.search{display:flex;gap:.8rem;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap}
+.search input{flex:1;min-width:16rem;padding:1rem 1.2rem;border-radius:18px;border:2px solid var(--line);background:#fff;font-size:1.05rem}
+.search input:focus,textarea:focus,select:focus{outline:3px solid #b9eaf1;border-color:var(--tl)}
+.mic{width:4.6rem;height:4.6rem;border-radius:50%;background:var(--or);color:#fff;font-size:2rem;display:grid;place-items:center;box-shadow:0 4px 0 var(--or-d)}
+.mic.on{background:var(--bad);animation:pulse2 1.2s infinite}
+@keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(214,64,58,.55)}70%{box-shadow:0 0 0 22px rgba(214,64,58,0)}100%{box-shadow:0 0 0 0 rgba(214,64,58,0)}}
+.heard{background:#fff;border-radius:18px;border:2px solid var(--line);padding:.8rem 1.1rem;margin-bottom:1rem;display:flex;gap:.8rem;align-items:flex-start}
+.ans{background:linear-gradient(135deg,#fff,#e9fbfe);border:2px solid var(--tl);border-radius:var(--r);padding:1.2rem 1.4rem;margin-bottom:1.2rem}
+.ans h3{font-size:1.1rem;margin-bottom:.4rem}.ans p{font-size:1.1rem;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:1rem}
+.cc{background:#fff;border-radius:24px;border:2px solid var(--line);padding:1.1rem 1.1rem 1.2rem;text-align:left;display:flex;flex-direction:column;gap:.45rem;box-shadow:var(--sh);position:relative;border-top:8px solid var(--ac,var(--or));min-height:12rem;transition:transform .12s}
+.cc:hover{transform:translateY(-3px);border-color:var(--ac,var(--or))}
+.cc:active{transform:scale(.98)}
+.cc .ic{font-size:3rem;line-height:1}.cc h3{font-size:1.05rem;font-weight:700;line-height:1.2}
+.cc .ar{font-size:.72rem;font-weight:700;color:var(--ac,var(--or));text-transform:uppercase;letter-spacing:.05em}
+.cc .badge{position:absolute;top:.6rem;right:.6rem;font-size:.65rem;font-weight:700;padding:.15rem .55rem;border-radius:99px;background:#fff3da;color:#8a6200}
+.cc .badge.new{background:#e2f6ec;color:var(--ok)}.cc .badge.crit{background:#fde6e5;color:var(--bad)}
+.cc .by{font-size:.72rem;color:var(--gr);margin-top:auto}
+.sect{font-size:1.15rem;font-weight:800;margin:1.2rem 0 .6rem}
+.det{display:grid;grid-template-columns:1fr 1.5fr;gap:1.4rem;align-items:start}
+.dcard{background:#fff;border-radius:28px;border:2px solid var(--line);padding:1.6rem;box-shadow:var(--sh)}
+.dcard .ic{font-size:5rem;line-height:1}
+.dcard h1{font-size:1.8rem;font-weight:800;line-height:1.15;margin:.5rem 0}
+.dcard .see{font-size:1.05rem;color:var(--gr);line-height:1.45}
+.tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem}
+.tag{background:#eef6f8;color:var(--tl-d);border-radius:99px;padding:.3rem .8rem;font-size:.82rem;font-weight:600}
+.stp{display:flex;gap:1rem;align-items:center;background:#fff;border:2px solid var(--line);border-radius:22px;padding:1rem 1.2rem;margin-bottom:.8rem;box-shadow:var(--sh)}
+.stp .n{width:2.6rem;height:2.6rem;border-radius:50%;background:var(--tl2);color:#fff;font-weight:800;display:grid;place-items:center;flex:none;font-size:1.2rem}
+.stp .si{font-size:2.6rem;flex:none}.stp p{font-size:1.15rem;line-height:1.35;font-weight:500}
+.alert{display:flex;gap:1rem;align-items:center;background:#fde6e5;border:2px solid var(--bad);color:#8f2420;border-radius:var(--r);padding:.9rem 1.2rem;margin-bottom:.9rem;font-weight:600}
+.alert .big{font-size:2rem}
+.alert.info{background:#fff3da;border-color:var(--warn);color:#7a5600}
+.fb{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem}
+.fb .btn{flex-direction:column;padding:1rem;font-size:1.05rem;gap:.2rem}.fb .btn span{font-size:2.4rem}
+.card{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:1.2rem 1.4rem;box-shadow:var(--sh)}
+.field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.9rem}
+.field label{font-weight:700;font-size:.9rem}
+.field input,.field select,.field textarea,.ta{padding:.8rem 1rem;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:1rem;width:100%}
+textarea{resize:vertical;min-height:7rem}
+.pick{display:flex;gap:.5rem;flex-wrap:wrap}
+.pk{padding:.7rem 1.1rem;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:600;font-size:.95rem;display:inline-flex;gap:.4rem;align-items:center}
+.pk.on{background:var(--tl2);border-color:var(--tl2);color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.stepper{display:inline-flex;align-items:center;gap:.6rem}
+.stepper button{width:2.6rem;height:2.6rem;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:1.4rem;font-weight:700}
+.stepper b{min-width:4.5rem;text-align:center;font-size:1.1rem}
+.paro{display:flex;align-items:center;gap:.8rem;background:#f8fbfc;border:2px solid var(--line);border-radius:14px;padding:.5rem .9rem;margin-top:.5rem;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.1rem}
+.kpi{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:1rem 1.2rem;box-shadow:var(--sh)}
+.kpi small{color:var(--gr);font-weight:600;font-size:.78rem;display:block}.kpi b{font-size:2.3rem;font-weight:800;line-height:1.1;display:block}.kpi em{font-style:normal;font-size:.75rem;color:var(--gr)}
+.panel3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+.bar{display:flex;align-items:center;gap:.6rem;margin:.45rem 0;font-size:.85rem}
+.bar .lb{width:11rem;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.bar .tr{flex:1;background:#f3ece2;border-radius:99px;height:1.1rem;overflow:hidden}
+.bar .fl{height:100%;border-radius:99px;background:var(--c,var(--or))}
+.bar .vl{width:2.4rem;text-align:right;font-weight:700}
+.cols{display:flex;align-items:flex-end;gap:3px;height:7rem;margin-top:.5rem}
+.cols div{flex:1;background:var(--tl);border-radius:5px 5px 0 0;min-height:2px;position:relative}
+.cols div span{position:absolute;bottom:-1.3rem;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--gr)}
+.feed{max-height:21rem;overflow:auto}
+.fi{display:flex;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--line);font-size:.85rem;align-items:flex-start}
+.fi .e{font-size:1.3rem}.fi time{margin-left:auto;color:var(--gr);font-size:.75rem;white-space:nowrap}
+.health{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;font-size:.85rem}
+.health div{background:#f8fbfc;border-radius:12px;padding:.6rem .8rem}.health b{display:block;font-size:1rem}
+.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.toolbar select{padding:.55rem .9rem;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:600}
+.overlay{position:fixed;inset:0;background:rgba(30,34,36,.62);z-index:50;display:grid;place-items:center;padding:1.5rem}
+.modal{background:#fff;border-radius:30px;max-width:56rem;width:100%;max-height:92vh;overflow:auto;padding:2rem 2.2rem;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.modal h2{font-size:1.6rem;font-weight:800;margin-bottom:.4rem}
+.tut{text-align:center}
+.tut .big{font-size:6.5rem;line-height:1.1;animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-12px)}}
+.tut h2{font-size:2rem}.tut p{font-size:1.2rem;color:var(--gr);margin:.5rem 0 1.2rem}
+.dots{display:flex;gap:.5rem;justify-content:center;margin:1rem 0}.dots i{width:.8rem;height:.8rem;border-radius:50%;background:#e5ddd2}.dots i.on{background:var(--or)}
+.toast{position:fixed;left:50%;bottom:1.6rem;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.9rem 1.6rem;border-radius:99px;z-index:70;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90vw}
+.spin{display:inline-block;width:1.2rem;height:1.2rem;border:3px solid #b9eaf1;border-top-color:var(--tl2);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.muted{color:var(--gr)}.small{font-size:.8rem}
+footer{padding:.8rem 1.8rem;text-align:center;font-size:.75rem;color:var(--gr)}
+@media (max-width:1100px){.tiles,.det,.two,.panel3,.how{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}header.top{flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand" data-act="home" title="Volver al inicio">
+    <svg width="54" height="54" viewBox="0 0 64 64" aria-hidden="true"><line x1="32" y1="6" x2="32" y2="14" stroke="#B15E14" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="6" r="4" fill="#00BED6"/><rect x="10" y="14" width="44" height="38" rx="14" fill="#EE7623"/><rect x="16" y="21" width="32" height="22" rx="9" fill="#fff"/><circle cx="26" cy="32" r="4.5" fill="#00758D"/><circle cx="38" cy="32" r="4.5" fill="#00758D"/><path d="M26 39 q6 5 12 0" stroke="#EE7623" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="5" y="26" width="6" height="14" rx="3" fill="#E99B35"/><rect x="53" y="26" width="6" height="14" rx="3" fill="#E99B35"/></svg>
+    <div><b>Maestro</b><small>la memoria viva de la planta</small></div>
+  </div>
+  <div class="sp"></div>
+  <span id="st-ia" class="chip"></span>
+  <span id="st-cloud" class="chip"></span>
+  <button class="hbtn" data-act="tutorial">❓ Cómo se usa</button>
+  <button class="hbtn" data-act="ajustes">⚙️ Ajustes</button>
+</header>
+<main id="app"></main>
+<footer>Maestro · Demo de Softgic para Alico · Los casos marcados «EJEMPLO» son de muestra y deben validarse con Calidad y Producción.</footer>
+<div id="layer"></div>
+
+<script src="../../shared/al.js"></script>
+<script src="../../shared/catalogo.js"></script>
+<script src="../../shared/planta.js"></script>
+<script id="seed-casos" type="application/json">[{"id": "tinta-corrida", "area": "Impresión", "icono": "🎨", "titulo": "Tinta corrida o manchada", "sintoma": "La tinta se ve corrida, manchada o se pasa a otra zona de la funda.", "claves": "tinta corrida manchada mancha borrosa chorreada pasa sucia", "causas": ["Tinta muy líquida", "Secado insuficiente", "Rodillo o rasqueta sucios"], "pasos": [{"ico": "🌡️", "texto": "Revisa que el secador esté en la temperatura de la ficha."}, {"ico": "🧪", "texto": "Mide la viscosidad de la tinta con la copa y compárala con la ficha."}, {"ico": "🧽", "texto": "Mira que el rodillo y la rasqueta estén limpios."}, {"ico": "🔁", "texto": "Imprime 5 metros y compara con la muestra aprobada."}], "llamar_lider": "Si sigue igual después de ajustar dos veces.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "color-diferente", "area": "Impresión", "icono": "🖨️", "titulo": "Color diferente al aprobado", "sintoma": "El color de la funda no se parece al color aprobado por el cliente.", "claves": "color diferente tono distinto pálido fuerte oscuro claro aprobado", "causas": ["Viscosidad fuera de rango", "Lote de tinta distinto", "Rodillo equivocado"], "pasos": [{"ico": "📋", "texto": "Compara la funda contra el patrón aprobado con la luz de la cabina."}, {"ico": "🧪", "texto": "Revisa el lote de la tinta y su viscosidad."}, {"ico": "🔍", "texto": "Verifica que el rodillo corresponda al color del trabajo."}, {"ico": "🙋", "texto": "Pide aprobación a Calidad antes de seguir imprimiendo."}], "llamar_lider": "Siempre que el color no coincida con el patrón.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "registro", "area": "Impresión", "icono": "🎯", "titulo": "Colores desalineados (registro)", "sintoma": "Los colores no coinciden: se ven bordes dobles o corridos.", "claves": "registro desalineado desalineacion doble borde corrido colores no coinciden", "causas": ["Tensión de la película", "Registro desajustado", "Marca de registro mal leída"], "pasos": [{"ico": "🎞️", "texto": "Revisa la tensión de la película."}, {"ico": "👀", "texto": "Mira las marcas de registro: ¿se ven alineadas?"}, {"ico": "⚙️", "texto": "Ajusta el registro en el panel, en pasos pequeños."}, {"ico": "📏", "texto": "Revisa de nuevo cada 10 metros."}], "llamar_lider": "Si el desajuste vuelve a aparecer en menos de 10 minutos.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "sello-abierto", "area": "Sellado", "icono": "🔥", "titulo": "Sello abierto o con arrugas", "sintoma": "El sello queda abierto, débil o con arrugas.", "claves": "sello abierto sellado debil arrugas arruga no sella despega se abre", "causas": ["Temperatura baja", "Poco tiempo o presión", "Residuos en la barra"], "pasos": [{"ico": "🌡️", "texto": "Compara la temperatura de sellado con la ficha."}, {"ico": "⏱️", "texto": "Revisa el tiempo y la presión de la barra."}, {"ico": "🧼", "texto": "Limpia la barra de sellado si tiene residuos."}, {"ico": "✋", "texto": "Haz la prueba de tirón con 3 fundas."}], "llamar_lider": "Si alguna funda se abre en la prueba de tirón. Separa lo producido.", "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "fuga", "area": "Sellado", "icono": "💨", "titulo": "Fuga en la bolsa", "sintoma": "La bolsa pierde aire o líquido.", "claves": "fuga fuga de aire gotea pierde aire liquido hermetica hermeticidad perforacion agujero", "causas": ["Sello incompleto", "Esquina débil", "Perforación en la película"], "pasos": [{"ico": "🫧", "texto": "Haz la prueba de hermeticidad con 3 bolsas."}, {"ico": "🔍", "texto": "Mira por dónde sale: sello, esquina o agujero."}, {"ico": "🚧", "texto": "Separa las bolsas dudosas con etiqueta roja."}, {"ico": "📣", "texto": "Avisa a tu líder de turno."}], "llamar_lider": "Siempre. Una fuga puede afectar al cliente.", "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "ojos-de-pez", "area": "Extrusión", "icono": "🫧", "titulo": "Puntos o burbujas en la película", "sintoma": "La película tiene puntos, geles o burbujas (ojos de pez).", "claves": "ojos de pez puntos burbujas geles gel pelicula manchas transparentes", "causas": ["Material húmedo o contaminado", "Mezcla mal hecha", "Filtro saturado"], "pasos": [{"ico": "🌾", "texto": "Revisa el lote de material y si estuvo bien guardado."}, {"ico": "🔥", "texto": "Compara la temperatura de extrusión con la ficha."}, {"ico": "🧹", "texto": "Pregunta si ya toca cambiar el filtro."}, {"ico": "📝", "texto": "Anota el lote para Calidad."}], "llamar_lider": "Si los puntos aparecen en más de un rollo.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "espesor", "area": "Extrusión", "icono": "📏", "titulo": "Espesor irregular o película que se rasga", "sintoma": "La película está más gruesa de un lado, o se rasga con facilidad.", "claves": "espesor irregular grueso delgado rasga rasgado rompe roto burbuja inestable calibre", "causas": ["Burbuja descentrada", "Aire de enfriamiento desigual", "Labio del dado desajustado"], "pasos": [{"ico": "🎈", "texto": "Mira la burbuja: ¿está centrada y estable?"}, {"ico": "🌬️", "texto": "Revisa el aire de enfriamiento."}, {"ico": "📐", "texto": "Mide el espesor en 4 puntos del ancho."}, {"ico": "🔧", "texto": "Si hay diferencia, pide al líder ajustar el dado."}], "llamar_lider": "Antes de mover el dado: siempre con el líder.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "delaminacion", "area": "Laminado", "icono": "🧻", "titulo": "Capas que se separan", "sintoma": "Las capas del material se despegan una de otra (delaminación).", "claves": "delaminacion delaminado capas despega separan pegante adhesivo laminado", "causas": ["Adhesivo mal mezclado", "Curado incompleto", "Superficie sucia"], "pasos": [{"ico": "🧪", "texto": "Revisa la mezcla y la cantidad de adhesivo."}, {"ico": "⏳", "texto": "Confirma el tiempo de reposo (curado) del rollo."}, {"ico": "✋", "texto": "Haz la prueba de pelado con una muestra."}, {"ico": "🚫", "texto": "Separa el lote hasta que Calidad lo revise."}], "llamar_lider": "Siempre que se separen las capas.", "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "zipper-valvula", "area": "Conversión", "icono": "🤐", "titulo": "Zipper o válvula con falla", "sintoma": "El zipper no cierra bien o la válvula no queda pegada.", "claves": "zipper cierre valvula cierra no cierra pegada suelta aditamento troquel", "causas": ["Posición equivocada", "Temperatura del aditamento", "Residuos"], "pasos": [{"ico": "🔍", "texto": "Revisa que el zipper o la válvula estén en su posición."}, {"ico": "🌡️", "texto": "Compara la temperatura de sellado del aditamento con la ficha."}, {"ico": "🧼", "texto": "Limpia la zona de pegado."}, {"ico": "🔁", "texto": "Abre y cierra 10 bolsas para probar."}], "llamar_lider": "Si falla más de 1 de cada 10.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "bandeja", "area": "Termoformado", "icono": "🍽️", "titulo": "Bandeja deformada o delgada", "sintoma": "La bandeja sale deformada, con esquinas delgadas o sin forma completa.", "claves": "bandeja deformada delgada esquinas termoformado forma molde lamina", "causas": ["Lámina mal calentada", "Enfriamiento corto", "Molde sucio"], "pasos": [{"ico": "🌡️", "texto": "Revisa la temperatura de la lámina."}, {"ico": "⏱️", "texto": "Revisa el tiempo de calentamiento."}, {"ico": "🧊", "texto": "Confirma que el molde se enfríe lo suficiente."}, {"ico": "📏", "texto": "Mide el espesor en las esquinas."}], "llamar_lider": "Si el espesor de la esquina está fuera de la ficha.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}, {"id": "sleeve", "area": "Fundas", "icono": "🧴", "titulo": "Manga termoencogible con arrugas", "sintoma": "La manga (sleeve) queda con arrugas o se encoge de forma desigual.", "claves": "sleeve manga termoencogible encoge arrugas arruga tunel fundas desigual", "causas": ["Temperatura del túnel", "Envase mal ubicado", "Flujo de aire desigual"], "pasos": [{"ico": "🔥", "texto": "Compara la temperatura del túnel con la ficha."}, {"ico": "🧭", "texto": "Mira que el envase pase centrado."}, {"ico": "💨", "texto": "Revisa el flujo de aire o vapor."}, {"ico": "👀", "texto": "Compara con la muestra aprobada."}], "llamar_lider": "Si el problema sigue después de revisar la temperatura.", "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"}]</script>
+<script>
+'use strict';
+/* ====================== utilidades ====================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ ]/g, ' ');
+const AREA_COLOR = {'Impresión':'#EE7623','Sellado':'#B15E14','Extrusión':'#00BED6','Laminado':'#008AAB','Conversión':'#E99B35','Termoformado':'#00758D','Fundas':'#53575A','Otra':'#7a8a90'};
+const AREAS = Object.keys(AREA_COLOR);
+const MAQUINAS = ['Extrusora','Impresora flexográfica','Laminadora','Selladora / conversión','Termoformadora','Línea de fundas'];
+const fmtT = ts => new Date(ts).toLocaleTimeString('es-CO', {hour: '2-digit', minute: '2-digit'});
+const fmtD = ts => new Date(ts).toLocaleDateString('es-CO', {day: '2-digit', month: 'short'});
+const turnoActual = () => { const h = new Date().getHours(); return h >= 6 && h < 14 ? 'A' : h >= 14 && h < 22 ? 'B' : 'C'; };
+
+/* ====================== estado ====================== */
+const DEF_CFG = {apiKey: '', model: 'claude-haiku-5-5', cloudUrl: '', cloudSecret: '', pin: '1234', voz: true, sesion: 'Sesión demo', tutorialVisto: false};
+const S = {
+  view: 'home', p: {},
+  cfg: Object.assign({}, DEF_CFG, LS.get('al_cfg', {})),
+  casos: [],
+  eventos: LS.get('m_eventos', []),
+  outbox: LS.get('m_outbox', []),
+  userCasos: LS.get('m_casos_user', []),
+  operario: LS.get('m_operario', ''),
+  turno: turnoActual(),
+  lider: false,
+  cloud: {ok: null, last: null},
+  ia: {ok: null},
+  tmp: {}
+};
+const saveCfg = () => LS.set('al_cfg', S.cfg);
+
+/* ====================== casos ====================== */
+function seedCasos() { try { return JSON.parse($('#seed-casos').textContent); } catch (e) { return []; } }
+async function loadCasos() {
+  const map = new Map();
+  seedCasos().forEach(c => map.set(c.id, c));
+  if (location.protocol !== 'file:') try { const r = await fetch('casos.json', {cache: 'no-store'}); if (r.ok) (await r.json()).forEach(c => map.set(c.id, c)); } catch (e) {}
+  if (S.cfg.cloudUrl) {
+    try {
+      const r = await fetch(S.cfg.cloudUrl + '?action=casos&secret=' + encodeURIComponent(S.cfg.cloudSecret));
+      const j = await r.json();
+      if (j.ok) { (j.casos || []).forEach(c => map.set(c.id, c)); S.cloud.ok = true; }
+    } catch (e) { S.cloud.ok = false; }
+  }
+  S.userCasos.forEach(c => map.set(c.id, c));
+  S.casos = [...map.values()];
+}
+const casoById = id => S.casos.find(c => c.id === id);
+function ayudoCount(id) { return S.eventos.filter(e => e.tipo === 'resultado' && e.caso_id === id && (e.ok === 'si' || e.ok === 'mas') && !e.ejemplo).length; }
+
+/* ====================== eventos + nube ====================== */
+function logEvent(e) {
+  const ev = Object.assign({id: uid(), ts: new Date().toISOString(), sesion: S.cfg.sesion, operario: S.operario || '', turno: S.turno, ejemplo: false}, e);
+  S.eventos.push(ev);
+  if (S.eventos.length > 4000) S.eventos = S.eventos.slice(-4000);
+  LS.set('m_eventos', S.eventos);
+  if (!ev.ejemplo) queue('evento', ev);
+  return ev;
+}
+function queue(kind, data) { S.outbox.push({kind, data}); LS.set('m_outbox', S.outbox); clearTimeout(queue.t); queue.t = setTimeout(syncNow, 1200); }
+async function syncNow() {
+  if (!S.cfg.cloudUrl || !S.outbox.length) { paintStatus(); return; }
+  const batch = S.outbox.slice(0, 40);
+  try {
+    const r = await fetch(S.cfg.cloudUrl, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({secret: S.cfg.cloudSecret, items: batch})});
+    const j = await r.json();
+    if (j.ok) { S.outbox = S.outbox.slice(batch.length); LS.set('m_outbox', S.outbox); S.cloud = {ok: true, last: Date.now()}; if (S.outbox.length) setTimeout(syncNow, 300); }
+    else S.cloud.ok = false;
+  } catch (e) { S.cloud.ok = false; }
+  paintStatus();
+}
+setInterval(syncNow, 30000);
+
+/* ====================== IA (Claude) ====================== */
+const hasIA = () => !!S.cfg.apiKey;
+async function claude(system, user, maxTokens = 700) {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'content-type': 'application/json', 'x-api-key': S.cfg.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true'},
+      body: JSON.stringify({model: S.cfg.model, max_tokens: maxTokens, system, messages: [{role: 'user', content: user}]})
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error?.message || ('HTTP ' + r.status));
+    const txt = (j.content || []).map(b => b.text || '').join('');
+    S.ia.ok = true; paintStatus();
+    logEvent({tipo: 'ia', ok: 'si', ms: Math.round(performance.now() - t0), detalle: 'ok'});
+    return txt;
+  } catch (err) {
+    S.ia.ok = false;
+    logEvent({tipo: 'ia', ok: 'no', ms: Math.round(performance.now() - t0), detalle: String(err.message || err).slice(0, 120)});
+    paintStatus();
+    throw err;
+  }
+}
+function parseJSON(t) { const m = String(t).match(/\{[\s\S]*\}/); if (!m) throw new Error('sin JSON'); return JSON.parse(m[0]); }
+const baseCompacta = () => JSON.stringify(S.casos.map(c => ({id: c.id, titulo: c.titulo, area: c.area, sintoma: c.sintoma, pasos: c.pasos.map(p => p.texto)})));
+const SYS_BASE = 'Eres Maestro, el asistente de voz de la planta de Alico (empaques flexibles, Medellín). Hablas con operarios con poco contacto con tecnología: frases cortas, palabras simples, tono cercano y respetuoso, sin tecnicismos. Nunca inventes valores de temperatura, presión ni tiempos: remite a «la ficha» o al líder. Si hay riesgo para la calidad del producto o la seguridad, indica llamar al líder. Responde SOLO con JSON válido.';
+
+async function iaResponder(texto) {
+  const out = await claude(SYS_BASE,
+    `BASE DE CASOS:\n${baseCompacta()}\n\nEl operario dice: "${texto}"\n\nDevuelve JSON: {"caso_id": id de la base que mejor aplica o null, "respuesta": máximo 55 palabras, explicando qué hacer en pasos simples, "llamar_lider": true/false}`);
+  return parseJSON(out);
+}
+async function iaEstructurar(texto, caso) {
+  const out = await claude(SYS_BASE,
+    `Un operario cuenta cómo resolvió un problema${caso ? ' parecido al caso «' + caso.titulo + '»' : ''}. Convierte su relato en una ficha clara.\nRelato: "${texto}"\nDevuelve JSON: {"titulo": máx 7 palabras, "area": una de ${JSON.stringify(AREAS)}, "icono": un emoji, "sintoma": una frase, "causa": una frase, "pasos": lista de 2 a 4 pasos cortos (verbo al inicio), "critico": true si afecta calidad crítica o seguridad}`, 600);
+  return parseJSON(out);
+}
+async function iaTurno(datos) {
+  const out = await claude(SYS_BASE,
+    `Resume el cambio de turno para el siguiente operario. Datos: ${JSON.stringify(datos)}\nDevuelve JSON: {"audio": texto para leer en voz alta, máximo 55 palabras, cálido y claro, "alertas": lista de máximo 3 frases cortas, "pendientes": lista de máximo 3 frases cortas, "causa_principal": una frase o ""}`, 600);
+  return parseJSON(out);
+}
+
+/* ====================== búsqueda local (sin IA) ====================== */
+function buscarLocal(texto) {
+  const q = norm(texto).split(/\s+/).filter(w => w.length > 2);
+  if (!q.length) return [];
+  return S.casos.map(c => {
+    const hay = norm([c.titulo, c.sintoma, c.claves, c.area].join(' '));
+    let s = 0;
+    q.forEach(w => { if (hay.includes(w)) s += w.length > 4 ? 2 : 1; });
+    return {c, s};
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.c);
+}
+const ICO_PASO = [[/temperatur|calor|calient/, '🌡️'], [/limpi|sucio|residu/, '🧽'], [/revis|mir|veri|compar|observ/, '🔍'], [/ajust|calibr|regul/, '⚙️'], [/med|espesor/, '📏'], [/cambi|reempl/, '🔁'], [/avis|llam|inform/, '📣'], [/espera|minut|tiempo/, '⏱️']];
+const icoPaso = t => (ICO_PASO.find(([r]) => r.test(norm(t))) || [0, '👉'])[1];
+function estructurarLocal(texto, caso) {
+  const partes = String(texto).split(/[.;\n]+|\s+y luego\s+|\s+después\s+|\s+luego\s+/i).map(s => s.trim()).filter(s => s.length > 3).slice(0, 4);
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  return {
+    titulo: caso ? caso.titulo : cap(String(texto).split(/\s+/).slice(0, 6).join(' ')),
+    area: caso ? caso.area : 'Otra', icono: caso ? caso.icono : '💡',
+    sintoma: caso ? caso.sintoma : '', causa: '',
+    pasos: (partes.length ? partes : [texto]).map(cap), critico: !!(caso && caso.critico)
+  };
+}
+function turnoLocal(d) {
+  const paros = d.paros.reduce((a, p) => a + p.min, 0);
+  const partes = [`Turno ${d.turno}, ${d.maquina}.`];
+  if (d.paros.length) partes.push(`Hubo ${d.paros.length} paro${d.paros.length > 1 ? 's' : ''}, ${paros} minutos en total.`);
+  if (d.pendientes.length) partes.push('Queda pendiente: ' + d.pendientes.join(', ') + '.');
+  if (d.texto) partes.push(d.texto);
+  return {audio: partes.join(' ').split(/\s+/).slice(0, 70).join(' '), alertas: d.paros.slice(0, 3).map(p => `Paro de ${p.min} min por ${p.causa}`), pendientes: d.pendientes.slice(0, 3), causa_principal: d.paros[0]?.causa || ''};
+}
+
+/* ====================== voz ====================== */
+let rec = null;
+function startListen(opts) {
+  stopListen();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Este navegador no escucha. Usa Chrome o Edge, o escribe con el teclado.'); return false; }
+  rec = new SR(); rec.lang = 'es-CO'; rec.interimResults = true; rec.continuous = !!opts.continuous;
+  let fin = '';
+  rec.onresult = ev => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) { const r = ev.results[i]; if (r.isFinal) fin += r[0].transcript + ' '; else interim += r[0].transcript; }
+    opts.onText && opts.onText((fin + interim).trim());
+  };
+  rec.onerror = ev => { if (ev.error !== 'no-speech' && ev.error !== 'aborted') toast('No te escuché bien. ¿Probamos otra vez?'); };
+  rec.onend = () => { rec = null; opts.onEnd && opts.onEnd(fin.trim()); };
+  try { rec.start(); } catch (e) { return false; }
+  return true;
+}
+function stopListen() { if (rec) { try { rec.stop(); } catch (e) {} } }
+function say(t) {
+  if (!S.cfg.voz || !('speechSynthesis' in window)) return;
+  try {
+    AL.hablar(t);
+  } catch (e) {}
+}
+function toast(m, ms = 3200) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+
+/* ====================== navegación ====================== */
+function go(view, p = {}) { stopListen(); try { speechSynthesis.cancel(); } catch (e) {} S.view = view; S.p = p; render(); window.scrollTo(0, 0); }
+function guide(ico, title, sub, step) {
+  const bar = step ? `<div class="steps-bar" aria-label="Paso ${step} de 3">${[1, 2, 3].map(n => `<i class="${n < step ? 'done' : n === step ? 'on' : ''}">${n < step ? '✓' : n}</i>`).join('')}</div>` : '';
+  return `<div class="guide"><div class="gi">${ico}</div><div><b>${title}</b><span>${sub}</span></div>${bar}</div>`;
+}
+const backBtn = (to = 'home') => `<button class="btn gr back" data-act="${to === 'home' ? 'home' : 'go'}" data-to="${to}">← Volver</button>`;
+
+function paintStatus() {
+  const ia = $('#st-ia'), cl = $('#st-cloud'); if (!ia) return;
+  ia.className = 'chip ' + (!hasIA() ? 'warn' : S.ia.ok === false ? 'bad' : 'ok');
+  ia.textContent = !hasIA() ? '🤖 IA: modo botones' : S.ia.ok === false ? '🤖 IA: sin respuesta' : '🤖 IA conectada';
+  const pend = S.outbox.length;
+  cl.className = 'chip ' + (!S.cfg.cloudUrl ? 'warn' : S.cloud.ok === false ? 'bad' : pend ? 'warn' : 'ok');
+  cl.textContent = !S.cfg.cloudUrl ? '☁️ Guardado: solo este equipo' : S.cloud.ok === false ? `☁️ Sin conexión (${pend} por enviar)` : pend ? `☁️ Enviando ${pend}…` : '☁️ Guardado en la nube';
+}
+
+function render() {
+  const v = VIEWS[S.view] || VIEWS.home;
+  $('#app').innerHTML = v(S.p);
+  paintStatus();
+  if (VIEWS_AFTER[S.view]) VIEWS_AFTER[S.view](S.p);
+}
+
+/* ====================== vistas ====================== */
+const VIEWS = {}, VIEWS_AFTER = {};
+
+VIEWS.home = () => {
+  const nota = S.eventos.filter(e => e.tipo === 'turno').slice(-1)[0];
+  const notaHtml = nota ? `<div class="nota"><div class="big">📻</div><div style="flex:1"><b>Nota del turno anterior · ${esc(nota.operario || 'Compañero')} · Turno ${esc(nota.turno)} · ${fmtT(nota.ts)}${nota.ejemplo ? ' · EJEMPLO' : ''}</b><span>${esc(nota.detalle || '')}</span></div><button class="btn tl" data-act="say-nota">🔊 Escuchar</button></div>` : '';
+  return `
+  <div class="hero">
+    <div style="flex:1"><h1>Hola${S.operario ? ', ' + esc(S.operario.split(' ')[0]) : ''} 👋 ¿En qué te ayudo?</h1><p>Toca una de las tres opciones. No necesitas escribir: también puedes hablarme.</p></div>
+  </div>
+  <div class="tiles">
+    <button class="tile t1 pulse" data-act="go" data-to="problema"><span class="num">Opción 1</span><span class="big">🆘</span><h2>Tengo un problema</h2><p>Toca la imagen de lo que está pasando y te digo qué hacer.</p></button>
+    <button class="tile t2" data-act="go" data-to="ensenar"><span class="num">Opción 2</span><span class="big">💡</span><h2>Ya lo resolví<br>y quiero enseñar</h2><p>Cuéntame tu truco. Tus compañeros lo verán con tu nombre.</p></button>
+    <button class="tile t3" data-act="go" data-to="turno"><span class="num">Opción 3</span><span class="big">🔄</span><h2>Pasar el turno</h2><p>Cuéntale en 1 minuto al turno que llega cómo quedó todo.</p></button>
+  </div>
+  ${notaHtml}
+  <div class="row2">
+    <button class="panelbtn" data-act="go" data-to="panel"><span class="big">📊</span><div><b>Panel de la planta</b><span>Qué problemas se repiten, en qué turno y cuánto tiempo se pierde.</span></div></button>
+    <div class="panelbtn" style="cursor:default"><span class="big">🏆</span><div><b>${S.casos.length} fichas en la memoria de la planta</b><span>${S.casos.filter(c => !c.ejemplo).length} aportadas por operarios · ${S.eventos.filter(e => e.tipo === 'resultado' && !e.ejemplo && e.ok !== 'no').length} veces que ayudaron</span></div></div>
+  </div>
+  <div class="how">
+    <div><em>👆</em><span><b>1. Toca</b>Elige la imagen de tu problema.</span></div>
+    <div><em>🔊</em><span><b>2. Escucha</b>Te digo los pasos, en voz alta o en pantalla.</span></div>
+    <div><em>👍</em><span><b>3. Cuéntanos</b>Si funcionó o no. Así mejoramos todos.</span></div>
+  </div>`;
+};
+
+/* ---- Tengo un problema ---- */
+VIEWS.problema = (p) => {
+  const orden = [...S.casos].sort((a, b) => (ayudoCount(b.id) - ayudoCount(a.id)));
+  const q = (S.tmp.q || '').trim();
+  const lista = q ? buscarLocal(q) : orden;
+  return `
+  ${backBtn()}
+  ${guide('👆', 'Toca la imagen que más se parezca a tu problema', 'Si no lo ves, aprieta el micrófono y cuéntame con tu voz.', 1)}
+  <div class="search">
+    <button class="mic" id="mic" data-act="mic-problema" aria-label="Hablar">🎤</button>
+    <input id="q" type="search" placeholder="O escribe aquí: «el sello queda abierto»…" value="${esc(S.tmp.q || '')}" autocomplete="off">
+    <button class="btn tl" data-act="buscar">🔎 Buscar</button>
+  </div>
+  <div id="heard"></div>
+  <div id="ans">${S.tmp.ans || ''}</div>
+  <div class="sect">${q ? 'Resultados' : 'Problemas más frecuentes'}</div>
+  <div class="grid" id="grid">${lista.length ? lista.map(cardCaso).join('') : '<p class="muted">No encontré nada parecido. Prueba con otras palabras o cuéntalo en «Ya lo resolví».</p>'}</div>`;
+};
+function cardCaso(c) {
+  const b = c.critico ? '<span class="badge crit">⚠️ Avisa al líder</span>' : c.estado === 'pendiente' ? '<span class="badge">Por validar</span>' : !c.ejemplo ? '<span class="badge new">Truco de operario</span>' : '<span class="badge">EJEMPLO</span>';
+  const n = ayudoCount(c.id);
+  return `<button class="cc" style="--ac:${AREA_COLOR[c.area] || '#EE7623'}" data-act="caso" data-id="${esc(c.id)}">${b}<span class="ic">${esc(c.icono)}</span><span class="ar">${esc(c.area)}</span><h3>${esc(c.titulo)}</h3><span class="by">${n ? '👍 Ayudó a ' + n + ' compañero' + (n > 1 ? 's' : '') : esc(c.autor || '')}</span></button>`;
+}
+VIEWS_AFTER.problema = () => { const i = $('#q'); i && i.addEventListener('keydown', e => { if (e.key === 'Enter') act_buscar(); }); };
+
+async function consultar(texto, via) {
+  texto = (texto || '').trim(); if (!texto) return;
+  S.tmp.q = texto;
+  $('#heard') && ($('#heard').innerHTML = `<div class="heard"><span style="font-size:1.6rem">🗣️</span><div><b>Te escuché:</b> «${esc(texto)}»</div></div>`);
+  const loc = buscarLocal(texto);
+  logEvent({tipo: 'consulta', via, caso_id: loc[0]?.id || '', area: loc[0]?.area || '', detalle: texto.slice(0, 200)});
+  const ans = $('#ans');
+  if (hasIA()) {
+    ans.innerHTML = `<div class="ans"><span class="spin"></span> Maestro está pensando…</div>`;
+    try {
+      const r = await iaResponder(texto);
+      const c = r.caso_id && casoById(r.caso_id);
+      S.tmp.ans = `<div class="ans"><h3>🤖 Maestro te dice:</h3><p>${esc(r.respuesta)}</p>${r.llamar_lider ? '<p style="margin-top:.5rem"><b>📣 Avisa a tu líder de turno.</b></p>' : ''}<div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">${c ? `<button class="btn" data-act="caso" data-id="${esc(c.id)}" data-via="${via}">Ver los pasos: ${esc(c.icono)} ${esc(c.titulo)}</button>` : ''}<button class="btn tl" data-act="say" data-t="${esc(r.respuesta)}">🔊 Escuchar</button></div></div>`;
+      ans.innerHTML = S.tmp.ans; say(r.respuesta);
+      if (r.llamar_lider) logEvent({tipo: 'escalamiento', caso_id: c?.id || '', area: c?.area || '', via, detalle: 'Maestro pidió avisar al líder'});
+      return;
+    } catch (err) { toast('No pude conectar con la IA. Te muestro lo que encontré en la base.'); }
+  }
+  S.tmp.ans = loc.length
+    ? `<div class="ans"><h3>🔎 Creo que es uno de estos:</h3><p>Toca el que se parezca más.</p></div>`
+    : `<div class="ans"><h3>🤔 No encontré algo igual</h3><p>Avisa a tu líder y, si lo resuelves, cuéntanos cómo en «Ya lo resolví».</p></div>`;
+  ans.innerHTML = S.tmp.ans;
+  $('#grid').innerHTML = loc.length ? loc.map(cardCaso).join('') : '';
+  if (loc.length) say('Creo que es uno de estos. Toca el que se parezca más.');
+}
+
+/* ---- ficha del caso ---- */
+VIEWS.caso = ({id}) => {
+  const c = casoById(id); if (!c) return backBtn('problema') + '<p>No encontré esa ficha.</p>';
+  const n = ayudoCount(c.id);
+  return `
+  ${backBtn('problema')}
+  ${guide('🔊', 'Sigue estos pasos, uno por uno', 'Puedes pedirme que te los lea en voz alta.', 2)}
+  <div class="det">
+    <div class="dcard" style="border-top:10px solid ${AREA_COLOR[c.area] || '#EE7623'}">
+      <div class="ic">${esc(c.icono)}</div>
+      <span class="tag" style="background:${AREA_COLOR[c.area] || '#EE7623'};color:#fff">${esc(c.area)}</span>
+      <h1>${esc(c.titulo)}</h1>
+      <p class="see"><b>Qué se ve:</b> ${esc(c.sintoma)}</p>
+      ${(c.causas && c.causas.length) ? `<p class="small muted" style="margin-top:.8rem"><b>Puede ser por:</b></p><div class="tags">${c.causas.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div>` : ''}
+      <p class="small muted" style="margin-top:1rem">${c.ejemplo ? '🧪 Ficha de EJEMPLO, por validar con Alico.' : '👤 Aportada por ' + esc(c.autor || 'un compañero') + (c.estado === 'pendiente' ? ' · pendiente de validar por el líder' : '')}${n ? ' · 👍 ayudó a ' + n : ''}</p>
+      <div style="margin-top:1rem"><button class="btn tl" data-act="say-caso" data-id="${esc(c.id)}">🔊 Léemelo en voz alta</button></div>
+    </div>
+    <div>
+      ${c.critico ? `<div class="alert"><span class="big">⚠️</span><div>Este problema puede afectar la calidad. <u>Avisa a tu líder</u> y separa lo producido.</div></div>` : ''}
+      ${c.pasos.map((s, i) => `<div class="stp"><div class="n">${i + 1}</div><div class="si">${esc(s.ico)}</div><p>${esc(s.texto)}</p></div>`).join('')}
+      ${c.llamar_lider ? `<div class="alert info"><span class="big">📣</span><div><b>Llama al líder si:</b> ${esc(c.llamar_lider)}</div></div>` : ''}
+      <div class="sect" style="margin-top:1rem">Paso 3 · ¿Funcionó?</div>
+      <div class="fb">
+        <button class="btn ok" data-act="res" data-ok="si" data-id="${esc(c.id)}"><span>👍</span>Sí, funcionó</button>
+        <button class="btn warn" data-act="res" data-ok="mas" data-id="${esc(c.id)}"><span>🤔</span>Más o menos</button>
+        <button class="btn bad" data-act="res" data-ok="no" data-id="${esc(c.id)}"><span>👎</span>No funcionó</button>
+      </div>
+    </div>
+  </div>`;
+};
+VIEWS_AFTER.caso = ({id}) => { const c = casoById(id); if (c && S.p.via === 'boton') logEvent({tipo: 'consulta', via: S.p.via || 'boton', caso_id: c.id, area: c.area, detalle: c.titulo}); };
+
+/* ---- Ya lo resolví ---- */
+VIEWS.ensenar = (p) => {
+  const t = S.tmp.ens = S.tmp.ens || {caso: p.caso || '', texto: '', ficha: null};
+  const c = t.caso && casoById(t.caso);
+  return `
+  ${backBtn()}
+  ${guide('💡', 'Cuéntame qué hiciste y yo lo organizo', 'Habla con tus palabras, como se lo contarías a un compañero. 15 segundos bastan.', 1)}
+  <div class="two">
+    <div class="card">
+      <div class="field"><label>1. ¿Cómo te llamas? (para darte el crédito)</label><input id="nom" value="${esc(S.operario)}" placeholder="Ej: Carlos"></div>
+      <div class="field"><label>2. ¿Se parece a alguno de estos problemas?</label>
+        <div class="pick" id="pk-caso">
+          <button class="pk ${!t.caso ? 'on' : ''}" data-act="ens-caso" data-id="">✨ Es uno nuevo</button>
+          ${S.casos.map(x => `<button class="pk ${t.caso === x.id ? 'on' : ''}" data-act="ens-caso" data-id="${esc(x.id)}">${esc(x.icono)} ${esc(x.titulo)}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="field"><label>3. ¿Qué hiciste y funcionó?</label>
+        <div style="display:flex;gap:.8rem;align-items:flex-start">
+          <button class="mic" id="mic" data-act="mic-ensenar" aria-label="Hablar">🎤</button>
+          <textarea id="txt" placeholder="Aprieta el micrófono y cuéntame, o escribe aquí…">${esc(t.texto)}</textarea>
+        </div>
+      </div>
+      <button class="btn lg" data-act="ens-organizar">✨ Organizar mi truco</button>
+    </div>
+  </div>
+  <div id="preview">${t.ficha ? previewFicha(t.ficha) : ''}</div>`;
+};
+function previewFicha(f) {
+  return `<div class="sect">Así quedaría tu truco</div>
+  <div class="card" style="border:3px solid var(--tl)">
+    <div style="display:flex;gap:1rem;align-items:center"><span style="font-size:3.4rem">${esc(f.icono)}</span><div><span class="tag">${esc(f.area)}</span><h2 style="font-size:1.5rem;margin-top:.3rem">${esc(f.titulo)}</h2>${f.sintoma ? `<p class="muted">${esc(f.sintoma)}</p>` : ''}</div></div>
+    <div style="margin-top:.8rem">${f.pasos.map((s, i) => `<div class="stp"><div class="n">${i + 1}</div><div class="si">${icoPaso(s)}</div><p>${esc(s)}</p></div>`).join('')}</div>
+    ${f.critico ? '<div class="alert"><span class="big">⚠️</span><div>Parece un tema de calidad crítica: el líder debe validarlo antes de publicarlo.</div></div>' : ''}
+    <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.6rem">
+      <button class="btn tl" data-act="ens-oir">🔊 Escúchalo</button>
+      <button class="btn ok lg" data-act="ens-guardar">✅ Sí, guardar mi truco</button>
+      <button class="btn gr" data-act="ens-corregir">✏️ Corregir</button>
+    </div>
+  </div>`;
+}
+VIEWS_AFTER.ensenar = () => {
+  const t = $('#txt'); t && t.addEventListener('input', () => { S.tmp.ens.texto = t.value; });
+  const n = $('#nom'); n && n.addEventListener('input', () => { S.operario = n.value; LS.set('m_operario', S.operario); });
+};
+
+/* ---- Pasar el turno ---- */
+VIEWS.turno = () => {
+  const t = S.tmp.tur = S.tmp.tur || {maquina: MAQUINAS[0], paros: [], pend: [], texto: '', res: null, causa: '', min: 15};
+  const PEND = ['🔧 Mantenimiento pendiente', '📦 Falta material', '🔁 Cambio de referencia', '🧪 Ajuste de calidad', '🧹 Limpieza pendiente'];
+  return `
+  ${backBtn()}
+  ${guide('🔄', 'Cuéntale al turno que llega cómo quedó todo', 'Marca lo que pasó y habla 1 minuto. Yo armo un audio de 20 segundos.', 1)}
+  <div class="two">
+    <div class="card">
+      <div class="field"><label>Tu nombre</label><input id="nom" value="${esc(S.operario)}" placeholder="Ej: Carlos"></div>
+      <div class="field"><label>Tu turno</label><div class="pick">${[['A', '6 a. m. – 2 p. m.'], ['B', '2 p. m. – 10 p. m.'], ['C', '10 p. m. – 6 a. m.']].map(([k, h]) => `<button class="pk ${S.turno === k ? 'on' : ''}" data-act="tur-turno" data-k="${k}">Turno ${k} · ${h}</button>`).join('')}</div></div>
+      <div class="field"><label>¿Qué máquina o línea?</label><div class="pick">${MAQUINAS.map(m => `<button class="pk ${t.maquina === m ? 'on' : ''}" data-act="tur-maq" data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div></div>
+      <div class="field"><label>¿Quedó algo pendiente?</label><div class="pick">${PEND.map(x => `<button class="pk ${t.pend.includes(x) ? 'on' : ''}" data-act="tur-pend" data-x="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>
+    </div>
+    <div class="card">
+      <div class="field"><label>¿Hubo paros? Elige la causa y los minutos</label>
+        <div class="pick">${S.casos.map(c => `<button class="pk ${t.causa === c.titulo ? 'on' : ''}" data-act="tur-causa" data-c="${esc(c.titulo)}">${esc(c.icono)} ${esc(c.titulo)}</button>`).join('')}<button class="pk ${t.causa === 'Otra causa' ? 'on' : ''}" data-act="tur-causa" data-c="Otra causa">❔ Otra causa</button></div>
+        <div style="display:flex;gap:1rem;align-items:center;margin-top:.7rem"><div class="stepper"><button data-act="tur-min" data-d="-5">−</button><b id="minv">${t.min} min</b><button data-act="tur-min" data-d="5">+</button></div><button class="btn tl" data-act="tur-addparo">➕ Agregar paro</button></div>
+        <div id="paros">${t.paros.map((p, i) => `<div class="paro">⏸️ ${esc(p.causa)} · ${p.min} min <button class="hbtn" style="margin-left:auto" data-act="tur-delparo" data-i="${i}">Quitar</button></div>`).join('')}</div>
+      </div>
+      <div class="field"><label>Cuéntanos con tu voz lo importante</label>
+        <div style="display:flex;gap:.8rem;align-items:flex-start"><button class="mic" id="mic" data-act="mic-turno" aria-label="Hablar">🎤</button><textarea id="txt" placeholder="Aprieta el micrófono y habla, o escribe…">${esc(t.texto)}</textarea></div>
+      </div>
+      <button class="btn lg" data-act="tur-resumir">📻 Crear audio para el siguiente turno</button>
+    </div>
+  </div>
+  <div id="preview">${t.res ? previewTurno(t.res) : ''}</div>`;
+};
+function previewTurno(r) {
+  return `<div class="sect">Así lo escuchará el turno que llega</div>
+  <div class="card" style="border:3px solid var(--tl)"><div style="display:flex;gap:1rem;align-items:flex-start"><span style="font-size:3.2rem">📻</span><p style="font-size:1.2rem;line-height:1.5">${esc(r.audio)}</p></div>
+  ${(r.alertas || []).length ? `<div class="sect">⚠️ Alertas</div><div class="tags">${r.alertas.map(a => `<span class="tag" style="background:#fde6e5;color:var(--bad)">${esc(a)}</span>`).join('')}</div>` : ''}
+  ${(r.pendientes || []).length ? `<div class="sect">📌 Pendientes</div><div class="tags">${r.pendientes.map(a => `<span class="tag" style="background:#fff3da;color:#8a6200">${esc(a)}</span>`).join('')}</div>` : ''}
+  <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1rem"><button class="btn tl" data-act="say" data-t="${esc(r.audio)}">🔊 Escuchar</button><button class="btn ok lg" data-act="tur-guardar">✅ Entregar el turno</button></div></div>`;
+}
+VIEWS_AFTER.turno = () => {
+  const t = $('#txt'); t && t.addEventListener('input', () => { S.tmp.tur.texto = t.value; });
+  const n = $('#nom'); n && n.addEventListener('input', () => { S.operario = n.value; LS.set('m_operario', S.operario); });
+};
+
+/* ---- Historia de 2 años (EJEMPLO, determinista): da contexto a lo que pasa hoy ---- */
+let HIST = null;
+const MAQS = {'Impresión': 'Impresora flexográfica FX-02', 'Sellado': 'Selladora-cortadora SC-03', 'Extrusión': 'Extrusora EX-01', 'Laminado': 'Laminadora LM-01', 'Conversión': 'Selladora-cortadora SC-03', 'Termoformado': 'Termoformadora TF-01', 'Fundas': 'Línea de fundas termoencogibles'};
+function historia() {
+  if (HIST) return HIST;
+  const r = AL.rng(730), ops = (window.PLANTA ? PLANTA.OPERARIOS : ['Carlos', 'Marta', 'Jhon', 'Luz', 'Andrés', 'Paola']), out = [], hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const ids = S.casos.filter(c => c.ejemplo).map(c => c.id), base = {'sello-abierto': 12, 'tinta-corrida': 9, 'color-diferente': 6, 'registro': 5, 'fuga': 5, 'ojos-de-pez': 4, 'espesor': 4, 'delaminacion': 5, 'zipper-valvula': 4, 'bandeja': 5, 'sleeve': 3};
+  const add = e => out.push(Object.assign({id: 'h' + out.length, sesion: 'Histórico 2 años', ejemplo: true, hist: true}, e));
+  for (let d = 730; d >= 1; d--) {
+    const dia = new Date(hoy - d * 864e5), m = dia.getMonth(), prog = (730 - d) / 730;               // prog: 0 hace dos años → 1 ayer
+    const adop = .35 + .65 * Math.min(1, prog * 1.6), temporada = m >= 9 ? 1.3 : m <= 1 ? .85 : 1, dom = dia.getDay() === 0 ? .3 : 1;
+    const n = Math.round(14 * adop * temporada * dom * (.75 + r() * .5)), pResuelve = .6 + .25 * prog;
+    const bag = []; ids.forEach(id => { let w = base[id] || 3; if (id === 'tinta-corrida' && prog > .55) w *= .45; if (id === 'bandeja' && prog > .7) w *= 1.8; if (id === 'sello-abierto' && m >= 9) w *= 1.4; for (let k = 0; k < w; k++) bag.push(id); });
+    for (let i = 0; i < n; i++) {
+      const id = bag[Math.floor(r() * bag.length)], c = casoById(id); if (!c) continue;
+      const h = Math.floor(r() * 24), ts = dia.getTime() + h * 36e5 + Math.floor(r() * 36e5), turno = h >= 6 && h < 14 ? 'A' : h >= 14 && h < 22 ? 'B' : 'C';
+      const op = ops[Math.floor(r() * ops.length)], pr = pResuelve - (turno === 'C' ? .1 : 0), x = r(), ok = x < pr ? 'si' : x < pr + .14 ? 'mas' : 'no';
+      add({ts: new Date(ts).toISOString(), tipo: 'consulta', caso_id: id, area: c.area, via: r() > .45 ? 'voz' : 'boton', operario: op, turno, detalle: c.titulo, maquina: MAQS[c.area]});
+      add({ts: new Date(ts + 3e5).toISOString(), tipo: 'resultado', caso_id: id, area: c.area, ok, operario: op, turno});
+      if (ok === 'no') add({ts: new Date(ts + 3.2e5).toISOString(), tipo: 'escalamiento', caso_id: id, area: c.area, operario: op, turno, detalle: 'No funcionó', maquina: MAQS[c.area]});
+      if (ok !== 'si' && r() < .45) add({ts: new Date(ts + 2e5).toISOString(), tipo: 'paro', min: Math.round(10 + r() * (60 - 25 * prog)), detalle: c.titulo + ' · ' + MAQS[c.area], caso_id: id, area: c.area, operario: op, turno, maquina: MAQS[c.area]});
+    }
+    if (r() < .06 * adop) add({ts: new Date(dia.getTime() + 15 * 36e5).toISOString(), tipo: 'truco', detalle: 'Truco aportado por un operario', operario: ops[Math.floor(r() * ops.length)], turno: 'B'});
+  }
+  HIST = out; return out;
+}
+/* ---- Panel de observabilidad ---- */
+function filtrarEventos() {
+  const f = S.tmp.pf = S.tmp.pf || {rango: '30d', ejemplo: true, sesion: ''};
+  const ahora = Date.now();
+  const desde = f.rango === 'hora' ? ahora - 3600e3 : f.rango === 'hoy' ? new Date().setHours(0, 0, 0, 0) : f.rango === '7d' ? ahora - 7 * 864e5 : f.rango === '30d' ? ahora - 30 * 864e5 : f.rango === '12m' ? ahora - 365 * 864e5 : 0;
+  const base = f.ejemplo ? S.eventos.concat(historia()) : S.eventos;
+  return base.filter(e => new Date(e.ts).getTime() >= desde && (f.ejemplo || !e.ejemplo) && (!f.sesion || e.sesion === f.sesion)).sort((a, b) => a.ts < b.ts ? -1 : 1);
+}
+function tendencia() {
+  const ev = historia().concat(S.eventos), M = {}, MN = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  ev.forEach(e => { const k = e.ts.slice(0, 7), o = M[k] || (M[k] = {c: 0, si: 0, res: 0, paro: 0, esc: 0}); if (e.tipo === 'consulta') o.c++; if (e.tipo === 'resultado') { o.res++; if (e.ok === 'si' || e.ok === 'mas') o.si++; } if (e.tipo === 'paro') o.paro += +e.min || 0; if (e.tipo === 'escalamiento') o.esc++; });
+  return Object.keys(M).sort().slice(-24).map(k => Object.assign({k, l: MN[+k.slice(5) - 1] + (k.endsWith('-01') ? ' ' + k.slice(2, 4) : '')}, M[k]));
+}
+function hallazgos2a() {
+  const T = tendencia(), a = T.slice(0, 12), b = T.slice(-12), s = (x, f) => x.reduce((t, o) => t + o[f], 0);
+  const r1 = s(a, 'si') / Math.max(1, s(a, 'res')), r2 = s(b, 'si') / Math.max(1, s(b, 'res')), p1 = s(a, 'paro'), p2 = s(b, 'paro');
+  const ev = historia(), byC = {}, byT = {A: 0, B: 0, C: 0}, escT = {A: 0, B: 0, C: 0}, byM = {};
+  ev.forEach(e => { if (e.tipo === 'consulta') { byC[e.caso_id] = (byC[e.caso_id] || 0) + 1; byT[e.turno]++; } if (e.tipo === 'escalamiento') escT[e.turno]++; if (e.tipo === 'paro') byM[e.maquina] = (byM[e.maquina] || 0) + (+e.min || 0); });
+  const top = Object.entries(byC).sort((x, y) => y[1] - x[1])[0], mq = Object.entries(byM).sort((x, y) => y[1] - x[1])[0], q4 = T.filter(t => /-(10|11|12)$/.test(t.k)), resto = T.filter(t => !/-(10|11|12)$/.test(t.k));
+  const pc = v => Math.round(v * 100) + '%';
+  return [
+    `🟢 La planta resuelve más sola: de ${pc(r1)} a ${pc(r2)} de problemas resueltos con la guía (año anterior vs. último año).`,
+    `⏱️ Los minutos de paro bajaron ${Math.round((1 - p2 / p1) * 100)}% año contra año (${p1.toLocaleString('es-CO')} → ${p2.toLocaleString('es-CO')} min).`,
+    `🔁 El problema más repetido en 2 años es «${casoById(top[0])?.titulo || top[0]}» (${top[1].toLocaleString('es-CO')} consultas): candidato a solución de raíz.`,
+    `🌙 El turno C escala ${pc(escT.C / Math.max(1, byT.C) / (escT.A / Math.max(1, byT.A)) - 1)} más que el turno A: reforzar acompañamiento nocturno.`,
+    `📅 Temporada alta (oct–dic): ${Math.round((q4.reduce((t, o) => t + o.c, 0) / q4.length) / (resto.reduce((t, o) => t + o.c, 0) / resto.length) * 100 - 100)}% más consultas por mes. Planear repuestos y personal antes.`,
+    `🛠️ La máquina con más minutos de paro acumulados es ${mq[0]} (${mq[1].toLocaleString('es-CO')} min).`
+  ];
+}
+function metricas(evs) {
+  const cons = evs.filter(e => e.tipo === 'consulta');
+  const res = evs.filter(e => e.tipo === 'resultado');
+  const si = res.filter(e => e.ok === 'si' || e.ok === 'mas').length;
+  const porCaso = {}, porArea = {}, porTurno = {A: 0, B: 0, C: 0}, porHora = Array(24).fill(0);
+  cons.forEach(e => { if (e.caso_id) porCaso[e.caso_id] = (porCaso[e.caso_id] || 0) + 1; if (e.area) porArea[e.area] = (porArea[e.area] || 0) + 1; if (porTurno[e.turno] !== undefined) porTurno[e.turno]++; porHora[new Date(e.ts).getHours()]++; });
+  const paros = evs.filter(e => e.tipo === 'paro');
+  const ia = evs.filter(e => e.tipo === 'ia');
+  return {cons, res, si, porCaso, porArea, porTurno, porHora, paros, minParo: paros.reduce((a, e) => a + (Number(e.min) || 0), 0),
+    escal: evs.filter(e => e.tipo === 'escalamiento').length, trucos: evs.filter(e => e.tipo === 'truco').length,
+    iaN: ia.length, iaFail: ia.filter(e => e.ok === 'no').length, iaMs: ia.length ? Math.round(ia.reduce((a, e) => a + (Number(e.ms) || 0), 0) / ia.length) : 0};
+}
+function patrones(evs) {
+  const hora = evs.filter(e => new Date(e.ts).getTime() >= Date.now() - 3600e3);
+  const out = [];
+  const g = {}; hora.filter(e => e.tipo === 'consulta' && e.caso_id).forEach(e => { g[e.caso_id] = (g[e.caso_id] || 0) + 1; });
+  Object.entries(g).filter(([, n]) => n >= 3).forEach(([id, n]) => {
+    const r = hora.filter(e => e.tipo === 'resultado' && e.caso_id === id); const malos = r.filter(e => e.ok === 'no').length;
+    const c = casoById(id); out.push(`«${c ? c.titulo : id}» se consultó ${n} veces en la última hora${malos ? ` y no funcionó ${malos} ${malos > 1 ? 'veces' : 'vez'}` : ''}. Posible falla de la línea: conviene que el líder la revise.`);
+  });
+  return out;
+}
+VIEWS.panel = () => {
+  const f = S.tmp.pf = S.tmp.pf || {rango: '30d', ejemplo: true, sesion: ''};
+  const evs = filtrarEventos(), m = metricas(evs), T = tendencia(), mxT = Math.max(1, ...T.map(t => t.c)), mxP = Math.max(1, ...T.map(t => t.paro));
+  const tasa = m.res.length ? Math.round(m.si / m.res.length * 100) : null;
+  const top = Object.entries(m.porCaso).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const maxTop = top[0]?.[1] || 1;
+  const areas = Object.entries(m.porArea).sort((a, b) => b[1] - a[1]);
+  const maxA = areas[0]?.[1] || 1, maxH = Math.max(1, ...m.porHora);
+  const sesiones = [...new Set(S.eventos.map(e => e.sesion).filter(Boolean))];
+  const pat = patrones(evs);
+  const feed = evs.filter(e => e.tipo !== 'ia').slice(-14).reverse();
+  const EI = {consulta: '🔎', resultado: '👍', escalamiento: '📣', truco: '💡', validacion: '✅', turno: '🔄', paro: '⏸️', error: '⚠️'};
+  const txt = e => e.tipo === 'consulta' ? `Consulta: ${esc(casoById(e.caso_id)?.titulo || e.detalle || '')}` : e.tipo === 'resultado' ? `${e.ok === 'si' ? 'Funcionó' : e.ok === 'mas' ? 'Funcionó a medias' : 'No funcionó'}: ${esc(casoById(e.caso_id)?.titulo || '')}` : e.tipo === 'escalamiento' ? `Aviso al líder: ${esc(casoById(e.caso_id)?.titulo || e.detalle || '')}` : e.tipo === 'truco' ? `Nuevo truco: ${esc(e.detalle || '')}` : e.tipo === 'validacion' ? `Truco validado: ${esc(e.detalle || '')}` : e.tipo === 'paro' ? `Paro ${e.min} min: ${esc(e.detalle || '')}` : e.tipo === 'turno' ? `Entrega de turno ${esc(e.turno)}` : esc(e.detalle || e.tipo);
+  const pend = S.casos.filter(c => c.estado === 'pendiente');
+  return `
+  ${backBtn()}
+  ${guide('📊', 'Panel de la planta: lo que está pasando ahora', 'Se llena solo con lo que los operarios consultan, resuelven y entregan.', 0)}
+  <div class="toolbar">
+    <select id="f-rango">${[['hora', 'Última hora'], ['hoy', 'Hoy'], ['7d', '7 días'], ['30d', '30 días'], ['12m', '12 meses'], ['todo', '2 años']].map(([k, l]) => `<option value="${k}" ${f.rango === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <select id="f-ses"><option value="">Todas las sesiones</option>${sesiones.map(s => `<option ${f.sesion === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
+    <label class="pk ${f.ejemplo ? 'on' : ''}" style="cursor:pointer"><input type="checkbox" id="f-ej" ${f.ejemplo ? 'checked' : ''} style="display:none"> 🧪 Incluir datos de ejemplo</label>
+    <span class="sp"></span>
+    <button class="hbtn" data-act="seed-demo">🧪 Cargar datos de ejemplo</button>
+    <button class="hbtn" data-act="export-csv">⬇️ Descargar CSV</button>
+    <button class="hbtn" data-act="lider">${S.lider ? '🔓 Modo líder activo' : '🔒 Modo líder'}</button>
+  </div>
+  ${f.ejemplo ? '<div class="alert info"><span class="big">🧪</span><div>Incluye <b>2 años de historia de EJEMPLO</b> para tener datos relevantes, más lo que registren hoy los operarios. Desmarca «datos de ejemplo» para ver solo lo real.</div></div>' : ''}
+  ${pat.map(p => `<div class="alert"><span class="big">🚨</span><div><b>Posible patrón:</b> ${esc(p)}</div></div>`).join('')}
+  <div class="kpis">
+    <div class="kpi"><small>Consultas</small><b>${m.cons.length}</b><em>problemas que los operarios consultaron</em></div>
+    <div class="kpi"><small>Se resolvieron</small><b>${tasa === null ? '–' : tasa + '%'}</b><em>${m.res.length} respuestas de «¿funcionó?»</em></div>
+    <div class="kpi"><small>Avisos al líder</small><b>${m.escal}</b><em>escalados</em></div>
+    <div class="kpi"><small>Trucos nuevos</small><b>${m.trucos}</b><em>aportados por operarios</em></div>
+    <div class="kpi"><small>Tiempo en paros</small><b>${m.minParo}<span style="font-size:1rem"> min</span></b><em>${m.paros.length} paros reportados</em></div>
+  </div>
+  ${f.ejemplo ? `<div class="two" style="margin-bottom:1rem"><div class="card"><h3>📆 24 meses de planta: consultas (barras) y minutos de paro (línea)</h3>
+    <div style="position:relative"><div class="cols" style="height:9rem">${T.map(t => `<div style="height:${t.c / mxT * 100}%;background:${/-(10|11|12)$/.test(t.k) ? '#EE7623' : '#00BED6'}" title="${t.l}: ${t.c} consultas · ${t.paro} min de paro · ${t.res ? Math.round(t.si / t.res * 100) : 0}% resuelto">${/-(01|07)$/.test(t.k) ? `<span>${t.l}</span>` : ''}</div>`).join('')}</div>
+    <svg viewBox="0 0 ${T.length * 10} 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:9rem;pointer-events:none"><polyline fill="none" stroke="#d6403a" stroke-width="2" vector-effect="non-scaling-stroke" points="${T.map((t, i) => (i * 10 + 5) + ',' + (100 - t.paro / mxP * 92)).join(' ')}"/></svg></div>
+    <div style="height:1.4rem"></div><div class="small muted">🟧 temporada alta (oct–dic) · 🟦 resto del año · <span style="color:#d6403a">━</span> minutos de paro</div></div>
+    <div class="card"><h3>🧠 Lo que dicen 2 años de datos</h3>${hallazgos2a().map(h => `<div style="padding:.45rem 0;border-bottom:1px solid var(--line);font-size:.9rem">${esc(h)}</div>`).join('')}</div></div>` : ''}
+  <div class="panel3">
+    <div class="card"><h3>Problemas que más se repiten</h3>${top.length ? top.map(([id, n]) => { const c = casoById(id); return `<div class="bar"><span class="lb">${esc(c?.icono || '')} ${esc(c?.titulo || id)}</span><span class="tr"><span class="fl" style="display:block;width:${n / maxTop * 100}%;--c:${AREA_COLOR[c?.area] || '#EE7623'}"></span></span><span class="vl">${n}</span></div>`; }).join('') : '<p class="muted">Aún no hay consultas.</p>'}
+      <h3 style="margin-top:1rem">Consultas por hora del día</h3><div class="cols">${m.porHora.map((n, h) => `<div style="height:${n / maxH * 100}%" title="${h}:00 · ${n}">${h % 4 === 0 ? `<span>${h}h</span>` : ''}</div>`).join('')}</div><div style="height:1.2rem"></div>
+    </div>
+    <div class="card"><h3>Por área</h3>${areas.length ? areas.map(([a, n]) => `<div class="bar"><span class="lb">${esc(a)}</span><span class="tr"><span class="fl" style="display:block;width:${n / maxA * 100}%;--c:${AREA_COLOR[a] || '#EE7623'}"></span></span><span class="vl">${n}</span></div>`).join('') : '<p class="muted">Sin datos.</p>'}
+      <h3 style="margin-top:1rem">Por turno</h3>${['A', 'B', 'C'].map(k => `<div class="bar"><span class="lb">Turno ${k}</span><span class="tr"><span class="fl" style="display:block;width:${m.porTurno[k] / Math.max(1, ...Object.values(m.porTurno)) * 100}%;--c:#008AAB"></span></span><span class="vl">${m.porTurno[k]}</span></div>`).join('')}
+    </div>
+    <div class="card"><h3>Salud del sistema</h3><div class="health">
+      <div>🤖 IA<b>${!hasIA() ? 'Sin clave' : m.iaN ? (m.iaFail ? m.iaFail + ' errores' : 'Sin errores') : 'Lista'}</b>${m.iaN ? m.iaMs + ' ms promedio' : '&nbsp;'}</div>
+      <div>☁️ Nube<b>${!S.cfg.cloudUrl ? 'No conectada' : S.cloud.ok === false ? 'Sin conexión' : 'Conectada'}</b>${S.outbox.length} por enviar</div>
+      <div>🎤 Voz<b>${(window.SpeechRecognition || window.webkitSpeechRecognition) ? 'Disponible' : 'No disponible'}</b>Chrome o Edge</div>
+      <div>💾 Este equipo<b>${S.eventos.length} eventos</b>${S.casos.length} fichas</div></div>
+      <button class="btn tl" style="margin-top:.9rem;width:100%" data-act="diag">🤖 Pídele a Maestro un diagnóstico</button>
+      <div id="diag" style="margin-top:.8rem"></div>
+    </div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>En vivo</h3><div class="feed">${feed.length ? feed.map(e => `<div class="fi"><span class="e">${EI[e.tipo] || '•'}</span><div>${txt(e)}<br><span class="small muted">${esc(e.operario || 'Operario')} · Turno ${esc(e.turno || '')}${e.ejemplo ? ' · EJEMPLO' : ''}</span></div><time>${fmtD(e.ts)} ${fmtT(e.ts)}</time></div>`).join('') : '<p class="muted">Todavía no hay actividad.</p>'}</div></div>
+    <div class="card"><h3>Trucos por validar ${S.lider ? '' : '🔒'}</h3>
+      ${!S.lider ? '<p class="muted">Entra al modo líder para validar los trucos que aportan los operarios.</p>' : pend.length ? pend.map(c => `<div class="stp" style="margin:.5rem 0"><div class="si">${esc(c.icono)}</div><div style="flex:1"><b>${esc(c.titulo)}</b><br><span class="small muted">${esc(c.autor)} · ${esc(c.pasos.map(p => p.texto).join(' → ').slice(0, 110))}</span></div><button class="btn ok" data-act="validar" data-id="${esc(c.id)}">✅</button><button class="btn bad" data-act="rechazar" data-id="${esc(c.id)}">✖</button></div>`).join('') : '<p class="muted">No hay trucos pendientes. 🎉</p>'}
+    </div>
+  </div>`;
+};
+VIEWS_AFTER.panel = () => {
+  const f = S.tmp.pf;
+  $('#f-rango').onchange = e => { f.rango = e.target.value; render(); };
+  $('#f-ses').onchange = e => { f.sesion = e.target.value; render(); };
+  $('#f-ej').onchange = e => { f.ejemplo = e.target.checked; render(); };
+};
+
+/* ====================== ajustes y tutorial ====================== */
+function openModal(html, cls = '') { $('#layer').innerHTML = `<div class="overlay" data-act="ov"><div class="modal ${cls}" role="dialog">${html}</div></div>`; }
+function closeModal() { $('#layer').innerHTML = ''; }
+function tutorial(i = 0) {
+  const T = [
+    ['👆', '1. Toca', 'Elige la imagen del problema que tienes. Si no lo ves, aprieta el micrófono 🎤 y cuéntame.'],
+    ['🔊', '2. Escucha', 'Te muestro los pasos con dibujos y los puedo leer en voz alta. Hazlos uno por uno.'],
+    ['👍', '3. Cuéntanos', 'Dime si funcionó. Si lo resolviste a tu manera, enséñanos: tu truco quedará con tu nombre.']
+  ];
+  const [ic, h, p] = T[i];
+  openModal(`<div class="tut"><div class="big">${ic}</div><h2>${h}</h2><p>${p}</p><div class="dots">${T.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+  <div style="display:flex;gap:.8rem;justify-content:center">${i < 2 ? `<button class="btn lg" data-act="tut" data-i="${i + 1}">Siguiente →</button>` : `<button class="btn ok lg" data-act="tut-fin">¡Entendido, vamos!</button>`}<button class="btn gr" data-act="tut-fin">Saltar</button></div></div>`);
+}
+function ajustes() {
+  const c = S.cfg;
+  openModal(`<h2>⚙️ Ajustes <span class="muted small">(para quien prepara la demo)</span></h2>
+  <div class="two" style="margin-top:.8rem">
+    <div>
+      <div class="field"><label>Nombre de la sesión (queda en cada registro)</label><input id="a-ses" value="${esc(c.sesion)}" placeholder="Ej: Grupo 3 · 10:00 a. m."></div>
+      <div class="field"><label>Clave de la IA (Anthropic)</label><input id="a-key" type="password" value="${esc(c.apiKey)}" placeholder="sk-ant-…" autocomplete="off"><span class="small muted">Se guarda solo en este navegador. Usa una clave con límite de gasto y bórrala al terminar.</span></div>
+      <div class="field"><label>Modelo</label><input id="a-mod" value="${esc(c.model)}"></div>
+      <div class="field"><label>PIN del líder</label><input id="a-pin" value="${esc(c.pin)}" inputmode="numeric"></div>
+      <label class="pk ${c.voz ? 'on' : ''}" style="cursor:pointer"><input type="checkbox" id="a-voz" ${c.voz ? 'checked' : ''} style="display:none"> 🔊 Maestro habla en voz alta</label>
+    </div>
+    <div>
+      <div class="field"><label>URL de la nube (Apps Script, termina en /exec)</label><input id="a-url" value="${esc(c.cloudUrl)}" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <div class="field"><label>Clave de la nube</label><input id="a-sec" type="password" value="${esc(c.cloudSecret)}"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem"><button class="hbtn" data-act="test-ia">🤖 Probar IA</button><button class="hbtn" data-act="test-cloud">☁️ Probar nube</button></div>
+      <div id="a-res" class="small muted" style="min-height:2.5rem"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap"><button class="hbtn" data-act="export-casos">⬇️ Exportar fichas (casos.json)</button><button class="hbtn" data-act="export-csv">⬇️ Eventos (CSV)</button><button class="hbtn" data-act="borrar-ej">🧹 Borrar datos de ejemplo</button><button class="hbtn" data-act="borrar-key">🔑 Borrar clave de la IA</button></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.8rem;justify-content:flex-end;margin-top:1rem"><button class="btn gr" data-act="close">Cerrar</button><button class="btn ok" data-act="save-cfg">Guardar</button></div>`);
+}
+function readCfg() {
+  const g = id => $(id) ? $(id).value.trim() : '';
+  S.cfg.sesion = g('#a-ses') || 'Sesión demo'; S.cfg.apiKey = g('#a-key'); S.cfg.model = g('#a-mod') || DEF_CFG.model;
+  S.cfg.pin = g('#a-pin') || '1234'; S.cfg.cloudUrl = g('#a-url'); S.cfg.cloudSecret = g('#a-sec'); S.cfg.voz = $('#a-voz').checked; saveCfg();
+}
+
+/* ====================== datos de ejemplo ====================== */
+function seedDemo() {
+  const ids = S.casos.map(c => c.id), peso = [9, 5, 4, 12, 6, 3, 4, 3, 3, 2, 2];
+  const bag = []; ids.forEach((id, i) => { for (let k = 0; k < (peso[i] || 2); k++) bag.push(id); });
+  const ops = ['Carlos', 'Marta', 'Jhon', 'Luz', 'Andrés', 'Paola'], now = Date.now();
+  const add = (e) => S.eventos.push(Object.assign({id: uid(), sesion: 'Ejemplo', ejemplo: true}, e));
+  const mk = (ts, id, ok) => {
+    const c = casoById(id), op = ops[Math.floor(Math.random() * ops.length)], h = new Date(ts).getHours(), turno = h >= 6 && h < 14 ? 'A' : h >= 14 && h < 22 ? 'B' : 'C';
+    add({ts: new Date(ts).toISOString(), tipo: 'consulta', caso_id: id, area: c.area, via: Math.random() > .5 ? 'boton' : 'voz', operario: op, turno, detalle: c.titulo});
+    add({ts: new Date(ts + 240e3).toISOString(), tipo: 'resultado', caso_id: id, area: c.area, ok, operario: op, turno});
+    if (ok === 'no') add({ts: new Date(ts + 250e3).toISOString(), tipo: 'escalamiento', caso_id: id, area: c.area, operario: op, turno, detalle: 'No funcionó'});
+  };
+  for (let i = 0; i < 70; i++) { const t = now - Math.random() * 6.5 * 864e5; const id = bag[Math.floor(Math.random() * bag.length)]; mk(t, id, Math.random() < .78 ? 'si' : Math.random() < .5 ? 'mas' : 'no'); }
+  for (let i = 0; i < 4; i++) mk(now - (10 + i * 11) * 60e3, 'sello-abierto', i % 2 ? 'no' : 'mas');
+  [['Impresora flexográfica', 25, 'Tinta corrida o manchada'], ['Selladora / conversión', 40, 'Sello abierto o con arrugas'], ['Extrusora', 15, 'Espesor irregular o película que se rasga']].forEach(([m, min, causa], i) => {
+    add({ts: new Date(now - (i + 1) * 3 * 3600e3).toISOString(), tipo: 'paro', min, detalle: `${causa} · ${m}`, operario: ops[i], turno: turnoActual()});
+  });
+  add({ts: new Date(now - 2 * 3600e3).toISOString(), tipo: 'truco', detalle: 'Limpiar la barra con alcohol antes de arrancar', operario: 'Carlos', turno: 'A'});
+  add({ts: new Date(now - 5 * 3600e3).toISOString(), tipo: 'turno', operario: 'Marta', turno: 'C', detalle: 'Turno C, Selladora. Hubo un paro de 40 minutos por sello abierto. Quedó pendiente limpiar la barra de sellado. Revisen el sello cada hora.'});
+  S.eventos.sort((a, b) => a.ts.localeCompare(b.ts)); LS.set('m_eventos', S.eventos);
+}
+
+/* ====================== acciones ====================== */
+function act_buscar() { const v = $('#q').value; consultar(v, 'texto'); if (!hasIA()) { S.tmp.q = v; render(); const loc = buscarLocal(v); $('#heard').innerHTML = `<div class="heard"><span style="font-size:1.6rem">🔎</span><div>Buscando: «${esc(v)}»</div></div>`; } }
+const A = {
+  home: () => { S.tmp = {}; go('home'); },
+  go: (d) => { if (d.to === 'problema' || d.to === 'panel') {} if (d.to === 'ensenar' || d.to === 'turno') { if (d.to === 'ensenar') S.tmp.ens = null; } go(d.to); },
+  tutorial: () => tutorial(0), ajustes, close: closeModal,
+  ov: (d, el, ev) => { if (ev.target === el) closeModal(); },
+  tut: d => tutorial(+d.i), 'tut-fin': () => { closeModal(); S.cfg.tutorialVisto = true; saveCfg(); },
+  caso: d => go('caso', {id: d.id, via: (d.via || S.tmp.q) ? 'ya' : 'boton'}),
+  say: d => say(d.t),
+  'say-caso': d => { const c = casoById(d.id); say(`${c.titulo}. ${c.pasos.map((p, i) => 'Paso ' + (i + 1) + '. ' + p.texto).join(' ')} ${c.critico ? 'Avisa a tu líder.' : ''}`); },
+  'say-nota': () => { const n = S.eventos.filter(e => e.tipo === 'turno').slice(-1)[0]; n && say(n.detalle); },
+  buscar: act_buscar,
+  'mic-problema': () => micToggle(t => consultar(t, 'voz'), {live: txt => { $('#heard').innerHTML = `<div class="heard"><span style="font-size:1.6rem">🎤</span><div><i>${esc(txt || 'Te escucho…')}</i></div></div>`; }}),
+  'mic-ensenar': () => micToggle(t => { S.tmp.ens.texto = t; $('#txt').value = t; }, {live: t => { $('#txt').value = t; }}),
+  'mic-turno': () => micToggle(t => { S.tmp.tur.texto = t; $('#txt').value = t; }, {continuous: true, live: t => { $('#txt').value = t; }}),
+  res: d => {
+    const c = casoById(d.id);
+    logEvent({tipo: 'resultado', caso_id: c.id, area: c.area, ok: d.ok, detalle: c.titulo});
+    if (d.ok === 'no' || (c.critico && d.ok !== 'si')) logEvent({tipo: 'escalamiento', caso_id: c.id, area: c.area, detalle: 'Aviso al líder'});
+    if (d.ok === 'si') {
+      openModal(`<div class="tut"><div class="big">🎉</div><h2>¡Buen trabajo!</h2><p>Gracias por contarnos. ¿Hiciste algo distinto que quieras enseñar a tus compañeros?</p><div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap"><button class="btn lg" data-act="to-ens" data-id="${esc(c.id)}">💡 Sí, quiero enseñar</button><button class="btn gr" data-act="fin-res">No, volver al inicio</button></div></div>`);
+      say('Buen trabajo. Gracias por contarnos.');
+    } else if (d.ok === 'mas') {
+      openModal(`<div class="tut"><div class="big">🤝</div><h2>Gracias por decirnos</h2><p>Si quedó a medias, avisa a tu líder. Y si encontraste algo que ayuda, enséñalo.</p><div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap"><button class="btn lg" data-act="to-ens" data-id="${esc(c.id)}">💡 Enseñar lo que hice</button><button class="btn gr" data-act="fin-res">Volver al inicio</button></div></div>`);
+    } else {
+      openModal(`<div class="tut"><div class="big">📣</div><h2>Ya avisamos a tu líder</h2><p>Quédate con la máquina segura. Tu líder verá el caso en el panel con todo lo que hiciste.</p><div style="display:flex;gap:.8rem;justify-content:center"><button class="btn lg" data-act="fin-res">Entendido</button></div></div>`);
+      say('Ya avisamos a tu líder.');
+    }
+  },
+  'to-ens': d => { closeModal(); S.tmp.ens = {caso: d.id, texto: '', ficha: null}; go('ensenar', {caso: d.id}); },
+  'fin-res': () => { closeModal(); S.tmp = {}; go('home'); },
+  /* enseñar */
+  'ens-caso': d => { const t = S.tmp.ens; t.caso = d.id; t.ficha = null; render(); },
+  'ens-organizar': async () => {
+    const t = S.tmp.ens; t.texto = $('#txt').value.trim();
+    if (t.texto.length < 8) { toast('Cuéntame un poquito más: ¿qué hiciste?'); return; }
+    const c = t.caso && casoById(t.caso);
+    $('#preview').innerHTML = `<div class="ans"><span class="spin"></span> Organizando tu truco…</div>`;
+    try { t.ficha = hasIA() ? await iaEstructurar(t.texto, c) : estructurarLocal(t.texto, c); }
+    catch (e) { toast('La IA no respondió; lo organicé yo.'); t.ficha = estructurarLocal(t.texto, c); }
+    t.ficha.pasos = (t.ficha.pasos || []).slice(0, 4);
+    $('#preview').innerHTML = previewFicha(t.ficha); $('#preview').scrollIntoView({behavior: 'smooth'});
+  },
+  'ens-oir': () => { const f = S.tmp.ens.ficha; say(`Tu truco: ${f.titulo}. ${f.pasos.map((p, i) => 'Paso ' + (i + 1) + '. ' + p).join(' ')} ¿Está bien así?`); },
+  'ens-corregir': () => { S.tmp.ens.ficha = null; render(); },
+  'ens-guardar': () => {
+    const t = S.tmp.ens, f = t.ficha, c = t.caso && casoById(t.caso);
+    if (!S.operario.trim()) { toast('Escribe tu nombre para darte el crédito 🙂'); $('#nom').focus(); return; }
+    const caso = {id: 'u-' + uid(), area: AREAS.includes(f.area) ? f.area : 'Otra', icono: f.icono || '💡', titulo: f.titulo, sintoma: f.sintoma || '', claves: norm(t.texto), causas: f.causa ? [f.causa] : [],
+      pasos: f.pasos.map(p => ({ico: icoPaso(p), texto: p})), llamar_lider: '', critico: !!f.critico, autor: S.operario.trim(), ejemplo: false, estado: 'pendiente', variante_de: c?.id || '', ts: new Date().toISOString()};
+    S.userCasos.push(caso); LS.set('m_casos_user', S.userCasos); S.casos.push(caso); queue('caso', caso);
+    logEvent({tipo: 'truco', caso_id: caso.id, area: caso.area, detalle: caso.titulo});
+    S.tmp = {};
+    openModal(`<div class="tut"><div class="big">🌟</div><h2>¡Gracias, ${esc(S.operario.split(' ')[0])}!</h2><p>Tu truco «${esc(caso.titulo)}» ya está en la memoria de la planta. Cuando el líder lo valide, lo verán todos con tu nombre.</p><button class="btn ok lg" data-act="fin-res">Volver al inicio</button></div>`);
+    say('Gracias. Tu truco ya está en la memoria de la planta.');
+  },
+  /* turno */
+  'tur-turno': d => { S.turno = d.k; render(); },
+  'tur-maq': d => { S.tmp.tur.maquina = d.m; render(); },
+  'tur-pend': d => { const a = S.tmp.tur.pend, i = a.indexOf(d.x); i >= 0 ? a.splice(i, 1) : a.push(d.x); render(); },
+  'tur-causa': d => { S.tmp.tur.causa = d.c; render(); },
+  'tur-min': d => { const t = S.tmp.tur; t.min = Math.max(5, Math.min(240, t.min + +d.d)); $('#minv').textContent = t.min + ' min'; },
+  'tur-addparo': () => { const t = S.tmp.tur; if (!t.causa) { toast('Primero elige la causa del paro.'); return; } t.paros.push({causa: t.causa, min: t.min}); t.causa = ''; render(); },
+  'tur-delparo': d => { S.tmp.tur.paros.splice(+d.i, 1); render(); },
+  'tur-resumir': async () => {
+    const t = S.tmp.tur; t.texto = $('#txt').value.trim();
+    if (!t.paros.length && !t.pend.length && t.texto.length < 5) { toast('Marca algo o cuéntame cómo quedó el turno.'); return; }
+    const datos = {turno: S.turno, maquina: t.maquina, paros: t.paros, pendientes: t.pend.map(x => x.replace(/^\S+\s/, '')), texto: t.texto};
+    $('#preview').innerHTML = `<div class="ans"><span class="spin"></span> Armando el audio…</div>`;
+    try { t.res = hasIA() ? await iaTurno(datos) : turnoLocal(datos); } catch (e) { toast('La IA no respondió; armé el resumen yo.'); t.res = turnoLocal(datos); }
+    $('#preview').innerHTML = previewTurno(t.res); $('#preview').scrollIntoView({behavior: 'smooth'}); say(t.res.audio);
+  },
+  'tur-guardar': () => {
+    const t = S.tmp.tur;
+    t.paros.forEach(p => logEvent({tipo: 'paro', min: p.min, detalle: `${p.causa} · ${t.maquina}`}));
+    const ev = logEvent({tipo: 'turno', detalle: t.res.audio, area: '', via: 'voz'});
+    queue('turno', {id: ev.id, ts: ev.ts, sesion: ev.sesion, operario: ev.operario, turno: ev.turno, maquina: t.maquina, paros_min: t.paros.reduce((a, p) => a + p.min, 0), resumen_audio: t.res.audio, alertas: t.res.alertas, pendientes: t.res.pendientes, texto_original: t.texto});
+    S.tmp = {};
+    openModal(`<div class="tut"><div class="big">📻</div><h2>Turno entregado</h2><p>El siguiente turno escuchará tu nota apenas abra Maestro. ¡Buen descanso!</p><button class="btn ok lg" data-act="fin-res">Volver al inicio</button></div>`);
+  },
+  /* panel */
+  'seed-demo': () => { seedDemo(); S.tmp.pf = {rango: '7d', ejemplo: true, sesion: ''}; toast('Datos de EJEMPLO cargados.'); render(); },
+  'borrar-ej': () => { S.eventos = S.eventos.filter(e => !e.ejemplo); LS.set('m_eventos', S.eventos); toast('Datos de ejemplo borrados.'); render(); },
+  'borrar-key': () => { S.cfg.apiKey = ''; saveCfg(); closeModal(); paintStatus(); toast('Clave borrada de este equipo.'); },
+  lider: () => {
+    if (S.lider) { S.lider = false; render(); return; }
+    openModal(`<div class="tut"><div class="big">🔒</div><h2>Modo líder</h2><p>Escribe el PIN para validar trucos.</p><div class="field" style="max-width:16rem;margin:0 auto 1rem"><input id="pin" type="password" inputmode="numeric" style="text-align:center;font-size:1.6rem"></div><div style="display:flex;gap:.8rem;justify-content:center"><button class="btn lg" data-act="pin-ok">Entrar</button><button class="btn gr" data-act="close">Cancelar</button></div></div>`);
+    setTimeout(() => $('#pin') && $('#pin').focus(), 50);
+  },
+  'pin-ok': () => { if ($('#pin').value === S.cfg.pin) { S.lider = true; closeModal(); render(); } else toast('PIN incorrecto.'); },
+  validar: d => {
+    const c = casoById(d.id); c.estado = 'validado'; const i = S.userCasos.findIndex(x => x.id === c.id); if (i >= 0) S.userCasos[i] = c; LS.set('m_casos_user', S.userCasos);
+    queue('caso', c); logEvent({tipo: 'validacion', caso_id: c.id, area: c.area, detalle: c.titulo}); render();
+  },
+  rechazar: d => {
+    S.casos = S.casos.filter(x => x.id !== d.id); S.userCasos = S.userCasos.filter(x => x.id !== d.id); LS.set('m_casos_user', S.userCasos);
+    queue('caso', Object.assign({}, casoById(d.id) || {id: d.id}, {id: d.id, estado: 'rechazado'})); render();
+  },
+  diag: async () => {
+    const box = $('#diag'), m = metricas(filtrarEventos());
+    if (!hasIA()) { box.innerHTML = '<p class="small muted">Conecta la clave de la IA en Ajustes para pedir un diagnóstico.</p>'; return; }
+    box.innerHTML = '<span class="spin"></span> Analizando…';
+    const resumen = {consultas: m.cons.length, resueltas_pct: m.res.length ? Math.round(m.si / m.res.length * 100) : null, avisos_lider: m.escal, minutos_paro: m.minParo, top: Object.entries(m.porCaso).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([id, n]) => [casoById(id)?.titulo, n]), por_turno: m.porTurno};
+    try { const t = await claude('Eres analista de operaciones de una planta de empaques. Escribe en español claro para un gerente de planta. 4 viñetas cortas: qué ves, dónde está el riesgo, qué acción tomar hoy, qué medir mañana. No inventes datos que no estén.', JSON.stringify(resumen), 450); box.innerHTML = `<div class="small" style="white-space:pre-wrap;line-height:1.5">${esc(t)}</div>`; }
+    catch (e) { box.innerHTML = '<p class="small" style="color:var(--bad)">No pude consultar la IA.</p>'; }
+  },
+  'export-csv': () => {
+    const cols = ['id', 'ts', 'sesion', 'tipo', 'caso_id', 'area', 'via', 'ok', 'ms', 'min', 'operario', 'turno', 'detalle', 'ejemplo'];
+    const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    descargar('maestro-eventos.csv', 'text/csv', '﻿' + [cols.join(','), ...S.eventos.map(e => cols.map(c => q(e[c])).join(','))].join('\n'));
+  },
+  'export-casos': () => descargar('casos.json', 'application/json', JSON.stringify(S.casos, null, 2)),
+  'save-cfg': () => { readCfg(); closeModal(); paintStatus(); loadCasos().then(() => { paintStatus(); render(); }); syncNow(); toast('Ajustes guardados.'); },
+  'test-ia': async () => { readCfg(); const r = $('#a-res'); r.innerHTML = '<span class="spin"></span> Probando…'; try { const t = await claude('Responde solo con la palabra OK.', 'Prueba', 10); r.innerHTML = '✅ La IA respondió: ' + esc(t.trim().slice(0, 40)); } catch (e) { r.innerHTML = '❌ ' + esc(e.message); } paintStatus(); },
+  'test-cloud': async () => { readCfg(); const r = $('#a-res'); r.innerHTML = '<span class="spin"></span> Probando…'; try { const x = await fetch(S.cfg.cloudUrl + '?action=ping&secret=' + encodeURIComponent(S.cfg.cloudSecret)); const j = await x.json(); S.cloud.ok = !!j.ok; r.innerHTML = j.ok ? '✅ Nube conectada.' : '❌ La nube respondió «' + esc(j.error || 'error') + '» (revisa la clave).'; } catch (e) { S.cloud.ok = false; r.innerHTML = '❌ No pude llegar a la URL.'; } paintStatus(); }
+};
+function descargar(nombre, tipo, txt) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], {type: tipo})); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); }
+function micToggle(onFinal, {live, continuous} = {}) {
+  const btn = $('#mic');
+  if (rec) { stopListen(); return; }
+  const ok = startListen({continuous, onText: t => live && live(t), onEnd: t => { btn && btn.classList.remove('on'); if (btn) btn.textContent = '🎤'; if (t) onFinal(t); }});
+  if (ok && btn) { btn.classList.add('on'); btn.textContent = '⏹️'; live && live(''); }
+}
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  const fn = A[el.dataset.act]; if (fn) fn(el.dataset, el, ev);
+});
+
+/* ====================== arranque ====================== */
+(async function init() {
+  await loadCasos();
+  paintStatus(); render();
+  if (!S.cfg.tutorialVisto) tutorial(0);
+  syncNow();
+  AL.bar({id: 'maestro', publico: 'Operarios de planta (poco contacto con sistemas) y líderes de turno', area: 'Producción · Piso de planta', iniciativa: 'Soporte técnico en planta + traspaso de turno', chips: false, narra: 'Maestro, el asistente de planta. Es para el operario que está en la máquina: toca la imagen del problema o háblale, y te guía paso a paso con dibujos y voz. Reportar un paro es tan fácil como decirlo. Cuando cambias de turno, arma el resumen para el siguiente. Y el panel de la planta muestra, con dos años de historia, qué se repite, en qué turno y cuánto tiempo se pierde.'});
+  const q = decodeURIComponent((location.hash.match(/[#&]q=([^&]*)/) || [])[1] || '');
+  if (q) { go('problema'); consultar(q, 'visión'); }
+  window.__maestro = {S, A, logEvent, consultar};
+})();
+</script>
+</body>
+</html>

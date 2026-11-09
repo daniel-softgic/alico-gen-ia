@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alico · Inspección visual con IA</title>
+<style>
+:root{
+  --bg:#0E1114; --panel:#161A1F; --panel2:#1D2228; --line:#2B323A; --txt:#F3F6F8; --mut:#9AA6B0;
+  --cy:#00BED6; --cy2:#008AAB; --or:#EE7623; --amb:#E99B35;
+  --ok:#2BD67B; --bad:#FF4D4F; --idle:#6B7782;
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 600px at 20% -10%,#14303A 0%,transparent 60%),var(--bg);color:var(--txt);
+  font-family:Poppins,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:15px;line-height:1.4;overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center}
+.logo i{display:block;width:20px;height:20px;background:
+  repeating-linear-gradient(135deg,#111 0 3px,transparent 3px 6px);border-radius:3px}
+.brand b{font-size:18px;letter-spacing:.3px}
+.brand span{color:var(--mut);font-size:13px;display:block;margin-top:-2px}
+h1{font-size:20px;font-weight:600;margin-left:8px}
+h1 em{font-style:normal;color:var(--cy)}
+.sp{flex:1}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,.btn{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn:hover,select:hover{border-color:var(--cy)}
+.btn.pri{background:var(--cy);color:#00222A;border-color:var(--cy);font-weight:600}
+.btn.pri:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 9px;font-size:13px;border-radius:8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(340px,.9fr);gap:20px;padding:20px 24px 28px}
+@media(max-width:1050px){main{grid-template-columns:1fr}}
+body.pres main{grid-template-columns:1fr}
+body.pres .side{display:none}
+.stage{position:relative;border-radius:var(--r);background:#000;overflow:hidden;border:3px solid var(--line);transition:border-color .15s, box-shadow .15s;aspect-ratio:16/9}
+.stage.s-ok{border-color:var(--ok);box-shadow:0 0 0 4px #2BD67B33,0 0 40px #2BD67B44}
+.stage.s-bad{border-color:var(--bad);box-shadow:0 0 0 4px #FF4D4F44,0 0 50px #FF4D4F66}
+.stage.s-learn{border-color:var(--cy);box-shadow:0 0 0 4px #00BED633}
+.stage video,.stage canvas.ov{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+.noCam{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--mut)}
+.noCam b{color:var(--txt);font-size:20px;display:block;margin-bottom:8px}
+.badge{position:absolute;top:12px;left:12px;background:#000A;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--mut);backdrop-filter:blur(6px)}
+.badge.sim{color:var(--amb);border-color:var(--amb)}
+.banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);min-width:340px;max-width:70%;text-align:center;border-radius:18px;padding:12px 28px;
+  background:#0009;backdrop-filter:blur(8px);border:2px solid var(--idle);transition:all .12s}
+.banner .t{font-size:clamp(26px,3.6vw,48px);font-weight:700;letter-spacing:.5px;line-height:1.1}
+.banner .u{font-size:clamp(12px,1.2vw,15px);color:#E5EAEE;margin-top:2px;opacity:.9}
+.s-ok .banner{border-color:var(--ok);background:#0B3B22D9}.s-ok .banner .t{color:var(--ok)}
+.s-bad .banner{border-color:var(--bad);background:#4A0F10E0}.s-bad .banner .t{color:#FF8082}
+.s-learn .banner{border-color:var(--cy);background:#04323BDD}.s-learn .banner .t{color:var(--cy)}
+.s-idle .banner .t{color:#C8D0D6}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi small{color:var(--mut);display:block;font-size:12px}
+.kpi b{font-size:28px;font-weight:700;line-height:1.15}
+.kpi.ok b{color:var(--ok)}.kpi.bad b{color:#FF7A7C}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.spark{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.spark .h{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;margin-bottom:6px}
+.spark canvas{width:100%;height:64px;display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.n{width:26px;height:26px;border-radius:50%;background:var(--cy);color:#00222A;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.n.o{background:var(--or);color:#2B1100}.n.r{background:var(--bad);color:#2A0000}
+.card p{color:var(--mut);font-size:13px;margin-bottom:10px}
+.row{display:flex;gap:8px;align-items:center}
+.row .cnt{margin-left:auto;color:var(--mut);font-size:13px;white-space:nowrap}
+.cap{position:relative;overflow:hidden;flex:1;text-align:left}
+.cap i{position:absolute;left:0;top:0;bottom:0;width:0;background:#FFFFFF2E;transition:width .08s}
+.cap span{position:relative}
+.defrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.defrow input{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:150px}
+kbd{background:#0006;border:1px solid var(--line);border-radius:5px;padding:0 6px;font-size:11px;color:var(--mut)}
+.sl{display:grid;grid-template-columns:130px 1fr 40px;gap:10px;align-items:center;margin:8px 0;font-size:13px;color:var(--mut)}
+input[type=range]{accent-color:var(--cy);width:100%}
+.log{max-height:230px;overflow:auto;display:grid;gap:8px}
+.li{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px}
+.ask{display:block;color:var(--cy);font-size:12px;margin-top:2px;text-decoration:none}.ask:hover{text-decoration:underline}
+
+.li img{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none}
+.li b{color:#FF8082}.li small{color:var(--mut);display:block}
+.tip{font-size:12.5px;color:var(--mut);border-left:3px solid var(--or);padding-left:10px;margin-top:8px}
+.simbar{display:none;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.simbar.on{display:flex}
+.simbar .btn.act{border-color:var(--amb);color:var(--amb)}
+.how{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.how div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--mut)}
+.how b{display:block;color:var(--txt);font-size:14px;margin-bottom:2px}
+@media(max-width:700px){.how{grid-template-columns:1fr}}
+footer{padding:0 24px 22px;color:var(--mut);font-size:12px}
+a.btn{color:var(--txt);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.vtabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px}
+.vtabs button{background:transparent;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;color:var(--mut)}
+.vtabs button.on{background:var(--cy);color:#00222A}
+.ctx{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:12px 24px 0}
+.ctx label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.ctx select,.ctx input{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--txt);min-width:0}
+.ctx .ro{background:transparent;border-style:dashed}
+@media(max-width:1050px){.ctx{grid-template-columns:repeat(2,1fr)}}
+.piece{display:none;margin-top:12px;border-radius:14px;padding:12px 16px;border:2px solid var(--line);background:var(--panel);gap:14px;align-items:center}
+.piece.on{display:flex}.piece.ok{border-color:var(--ok)}.piece.bad{border-color:var(--bad);background:#2A1213}
+.piece img{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none}
+.piece .t{font-size:20px;font-weight:700}.piece.ok .t{color:var(--ok)}.piece.bad .t{color:#FF8082}
+.piece .m{color:var(--mut);font-size:12.5px;line-height:1.5}
+.piece .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+details.card summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;align-items:center;gap:10px}
+details.card summary::-webkit-details-marker{display:none}
+details.card[open] summary{margin-bottom:10px}
+.rep{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13px;display:grid;grid-template-columns:56px 1fr;gap:10px;cursor:pointer}
+.rep:hover{border-color:var(--bad)}
+.rep img{width:56px;height:56px;border-radius:8px;object-fit:cover}
+.rep b{color:#FF8082}.rep small{color:var(--mut);display:block;line-height:1.45}
+.chk{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.chk span{font-size:11px;border-radius:99px;padding:2px 8px;background:#2BD67B22;color:var(--ok)}.chk span.w{background:#E99B3522;color:var(--amb)}
+.cz{display:inline-flex;gap:4px;align-items:center;font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px;color:#fff}
+/* informes */
+#vRep{padding:16px 24px 28px;display:none}
+body.vrep #vRep{display:block} body.vrep main,body.vrep .ctx,body.vrep footer{display:none}
+.rk{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+.rgrid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
+.rgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+@media(max-width:1100px){.rk{grid-template-columns:repeat(2,1fr)}.rgrid,.rgrid3{grid-template-columns:1fr}}
+.rbar{display:grid;grid-template-columns:minmax(0,11rem) 1fr 3.4rem;gap:8px;align-items:center;font-size:12.5px;margin:6px 0}
+.rbar .tr{height:12px;border-radius:99px;background:#ffffff10;overflow:hidden}.rbar .tr i{display:block;height:100%;border-radius:99px}
+.rbar span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rbar b{text-align:right}
+.ins{display:flex;gap:10px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--amb);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13.5px}
+.ins.r{border-left-color:var(--bad)}
+.ins .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
+table.tt{width:100%;border-collapse:collapse;font-size:12.5px}table.tt th{text-align:left;color:var(--mut);font-weight:500;padding:6px;border-bottom:1px solid var(--line)}
+table.tt td{padding:6px;border-bottom:1px solid #ffffff0d;vertical-align:top}table.tt tr.live td{background:#00BED611}
+.rf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.rf select,.rf input{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
+.sample{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--amb);border:1px solid var(--amb);border-radius:99px;padding:2px 9px}
+.overlay{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:2000;padding:20px}
+.overlay .modal{background:var(--panel);border:1px solid var(--line);border-radius:20px;max-width:560px;width:100%;padding:26px;text-align:center}
+.tut .big{font-size:56px}.tut h2{margin:8px 0}.tut p{color:var(--mut);margin-bottom:14px}.tut .dots{display:flex;gap:6px;justify-content:center;margin-bottom:14px}.tut .dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}.tut .dots i.on{background:var(--cy)}
+.tut .btn{background:var(--cy);color:#00222A;border:0;font-weight:700;padding:10px 18px}.tut .btn.gr{background:var(--panel2);color:var(--txt)}
+.toast{z-index:3000}.toast:not(#toast){opacity:1;transform:translateX(-50%)}
+.modalx{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:50;padding:20px}
+.modalx .bx{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:20px}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.kv div{background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:13px}.kv small{color:var(--mut);display:block;font-size:11px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);background:#000D;border:1px solid var(--cy);border-radius:12px;padding:10px 18px;opacity:0;transition:all .25s;pointer-events:none;z-index:9}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<script src="../../shared/al.js"></script>
+<script src="../../shared/catalogo.js"></script>
+<script src="../../shared/planta.js"></script>
+<header>
+  <h1>Inspección visual con IA · <em>Línea de producción</em></h1>
+  <div class="vtabs"><button class="on" data-v="live">🎥 Línea en vivo</button><button data-v="rep">📊 Informes de calidad</button></div>
+  <a class="btn ghost sm" href="#informes" target="_blank" title="Abre los informes en otra pestaña: se actualizan solos mientras la línea corre">↗ Informes en otra pestaña</a>
+  <div class="sp"></div>
+  <div class="tools">
+    <select id="camSel" title="Cámara"></select>
+    <button class="btn pri" id="btnCam">Activar cámara</button>
+    <button class="btn" id="btnSim" title="Línea simulada: útil como respaldo o para ensayar">Modo simulación</button>
+    <button class="btn ghost" id="btnPres" title="Oculta el panel (tecla H)">Presentación</button>
+    <button class="btn ghost" id="btnFs" title="Pantalla completa (tecla F)">⛶</button>
+  </div>
+</header>
+<div class="ctx" id="ctx">
+  <label>Línea<select id="xLin"></select></label>
+  <label>Producto (catálogo Alico)<select id="xProd"></select></label>
+  <label>Lote<input id="xLote"></label>
+  <label>Orden de producción<input id="xOP"></label>
+  <label>Operario<select id="xOpe"></select></label>
+  <label>Máquina · turno<input id="xMaq" class="ro" readonly></label>
+</div>
+
+<main>
+  <section>
+    <div class="stage s-idle" id="stage">
+      <video id="vid" playsinline muted></video>
+      <canvas class="ov" id="ov"></canvas>
+      <div class="noCam" id="noCam"><div><b>Conecta la cámara del PC</b>Pulsa «Activar cámara» y acepta el permiso.<br>Sin cámara, usa «Modo simulación».</div></div>
+      <div class="badge" id="badge">Cámara apagada</div>
+      <div class="banner" id="banner"><div class="t" id="bT">Esperando cámara</div><div class="u" id="bU"></div></div>
+    </div>
+    <div class="simbar" id="simbar">
+      <button class="btn sm pri" id="simAuto">▶ Línea automática</button>
+      <span style="color:var(--amb);font-size:13px">o pon una pieza:</span>
+      <button class="btn sm" data-sim="empty">Vacío</button>
+      <button class="btn sm" data-sim="good">Conforme</button>
+      <button class="btn sm" data-sim="smear">Mancha de tinta</button>
+      <button class="btn sm" data-sim="band">Banda sin imprimir</button>
+      <button class="btn sm" data-sim="hole">Perforación</button>
+    </div>
+    <div class="piece" id="piece"></div>
+    <div class="kpis">
+      <div class="kpi"><small>Piezas inspeccionadas</small><b id="kN">0</b></div>
+      <div class="kpi ok"><small>Pasan ✔</small><b id="kOk">0</b></div>
+      <div class="kpi bad"><small>Retiradas ✖</small><b id="kBad">0</b></div>
+      <div class="kpi"><small>% defecto del lote</small><b id="kPct">0%</b></div>
+      <div class="kpi"><small>Decisión por cuadro</small><b id="kMs">–</b></div>
+    </div>
+    <div class="spark"><div class="h"><span>Qué tan distinta es la pieza del patrón conforme</span><span id="sparkV">–</span></div><canvas id="spark" width="900" height="64"></canvas></div>
+  </section>
+
+  <aside class="side">
+    <div class="card">
+      <h3><span class="n r">!</span>Informes de rechazo <span class="sp"></span><button class="btn sm" data-v="rep">Ver todos</button></h3>
+      <div class="log" id="log"><div style="color:var(--mut);font-size:13px">Aún no hay rechazos en esta sesión.</div></div>
+    </div>
+    <details class="card" id="trainBox" open>
+      <summary><span class="n">🎓</span>Enseñar a la IA <small style="color:var(--mut);font-weight:400" id="trainSt"></small></summary>
+      <h3><span class="n">1</span>Fondo vacío <kbd>B</kbd></h3>
+      <div class="row" style="margin-bottom:12px"><button class="btn cap" id="cBg"><i></i><span>Capturar fondo (sin pieza)</span></button><span class="cnt" id="nBg">0 muestras</span></div>
+      <h3><span class="n">2</span>Pieza conforme <kbd>C</kbd></h3>
+      <p>Acerca una pieza buena y muévela suave 4 s. Repite con 2 o 3 piezas.</p>
+      <div class="row" style="margin-bottom:12px"><button class="btn cap pri" id="cOk"><i></i><span>Capturar conforme</span></button><span class="cnt" id="nOk">0 muestras</span></div>
+      <h3><span class="n r">3</span>Defectos conocidos <kbd>D</kbd> <small style="color:var(--mut);font-weight:400">(opcional)</small></h3>
+      <div id="defList"></div>
+      <div class="row"><button class="btn sm" id="addDef">+ Otro defecto</button></div>
+    </details>
+    <details class="card">
+      <summary><span class="n o">⚙</span>Ajustes y modelo</summary>
+      <div class="sl"><label>Sensibilidad</label><input type="range" id="sSens" min="0" max="100" value="50"><span id="vSens">50</span></div>
+      <div class="sl"><label>Tamaño de la zona</label><input type="range" id="sRoi" min="30" max="95" value="62"><span id="vRoi">62%</span></div>
+      <div class="row" style="margin-top:8px;flex-wrap:wrap">
+        <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mut)"><input type="checkbox" id="chHeat" checked> Mapa de calor</label>
+        <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mut)"><input type="checkbox" id="chSnd" checked> Sonido</label>
+        <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mut)"><input type="checkbox" id="chVoz" checked> Voz</label>
+        <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mut)" title="Si hay clave de IA, la foto de cada anomalía se clasifica sola"><input type="checkbox" id="chIA" checked> IA clasifica anomalías</label>
+      </div>
+      <div class="row" style="margin-top:12px;flex-wrap:wrap">
+        <button class="btn sm" id="bRst">Nuevo lote <kbd>R</kbd></button>
+        <button class="btn sm" id="bExp">Guardar modelo</button>
+        <button class="btn sm" id="bImp">Cargar modelo</button>
+        <button class="btn sm" id="bCloudUp">☁ Subir a Drive</button>
+        <button class="btn sm" id="bCloudDn">☁ Bajar de Drive</button>
+        <button class="btn sm" id="bClr">Borrar lo aprendido</button>
+        <input type="file" id="fImp" accept=".json" hidden>
+      </div>
+    </details>
+  </aside>
+</main>
+<section id="vRep"></section>
+<footer>Visión entrenada en vivo, 100 % en este equipo: ninguna imagen sale del computador (salvo que pidas el análisis con IA). En planta se lleva a cámaras industriales, iluminación controlada y modelos de aprendizaje profundo.</footer>
+<div id="mx"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const G = 16, CELL = 4, SZ = G * CELL, NC = G * G, DIM = NC * 4;
+const MAXS = 650;
+/* cada cuadro se guarda con pequeños desplazamientos para que la IA reconozca el empaque aunque no esté exactamente en el mismo punto */
+const OFFS = [[0, 0], [.02, 0], [-.02, 0], [0, .02], [0, -.02], [.02, .02], [-.02, -.02], [.02, -.02], [-.02, .02], [.04, 0], [-.04, 0], [0, .04], [0, -.04]];
+const $ = s => document.querySelector(s);
+const vid = $('#vid'), ov = $('#ov'), octx = ov.getContext('2d');
+const stage = $('#stage');
+
+/* ---------------- estado ---------------- */
+const S = {
+  classes: [
+    { id: 'bg', kind: 'bg', name: 'Fondo', samples: [], groups: [] },
+    { id: 'ok', kind: 'ok', name: 'Conforme', samples: [], groups: [] },
+    { id: 'bad1', kind: 'bad', name: 'Defecto 1', samples: [], groups: [] }
+  ],
+  roi: .62, sens: 50, heat: true, mute: false,
+  cal: null, mode: 'idle', cam: false, sim: false,
+  votes: [], stable: null, piece: null,
+  counts: { n: 0, ok: 0, bad: 0 }, hist: [], heatCells: null, lastRaw: null
+};
+let gid = 1;
+const cl = id => S.classes.find(c => c.id === id);
+const toast = (m, ms = 2200) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), ms); };
+
+/* ---------------- cámara ---------------- */
+let stream = null;
+async function listCams() {
+  try {
+    const ds = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+    const sel = $('#camSel'); sel.innerHTML = '';
+    ds.forEach((d, i) => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || ('Cámara ' + (i + 1)); sel.appendChild(o); });
+    sel.style.display = ds.length > 1 ? '' : 'none';
+  } catch (e) { $('#camSel').style.display = 'none'; }
+}
+function stopStream() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } if (simTimer) { clearInterval(simTimer); simTimer = null; } }
+async function startCamera(deviceId) {
+  stopStream(); S.sim = false; $('#simbar').classList.remove('on'); $('#btnSim').textContent = 'Modo simulación';
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Este navegador no permite usar la cámara. Abre el archivo con Chrome o Edge.'); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId ? { exact: deviceId } : undefined, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    vid.srcObject = stream; await vid.play(); attached('Cámara en vivo', false); listCams();
+  } catch (e) {
+    toast('No se pudo abrir la cámara: ' + (e.name === 'NotAllowedError' ? 'permiso denegado' : e.message), 4000);
+  }
+}
+function attached(label, sim) {
+  S.cam = true; $('#noCam').style.display = 'none';
+  const b = $('#badge'); b.textContent = label; b.classList.toggle('sim', !!sim);
+  stage.style.aspectRatio = (vid.videoWidth || 16) + '/' + (vid.videoHeight || 9);
+  resizeOv(); setStatus('idle', S.classes[1].samples.length ? 'Esperando empaque' : 'Cámara lista', 'Sigue los pasos 1 y 2 del panel');
+}
+
+/* ---------------- simulación (respaldo / ensayo) ---------------- */
+const simC = document.createElement('canvas'); simC.width = 640; simC.height = 480;
+const sx = simC.getContext('2d');
+let simScene = 'empty', simTimer = null, simT = 0, simAmp = 1, simNoise = 1;
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function drawSim() {
+  simT += 1 / 30;
+  const c = sx;
+  const g = c.createLinearGradient(0, 0, 640, 480); g.addColorStop(0, '#9c8a72'); g.addColorStop(1, '#85745e');
+  c.fillStyle = g; c.fillRect(0, 0, 640, 480);
+  c.globalAlpha = .12; c.strokeStyle = '#5b4d3b';
+  for (let i = 0; i < 18; i++) { c.beginPath(); c.moveTo(0, i * 28 + 6); c.lineTo(640, i * 28 + 10); c.stroke(); }
+  c.globalAlpha = 1;
+  if (simScene !== 'empty') {
+    const wx = (Math.sin(simT * 1.3) * 2.5 + Math.sin(simT * 3.1)) * simAmp, wy = (Math.cos(simT * 1.1) * 2.5 + Math.cos(simT * 2.7)) * simAmp;
+    c.save(); c.translate(320 + wx, 240 + wy); c.rotate(Math.sin(simT * .9) * .006);
+    const W = 340, H = 440, x = -W / 2, y = -H / 2;
+    c.shadowColor = '#0008'; c.shadowBlur = 24; c.shadowOffsetY = 10;
+    rr(c, x, y, W, H, 14); c.fillStyle = '#F3EFE6'; c.fill(); c.shadowColor = 'transparent';
+    c.save(); rr(c, x, y, W, H, 14); c.clip();
+    c.fillStyle = '#00A9C4'; c.fillRect(-170, -220, 340, 112);
+    c.fillStyle = '#EE7623'; c.fillRect(-170, -108, 340, 30);
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(-70, -20, 40, 0, 7); c.fill();
+    c.fillStyle = '#E99B35'; c.beginPath(); c.arc(-70, -20, 27, 0, 7); c.fill();
+    c.fillStyle = '#00758D'; c.fillRect(0, -46, 96, 12); c.fillRect(0, -22, 74, 12); c.fillRect(0, 2, 86, 12);
+    c.fillStyle = '#222'; for (let i = 0; i < 24; i++) c.fillRect(-104 + i * 8, 50, (i % 3) + 2, 42);
+    c.fillStyle = '#B15E14'; c.fillRect(-170, 128, 340, 14);
+    if (simScene === 'smear') {
+      c.globalAlpha = .85; c.strokeStyle = '#5a0f3d'; c.lineWidth = 11; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(10, 34); c.lineTo(92, 58); c.stroke(); c.globalAlpha = 1;
+    } else if (simScene === 'band') {
+      c.fillStyle = '#F3EFE6'; c.fillRect(-20, -108, 80, 30);
+    } else if (simScene === 'hole') {
+      c.fillStyle = '#1a1208'; c.beginPath(); c.arc(95, -92, 10, 0, 7); c.fill();
+    }
+    c.restore(); c.restore();
+  }
+  c.fillStyle = '#fff'; c.globalAlpha = .07;
+  for (let i = 0; i < 260 * simNoise; i++) c.fillRect(Math.random() * 640, Math.random() * 480, 1.5, 1.5);
+  c.fillStyle = '#000'; for (let i = 0; i < 260 * simNoise; i++) c.fillRect(Math.random() * 640, Math.random() * 480, 1.5, 1.5);
+  c.globalAlpha = 1;
+}
+async function startSim() {
+  stopStream(); S.sim = true;
+  simTimer = setInterval(drawSim, 33);
+  stream = simC.captureStream(30); vid.srcObject = stream;
+  try { await vid.play(); } catch (e) {}
+  $('#simbar').classList.add('on'); $('#btnSim').textContent = 'Salir de simulación';
+  attached('SIMULACIÓN', true); setSim('empty');
+}
+let autoT = null;
+function autoLine(on) {
+  clearTimeout(autoT); autoT = null; $('#simAuto').textContent = on ? '⏸ Detener línea' : '▶ Línea automática';
+  if (!on) return;
+  const step = (phase) => {
+    if (phase === 'gap') { setSim('empty'); autoT = setTimeout(() => step('piece'), 1600); }
+    else { const r = Math.random(); setSim(r < .72 ? 'good' : r < .82 ? 'smear' : r < .91 ? 'band' : 'hole'); autoT = setTimeout(() => step('gap'), 2600); }
+  };
+  step('gap');
+}
+function setSim(s) { simScene = s; document.querySelectorAll('[data-sim]').forEach(b => b.classList.toggle('act', b.dataset.sim === s)); }
+window.__sim = { set: setSim, cfg: (a, n) => { simAmp = a; simNoise = n; } };
+
+/* ---------------- características ---------------- */
+const fc = document.createElement('canvas'); fc.width = fc.height = SZ;
+const fx = fc.getContext('2d', { willReadFrequently: true });
+const lum = new Float32Array(SZ * SZ);
+function roiRect(ox = 0, oy = 0) {
+  const vw = vid.videoWidth, vh = vid.videoHeight, side = Math.min(vw, vh) * S.roi;
+  let x = vw / 2 - side / 2 + ox * side, y = vh / 2 - side / 2 + oy * side;
+  x = Math.max(0, Math.min(vw - side, x)); y = Math.max(0, Math.min(vh - side, y));
+  return { x, y, side };
+}
+function extract(ox, oy) {
+  const r = roiRect(ox, oy);
+  fx.drawImage(vid, r.x, r.y, r.side, r.side, 0, 0, SZ, SZ);
+  const d = fx.getImageData(0, 0, SZ, SZ).data;
+  let sum = 0;
+  for (let i = 0, p = 0; i < SZ * SZ; i++, p += 4) { const l = (.299 * d[p] + .587 * d[p + 1] + .114 * d[p + 2]) / 255; lum[i] = l; sum += l; }
+  const gain = 1 / (sum / (SZ * SZ) + .05);
+  const v = new Float32Array(DIM);
+  for (let cy = 0; cy < G; cy++) for (let cx = 0; cx < G; cx++) {
+    let r_ = 0, g_ = 0, b_ = 0, gr = 0;
+    for (let y = 0; y < CELL; y++) for (let x = 0; x < CELL; x++) {
+      const px = cx * CELL + x, py = cy * CELL + y, i = py * SZ + px, p = i * 4;
+      r_ += d[p]; g_ += d[p + 1]; b_ += d[p + 2];
+      if (px < SZ - 1) gr += Math.abs(lum[i + 1] - lum[i]);
+      if (py < SZ - 1) gr += Math.abs(lum[i + SZ] - lum[i]);
+    }
+    const k = (cy * G + cx) * 4, n = CELL * CELL;
+    v[k] = r_ / n / 255 * gain; v[k + 1] = g_ / n / 255 * gain; v[k + 2] = b_ / n / 255 * gain; v[k + 3] = gr / n * gain * 2.5;
+  }
+  return v;
+}
+function dist(a, b) { let s = 0; for (let i = 0; i < DIM; i++) { const t = a[i] - b[i]; s += t * t; } return Math.sqrt(s / DIM); }
+function near2(v, arr, groups, g0, skip) {
+  let d1 = Infinity, d2 = Infinity, i1 = -1;
+  for (let i = 0; i < arr.length; i++) {
+    if (skip && Math.abs(groups[i] - g0) <= skip) continue;
+    const d = dist(v, arr[i]);
+    if (d < d1) { d2 = d1; d1 = d; i1 = i; } else if (d < d2) d2 = d;
+  }
+  if (d2 === Infinity) d2 = d1;
+  return { d: (d1 + d2) / 2, d1, i1 };
+}
+/* residuo por celda con tolerancia de ±1 celda: absorbe el movimiento natural de la mano
+   y deja en evidencia solo lo que de verdad no existe en el patrón conforme */
+function cellRes(a, b, out) {
+  for (let cy = 0; cy < G; cy++) for (let cx = 0; cx < G; cx++) {
+    const ia = (cy * G + cx) * 4; let best = Infinity;
+    for (let dy = -1; dy <= 1; dy++) {
+      const y = cy + dy; if (y < 0 || y >= G) continue;
+      for (let dx = -1; dx <= 1; dx++) {
+        const x = cx + dx; if (x < 0 || x >= G) continue;
+        const ib = (y * G + x) * 4; let s = 0;
+        for (let k = 0; k < 4; k++) { const t = a[ia + k] - b[ib + k]; s += t * t; }
+        if (s < best) best = s;
+      }
+    }
+    out[cy * G + cx] = Math.sqrt(best);
+  }
+}
+/* puntaje local: las 3 celdas más raras, medidas contra lo que es normal EN ESA celda
+   (una zona lisa casi no varía, así que cualquier mancha ahí se nota mucho) */
+function hotRatio(res, thr) {
+  let a = 0, b = 0, c = 0;
+  for (let i = 0; i < NC; i++) { const r = res[i] / thr[i]; if (r > a) { c = b; b = a; a = r; } else if (r > b) { c = b; b = r; } else if (r > c) c = r; }
+  return (a + b + c) / 3;
+}
+
+/* ---------------- calibración ---------------- */
+function calibrate() {
+  const ok = cl('ok'), bg = cl('bg');
+  if (ok.samples.length < 12) { S.cal = null; return; }
+  const n = ok.samples.length, firsts = [], picks = [];
+  for (let i = 0; i < n; i++) if (i === 0 || ok.groups[i] !== ok.groups[i - 1]) firsts.push(i); /* muestra central de cada cuadro, como en vivo */
+  const skipG = Math.max(4, Math.min(10, Math.round(firsts.length / 8))); /* validación por bloques: ¿reconoce poses que no vio en el entrenamiento? */
+  const step = Math.max(1, Math.floor(firsts.length / 110));
+  for (let i = 0; i < firsts.length; i += step) picks.push(firsts[i]);
+  const sc = [], resList = [];
+  for (const i of picks) {
+    const q = ok.samples[i], g0 = ok.groups[i];
+    const nn = near2(q, ok.samples, ok.groups, g0, skipG);
+    if (nn.i1 < 0) continue;
+    const res = new Float32Array(NC); cellRes(q, ok.samples[nn.i1], res);
+    sc.push(nn.d1); resList.push(res);
+  }
+  if (sc.length < 6) { S.cal = null; return; }
+  const ms = a => { const m = a.reduce((x, y) => x + y, 0) / a.length; return [m, Math.sqrt(a.reduce((x, y) => x + (y - m) * (y - m), 0) / a.length)]; };
+  let noise = .006;
+  if (bg.samples.length > 12) {
+    const b2 = [];
+    for (let i = 0; i < bg.samples.length; i += Math.max(1, Math.floor(bg.samples.length / 40))) {
+      const nn = near2(bg.samples[i], bg.samples, bg.groups, bg.groups[i], 1);
+      if (nn.i1 >= 0) b2.push(nn.d1);
+    }
+    if (b2.length) noise = ms(b2)[0];
+  }
+  const thrCell = new Float32Array(NC);
+  for (let c = 0; c < NC; c++) { const [m, sd] = ms(resList.map(r => r[c])); thrCell[c] = Math.max(m + 3 * sd, .05); }
+  const hr = resList.map(r => hotRatio(r, thrCell));
+  const [m1, s1] = ms(sc), [m2, s2] = ms(hr);
+  S.cal = { thrG: Math.max(m1 + 3 * s1, noise * 3, .012), thrH: Math.max(m2 + 3 * s2, 1.2), thrCell, noise };
+  window.__cal = { thrG: S.cal.thrG, thrH: S.cal.thrH, noise, hrMean: m2, hrSd: s2 };
+}
+
+/* ---------------- clasificación ---------------- */
+const kk = () => .4 + S.sens / 100 * .7;
+function classify(v) {
+  const ok = cl('ok'), bg = cl('bg'), bads = S.classes.filter(c => c.kind === 'bad' && c.samples.length);
+  if (!ok.samples.length) return { key: 'untrained' };
+  const dOk = near2(v, ok.samples, ok.groups, 0, 0);
+  const cand = [{ k: 'ok', d: dOk.d }];
+  let nbg = null; if (bg.samples.length) { nbg = near2(v, bg.samples, bg.groups, 0, 0); cand.push({ k: 'bg', d: nbg.d }); }
+  for (const b of bads) cand.push({ k: 'bad:' + b.id, d: near2(v, b.samples, b.groups, 0, 0).d, name: b.name });
+  cand.sort((a, b) => a.d - b.d);
+  const c1 = cand[0];
+  const res = new Float32Array(NC);
+  cellRes(v, ok.samples[dOk.i1], res);
+  let A = 0;
+  if (S.cal) A = Math.max(dOk.d1 / S.cal.thrG, hotRatio(res, S.cal.thrCell) / S.cal.thrH);
+  const Ae = A * kk();
+  const out = { A, Ae, res, dOk: dOk.d1, c1, bgS: nbg && nbg.i1 >= 0 ? bg.samples[nbg.i1] : null, v };
+  if (c1.k === 'bg') { out.key = 'bg'; return out; }
+  if (c1.k.startsWith('bad:')) { out.key = c1.k; out.name = c1.name; const other = cand[1] ? cand[1].d : c1.d * 2; out.conf = Math.max(0, Math.min(1, 1 - c1.d / other)); return out; }
+  if (S.cal && Ae > 1) { out.key = 'bad:anom'; out.name = 'Anomalía'; return out; }
+  out.key = 'ok'; return out;
+}
+
+/* ---------------- captura ---------------- */
+let capturing = false;
+async function capture(id, frames, every) {
+  if (capturing) return; if (!S.cam || !vid.videoWidth) { toast('Primero activa la cámara o el modo simulación'); return; }
+  const c = cl(id); capturing = true; S.mode = 'learn';
+  const btn = document.querySelector('[data-cap="' + id + '"]');
+  const bar = btn && btn.querySelector('i');
+  setStatus('learn', 'APRENDIENDO ' + (c.kind === 'bg' ? 'EL FONDO' : c.kind === 'ok' ? 'LO CONFORME' : 'EL DEFECTO'), 'Mantén el empaque quieto y dentro del recuadro');
+  for (let f = 0; f < frames; f++) {
+    await new Promise(r => setTimeout(r, every));
+    const offs = c.kind === 'bg' ? [OFFS[0]] : OFFS;
+    for (const [ox, oy] of offs) { c.samples.push(extract(ox, oy)); c.groups.push(gid); }
+    gid++;
+    if (bar) bar.style.width = ((f + 1) / frames * 100) + '%';
+  }
+  while (c.samples.length > MAXS) { const i = Math.floor(Math.random() * c.samples.length); c.samples.splice(i, 1); c.groups.splice(i, 1); }
+  if (bar) setTimeout(() => bar.style.width = '0', 400);
+  await new Promise(r => setTimeout(r, 20)); calibrate();
+  S.votes = []; S.stable = null; S.piece = null; S.mode = 'run'; capturing = false;
+  render(); persist(); setStatus('idle', 'Esperando empaque', '');
+}
+
+/* ---------------- ciclo en vivo ---------------- */
+function setStatus(kind, t, u) {
+  stage.className = 'stage s-' + kind; $('#bT').textContent = t; $('#bU').textContent = u || '';
+}
+function snapshot() {
+  const r = roiRect(), c = document.createElement('canvas'); c.width = c.height = 88;
+  c.getContext('2d').drawImage(vid, r.x, r.y, r.side, r.side, 0, 0, 88, 88); return c.toDataURL('image/jpeg', .7);
+}
+let actx = null;
+function beep(f, d, t = 'square', vol = .05, delay = 0) {
+  if (S.mute) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = t; o.frequency.value = f; g.gain.value = vol;
+    o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + delay); o.stop(actx.currentTime + delay + d);
+  } catch (e) {}
+}
+/* ---------------- dónde está la pieza: círculo que la encierra ---------------- */
+function objCircle(r) {
+  const tgt = { x: .5, y: .5, r: .42 };
+  if (r.bgS && S.stable && S.stable !== 'bg') {
+    const v = r.v, b = r.bgS, df = new Float32Array(NC); let mx = 0;
+    for (let c = 0; c < NC; c++) { let t = 0; for (let j = 0; j < 4; j++) t += Math.abs(v[c * 4 + j] - b[c * 4 + j]); df[c] = t; if (t > mx) mx = t; }
+    if (mx > .12) {
+      const th = Math.max(.1, mx * .35), pts = [];
+      for (let c = 0; c < NC; c++) if (df[c] > th) pts.push([(c % G + .5) / G, (Math.floor(c / G) + .5) / G]);
+      if (pts.length >= 4) {
+        const cx = pts.reduce((a, p) => a + p[0], 0) / pts.length, cy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+        const ds = pts.map(p => Math.hypot(p[0] - cx, p[1] - cy)).sort((a, b) => a - b);
+        Object.assign(tgt, { x: cx, y: cy, r: Math.min(.62, Math.max(.14, ds[Math.floor(ds.length * .9)] + .06)) });
+      }
+    }
+  }
+  const o = S.obj || (S.obj = Object.assign({}, tgt));
+  o.x += (tgt.x - o.x) * .35; o.y += (tgt.y - o.y) * .35; o.r += (tgt.r - o.r) * .35;
+}
+
+/* ---------------- trazabilidad: qué se está produciendo ---------------- */
+const PL = window.PLANTA, CTX = Object.assign({ linea: 'SEL-3', operario: PL.OPERARIOS[0], op: 'OP-' + (48000 + Math.floor(Math.random() * 900)) }, AL.LS.get('vis_ctx', {}));
+const diaLocal = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const hoyK = () => diaLocal().slice(2).replace(/-/g, '');
+function nuevoLote() { CTX.lote = 'L' + hoyK() + '-' + CTX.linea.slice(0, 3) + PL.turno() + '-' + String(Math.floor(Math.random() * 90) + 10); CTX.serie = 0; }
+if (!CTX.lote) nuevoLote();
+const saveCtx = () => AL.LS.set('vis_ctx', CTX);
+const prodSel = () => (window.ALICO_CAT || []).find(p => p[0] === CTX.sku) || PL.productosDe(CTX.linea)[0];
+function paintCtx() {
+  const L = PL.linea(CTX.linea), prods = PL.productosDe(CTX.linea);
+  if (!prods.some(p => p[0] === CTX.sku)) CTX.sku = (prods.find(p => /nativa/i.test(p[1])) || prods[0])[0];
+  $('#xLin').innerHTML = PL.LINEAS.map(l => `<option value="${l.id}" ${l.id === CTX.linea ? 'selected' : ''}>${l.n}</option>`).join('');
+  $('#xProd').innerHTML = prods.map(p => `<option value="${p[0]}" ${p[0] === CTX.sku ? 'selected' : ''}>${AL.esc(p[1])} · ${p[0]}</option>`).join('');
+  $('#xOpe').innerHTML = PL.OPERARIOS.map(o => `<option ${o === CTX.operario ? 'selected' : ''}>${o}</option>`).join('');
+  $('#xLote').value = CTX.lote; $('#xOP').value = CTX.op; $('#xMaq').value = L.maq + ' · T' + PL.turno();
+  saveCtx(); render();
+}
+$('#xLin').onchange = e => { CTX.linea = e.target.value; nuevoLote(); resetCounts(); paintCtx(); toast('Línea cambiada: nuevo lote ' + CTX.lote); };
+$('#xProd').onchange = e => { CTX.sku = e.target.value; nuevoLote(); resetCounts(); paintCtx(); };
+$('#xOpe').onchange = e => { CTX.operario = e.target.value; saveCtx(); };
+$('#xLote').onchange = e => { CTX.lote = e.target.value.trim() || CTX.lote; saveCtx(); };
+$('#xOP').onchange = e => { CTX.op = e.target.value.trim() || CTX.op; saveCtx(); };
+
+function registro(bad, info) {
+  const L = PL.linea(CTX.linea), p = prodSel(); CTX.serie = (CTX.serie || 0) + 1; saveCtx();
+  const c = bad ? cl(info.key.slice(4)) : null, SIMD = { smear: 'mancha', band: 'registro', hole: 'contam' };
+  let did = bad ? (info.key === 'bad:anom' ? 'anom' : (c && c.def) || 'anom') : 'anom';
+  if (bad && did === 'anom' && S.sim && SIMD[simScene]) did = SIMD[simScene];   // en simulación sabemos qué defecto se puso
+  const def = PL.defecto(did);
+  return { id: AL.uid(), ts: new Date().toISOString(), linea: L.id, linea_n: L.n, area: L.area, maquina: L.maq, turno: PL.turno(), operario: CTX.operario, op: CTX.op,
+    sku: p[0], producto: p[1], lote: CTX.lote, serie: CTX.lote + '-' + String(CTX.serie).padStart(4, '0'), ok: !bad,
+    def: bad ? def.id : '', defecto: bad ? (did === 'anom' ? 'Anomalía frente al patrón' : def.n) : '', causa: bad ? def.causas[0][0] : '', causa_txt: bad ? def.causas[0][1] : '',
+    accion: bad ? def.acc : '', estado: bad ? 'Retirada de la línea' : 'Pasa', sesion: AL.cfg.sesion };
+}
+function decir(t) { if ($('#chVoz').checked && AL.cfg.voz !== false) AL.say(t); }
+function onStable(key, info) {
+  if (key === 'bg' || key === 'untrained') { S.piece = null; return; }
+  const bad = key.startsWith('bad:');
+  if (!S.piece) {
+    S.piece = { bad, key, img: snapshot() }; S.counts.n++; bad ? S.counts.bad++ : S.counts.ok++;
+    S.piece.rec = registro(bad, Object.assign({ key }, info));
+    if (bad) rechazo(S.piece, info); else { beep(880, .09, 'sine', .05); pasa(S.piece); }
+  } else if (S.piece.key !== key) {
+    if (S.piece.bad !== bad) {
+      if (S.piece.bad) { S.counts.bad--; S.counts.ok++; }
+      else { S.counts.ok--; S.counts.bad++; Object.assign(S.piece.rec, registro(true, Object.assign({ key }, info)), { serie: S.piece.rec.serie }); CTX.serie--; S.piece.img = snapshot(); rechazo(S.piece, info); }
+    }
+    S.piece.bad = bad; S.piece.key = key;
+  }
+  renderKpi();
+}
+function pasa(pc) {
+  const r = pc.rec; AL.hub.push('pieza', { linea: r.linea, ok: true, sku: r.sku, lote: r.lote }, 400);
+  pieceCard(pc);
+}
+function rechazo(pc, info) {
+  const r = pc.rec; r.foto = pc.img;
+  beep(220, .18, 'square', .06); beep(220, .18, 'square', .06, .25);
+  const it = AL.hub.push('inspeccion', Object.assign({ titulo: r.defecto + ' · ' + r.linea_n }, r), 300);
+  pc.rec.hubId = it.id;
+  /* reglas de reacción: 3 rechazos del mismo lote en 10 minutos → lote en observación */
+  const rec = AL.hub.list('inspeccion').filter(x => x.lote === r.lote && Date.now() - new Date(x.ts) < 6e5);
+  if (rec.length >= 3) { r.lote_obs = true; AL.hub.update('inspeccion', it.id, { lote_obs: true }); }
+  try { AL.log('defecto', { caso_id: 'vision', area: r.linea_n, detalle: r.defecto + ' · ' + r.serie, ok: 'no' }); } catch (e) {}
+  addLog(r); pieceCard(pc);
+  if (r.def === 'anom' && AL.hasIA() && $('#chIA').checked) clasificarIA(pc);
+  decir(`Pieza retirada. ${r.defecto}. ${r.linea_n}, lote ${r.lote.split('-').slice(-1)[0]}.${r.lote_obs ? ' Atención: tercer rechazo del lote, queda en observación.' : ''}`);
+}
+const fT = ts => new Date(ts).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const czChip = k => { const c = PL.CAUSAS[k]; return c ? `<span class="cz" style="background:${c.c}">${c.i} ${c.n}</span>` : ''; };
+/* la IA mira la foto de una anomalía y la clasifica con la taxonomía de la línea */
+async function clasificarIA(pc) {
+  const r = pc.rec, opts = PL.defectosDe(PL.linea(r.linea).area);
+  try {
+    const t = await AL.claude(AL.SYS + ' Eres inspector de calidad de empaques. Responde solo JSON.', `Pieza rechazada en ${r.linea_n} (${r.producto}). Clasifica el defecto visible en UNO de estos ids: ${opts.map(d => d.id + '=' + d.n).join('; ')}. Si no se ve un defecto claro usa "anom". JSON: {"id":"...","confianza":0-100,"motivo":"máx 15 palabras"}`, { images: [{ media_type: 'image/jpeg', data: pc.img.split(',')[1] }], max: 150, tag: 'vision-clasifica' });
+    const j = AL.parseJSON(t), df = PL.defecto(j.id);
+    if (df.id === 'anom') return;
+    Object.assign(r, { def: df.id, defecto: df.n, causa: df.causas[0][0], causa_txt: df.causas[0][1], accion: df.acc, ia: 'Clasificado por IA (' + (j.confianza || '?') + '%): ' + (j.motivo || '') });
+    AL.hub.update('inspeccion', r.hubId, r); pieceCard(pc);
+    const it = document.querySelector('#log [data-rep="' + r.hubId + '"] b'); if (it) it.textContent = df.n + ' · IA';
+  } catch (e) {}
+}
+function pieceCard(pc) {
+  const r = pc.rec, el = $('#piece');
+  el.className = 'piece on ' + (r.ok ? 'ok' : 'bad');
+  el.innerHTML = `<img src="${pc.img}"><div><div class="t">${r.ok ? '✔ PASA · registrada' : '✖ RETIRADA DE LA LÍNEA'}</div>
+    <div class="m">Serie <b>${r.serie}</b> · ${AL.esc(r.producto)} (${r.sku})<br>${r.linea_n} · ${AL.esc(r.maquina)} · ${AL.esc(r.operario)} · Turno ${r.turno} · ${fT(r.ts)}${r.ok ? '' : `<br><b style="color:#FF8082">${AL.esc(r.defecto)}</b> · causa probable ${czChip(r.causa)} ${AL.esc(r.causa_txt)}`}</div></div>
+    ${r.ok ? '' : `<div class="acts"><button class="btn sm" data-rep="${r.hubId}">📄 Informe</button></div>`}`;
+}
+function addLog(r) {
+  const l = $('#log'); if (l.firstElementChild && !l.firstElementChild.classList.contains('rep')) l.innerHTML = '';
+  const d = document.createElement('div'); d.className = 'rep'; d.dataset.rep = r.hubId;
+  d.innerHTML = `<img src="${r.foto}"><div><b>${AL.esc(r.defecto)}</b><small>${fT(r.ts)} · ${r.serie}<br>${AL.esc(r.producto).slice(0, 38)} · ${AL.esc(r.operario)}</small>
+   <div class="chk"><span>✓ Retirada</span><span>✓ Registrada</span><span>✓ Calidad avisada</span>${r.lote_obs ? '<span class="w">⚠ Lote en observación</span>' : ''}</div></div>`;
+  l.prepend(d); while (l.children.length > 8) l.lastChild.remove();
+}
+/* informe de un rechazo: trazabilidad completa + acciones que conectan con los otros casos */
+function informe(id) {
+  const r = AL.hub.list('inspeccion').find(x => x.id === id) || PL.historial().piezas.find(x => x.id === id); if (!r) return;
+  const df = PL.defecto(r.def), cz = PL.CAUSAS[r.causa] || {};
+  $('#mx').innerHTML = `<div class="modalx" id="mxo"><div class="bx">
+   <div style="display:flex;gap:14px;align-items:center">${r.foto ? `<img src="${r.foto}" style="width:96px;height:96px;border-radius:12px;object-fit:cover">` : ''}<div><div style="color:var(--mut);font-size:12px">INFORME DE RECHAZO · ${r.ejemplo ? 'EJEMPLO' : 'EN VIVO'}</div><h2 style="color:#FF8082">${AL.esc(r.defecto)}</h2><div style="color:var(--mut)">Serie ${r.serie} · ${new Date(r.ts).toLocaleString('es-CO')}</div></div><div class="sp"></div><button class="btn sm" id="mxc">✕</button></div>
+   <div class="kv"><div><small>Producto</small>${AL.esc(r.producto)}<br><small>${r.sku}</small></div><div><small>Lote · OP</small>${r.lote}<br><small>${r.op || '—'}</small></div><div><small>Línea · máquina</small>${AL.esc(PL.linea(r.linea).n)}<br><small>${AL.esc(r.maquina)}</small></div>
+   <div><small>Operario · turno</small>${AL.esc(r.operario)} · ${r.turno}</div><div><small>Estado</small>${AL.esc(r.estado)}${r.lote_obs ? '<br><small style="color:var(--amb)">Lote en observación</small>' : ''}</div><div><small>Costo de la pieza</small>${AL.money(PL.precioUnit(r.sku))}</div></div>
+   <h3 style="margin:8px 0">¿Por qué pudo pasar? <small style="color:var(--mut);font-weight:400">causas probables para ${AL.esc(df.n.toLowerCase())}</small></h3>
+   ${df.causas.map(([k, t, p]) => `<div class="rbar"><span>${czChip(k)}</span><span>${AL.esc(t)}<span class="tr" style="display:block;margin-top:3px"><i style="width:${p}%;background:${PL.CAUSAS[k].c}"></i></span></span><b>${p}%</b></div>`).join('')}
+   <div class="ins"><span>🛠️</span><div><b>Acción inmediata:</b> ${AL.esc(df.acc)}</div></div>
+   <div id="mxia"></div>
+   <div class="row" style="flex-wrap:wrap;margin-top:12px">
+     ${r.foto ? '<button class="btn sm pri" id="mxai">🤖 Analizar la foto con IA</button>' : ''}
+     <a class="btn sm" target="_blank" href="../conocimiento/index.html#aprender=${encodeURIComponent(r.id)}">🧠 Enviar a conocimiento técnico</a>
+     <a class="btn sm" target="_blank" href="../torre/index.html#calidad">🗼 Ver en la torre de control</a>
+     <a class="btn sm" target="_blank" href="../reclamos/index.html#lote=${encodeURIComponent(r.lote)}">🎧 ¿Afecta a clientes?</a>
+     <a class="btn sm" target="_blank" href="../maestro/index.html#q=${encodeURIComponent(df.n)}">🗣 Qué hace el operario (Maestro)</a>
+   </div></div></div>`;
+  $('#mxc').onclick = () => $('#mx').innerHTML = ''; $('#mxo').onclick = e => { if (e.target.id === 'mxo') $('#mx').innerHTML = ''; };
+  const ai = $('#mxai'); if (ai) ai.onclick = async () => {
+    if (!AL.hasIA()) return toast('Pega la clave de IA en Ajustes para analizar la foto');
+    $('#mxia').innerHTML = '<div class="ins"><span>⏳</span><div>La IA está mirando la foto…</div></div>';
+    try {
+      const t = await AL.claude(AL.SYS + ' Eres ingeniero de calidad en una planta de empaques flexibles y termoformados.', `Foto de una pieza rechazada por visión artificial en la línea ${PL.linea(r.linea).n} (${r.producto}). Defecto detectado: ${r.defecto}. En máximo 90 palabras: qué ves, qué tipo de defecto parece (de esta lista: ${PL.defectosDe(PL.linea(r.linea).area).map(d => d.n).join(', ')}), causa más probable según las 6M y qué revisar primero. Si la foto no permite saberlo, dilo.`, { images: [{ media_type: 'image/jpeg', data: r.foto.split(',')[1] }], max: 400, tag: 'vision-foto' });
+      $('#mxia').innerHTML = `<div class="ins"><span>🤖</span><div style="white-space:pre-wrap">${AL.esc(t)}</div></div>`; AL.hub.update('inspeccion', r.id, { ia: t });
+    } catch (e) { $('#mxia').innerHTML = `<div class="ins r"><span>⚠️</span><div>La IA no respondió: ${AL.esc(e.message)}</div></div>`; }
+  };
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-rep]'); if (b && b.dataset.rep) informe(b.dataset.rep); });
+let lastT = 0, msAvg = 0;
+function loop(ts) {
+  requestAnimationFrame(loop);
+  if (!S.cam || !vid.videoWidth || capturing || ts - lastT < 66) { drawOv(); return; }
+  lastT = ts;
+  const t0 = performance.now();
+  const v = extract(0, 0), r = classify(v);
+  const ms = performance.now() - t0; msAvg = msAvg ? msAvg * .9 + ms * .1 : ms; $('#kMs').textContent = msAvg.toFixed(0) + ' ms';
+  S.lastRaw = r;
+  S.votes.push(r.key); if (S.votes.length > 9) S.votes.shift();
+  const cnt = {}; S.votes.forEach(k => cnt[k] = (cnt[k] || 0) + 1);
+  /* para dar la alarma se exige más evidencia (7 de 9 cuadros) que para declarar conforme (5 de 9): menos falsas alarmas */
+  let best = null; for (const k in cnt) if (cnt[k] >= (k.startsWith('bad:') ? 7 : 5) && (!best || cnt[k] > cnt[best])) best = k;
+  if (best && best !== S.stable) { S.stable = best; onStable(best, r); }
+  if (r.Ae !== undefined) { S.hist.push(r.Ae); if (S.hist.length > 140) S.hist.shift(); }
+  S.heatCells = (S.stable && S.stable.startsWith('bad:') && S.cal) ? r.res : null;
+  objCircle(r);
+  paintStatus(r);
+  drawOv(); drawSpark();
+}
+function paintStatus(r) {
+  const k = S.stable;
+  if (!k) { if (r.key === 'untrained') setStatus('idle', 'Cámara lista', 'Paso 1: fondo vacío · Paso 2: empaque conforme'); return; }
+  if (k === 'untrained') setStatus('idle', 'Falta enseñar lo conforme', 'Captura el paso 2 para empezar');
+  else if (k === 'bg') setStatus('idle', 'ESPERANDO PIEZA', PL.linea(CTX.linea).n + ' · lote ' + CTX.lote);
+  else if (k === 'ok') setStatus('ok', 'PASA ✔', (S.piece && S.piece.rec ? 'Serie ' + S.piece.rec.serie + ' · ' : '') + (r.A !== undefined && S.cal ? 'similitud ' + Math.max(0, Math.round(100 - Math.min(1, r.Ae / 2) * 100)) + ' %' : 'registrada'));
+  else {
+    const nm = k === 'bad:anom' ? 'Anomalía frente al patrón conforme' : (r.name || cl(k.slice(4)).name);
+    setStatus('bad', 'RETIRADA ✖', (S.piece && S.piece.rec ? S.piece.rec.defecto : nm) + ' · ver informe');
+  }
+}
+/* ---------------- overlay ---------------- */
+function resizeOv() { const w = stage.clientWidth, h = stage.clientHeight, dp = window.devicePixelRatio || 1; ov.width = w * dp; ov.height = h * dp; octx.setTransform(dp, 0, 0, dp, 0, 0); }
+window.addEventListener('resize', () => { resizeOv(); });
+function drawOv() {
+  const w = stage.clientWidth, h = stage.clientHeight; octx.clearRect(0, 0, w, h);
+  if (!S.cam || !vid.videoWidth) return;
+  const vw = vid.videoWidth, vh = vid.videoHeight, rc = roiRect();
+  const x = rc.x / vw * w, y = rc.y / vh * h, sw = rc.side / vw * w, sh = rc.side / vh * h;
+  const k = S.stable, col = capturing ? '#00BED6' : k === 'ok' ? '#2BD67B' : (k && k.startsWith('bad:')) ? '#FF4D4F' : '#FFFFFFAA';
+  octx.fillStyle = '#0008'; octx.fillRect(0, 0, w, y); octx.fillRect(0, y + sh, w, h - y - sh); octx.fillRect(0, y, x, sh); octx.fillRect(x + sw, y, w - x - sw, sh);
+  if (S.heat && S.heatCells && S.cal) {
+    const cw = sw / G, ch = sh / G;
+    for (let c = 0; c < NC; c++) {
+      const a = S.heatCells[c] / S.cal.thrCell[c]; if (a < 1.3) continue;
+      octx.fillStyle = 'rgba(255,60,60,' + Math.min(.78, .25 + (a - 1.3) * .06) + ')';
+      octx.fillRect(x + (c % G) * cw, y + Math.floor(c / G) * ch, cw, ch);
+    }
+  }
+  if (k && k !== 'bg' && k !== 'untrained' && S.obj && !capturing) {
+    const o = S.obj, cx = x + o.x * sw, cy = y + o.y * sh, rr_ = o.r * Math.min(sw, sh), t = performance.now() / 1000;
+    octx.save(); octx.shadowColor = col; octx.shadowBlur = 24; octx.strokeStyle = col; octx.lineWidth = 6;
+    octx.beginPath(); octx.arc(cx, cy, rr_ * (1 + Math.sin(t * 6) * .015), 0, Math.PI * 2); octx.stroke();
+    octx.lineWidth = 2; octx.setLineDash([10, 8]); octx.lineDashOffset = -t * 30; octx.beginPath(); octx.arc(cx, cy, rr_ + 12, 0, Math.PI * 2); octx.stroke(); octx.restore();
+    const lab = k === 'ok' ? '✔ PASA' : '✖ RETIRAR'; octx.font = '700 18px Poppins,sans-serif'; const tw = octx.measureText(lab).width + 20;
+    octx.fillStyle = col; octx.fillRect(cx - tw / 2, cy - rr_ - 40, tw, 28); octx.fillStyle = k === 'ok' ? '#00331A' : '#fff'; octx.fillText(lab, cx - tw / 2 + 10, cy - rr_ - 20);
+  }
+  octx.strokeStyle = col; octx.lineWidth = 3; const L = Math.min(sw, sh) * .12;
+  octx.beginPath();
+  [[x, y, 1, 1], [x + sw, y, -1, 1], [x, y + sh, 1, -1], [x + sw, y + sh, -1, -1]].forEach(([cx, cy, dx, dy]) => { octx.moveTo(cx, cy + dy * L); octx.lineTo(cx, cy); octx.lineTo(cx + dx * L, cy); });
+  octx.stroke();
+  octx.lineWidth = 1; octx.setLineDash([5, 6]); octx.strokeRect(x, y, sw, sh); octx.setLineDash([]);
+}
+const sp = $('#spark'), spx = sp.getContext('2d');
+function drawSpark() {
+  const W = sp.width, H = sp.height; spx.clearRect(0, 0, W, H);
+  const top = 2.5, ty = H - Math.min(1, 1 / top) * H * 0 - (1 / top) * H;
+  spx.strokeStyle = '#FF4D4F'; spx.setLineDash([6, 5]); spx.beginPath(); spx.moveTo(0, ty); spx.lineTo(W, ty); spx.stroke(); spx.setLineDash([]);
+  spx.fillStyle = '#FF8082'; spx.font = '11px sans-serif'; spx.fillText('umbral de rechazo', 6, ty - 4);
+  if (S.hist.length < 2) return;
+  spx.beginPath();
+  S.hist.forEach((v, i) => { const x = i / 139 * W, y = H - Math.min(top, v) / top * H; i ? spx.lineTo(x, y) : spx.moveTo(x, y); });
+  const last = S.hist[S.hist.length - 1];
+  spx.strokeStyle = last > 1 ? '#FF4D4F' : '#00BED6'; spx.lineWidth = 2.5; spx.stroke(); spx.lineWidth = 1;
+  $('#sparkV').textContent = (last * 100).toFixed(0) + ' % del umbral';
+}
+
+/* ---------------- UI ---------------- */
+function renderKpi() {
+  const c = S.counts; $('#kN').textContent = c.n; $('#kOk').textContent = c.ok; $('#kBad').textContent = c.bad;
+  $('#kPct').textContent = c.n ? Math.round(c.bad / c.n * 100) + '%' : '0%';
+}
+function render() {
+  $('#nBg').textContent = cl('bg').samples.length + ' muestras'; $('#nOk').textContent = cl('ok').samples.length + ' muestras';
+  const dl = $('#defList'); dl.innerHTML = '';
+  S.classes.filter(c => c.kind === 'bad').forEach((c, i) => {
+    const r = document.createElement('div'); r.className = 'defrow';
+    const opts = PL.defectosDe(PL.linea(CTX.linea).area).filter(d => d.id !== 'anom');
+    if (!c.def || !opts.some(d => d.id === c.def)) { c.def = (opts[i] || opts[0]).id; c.name = PL.defecto(c.def).n; }
+    r.innerHTML = '<select style="background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px;max-width:170px">' + opts.map(d => '<option value="' + d.id + '"' + (d.id === c.def ? ' selected' : '') + '>' + d.n + '</option>').join('') + '</select><button class="btn cap sm" data-cap="' + c.id + '"><i></i><span>Capturar</span></button><span style="color:var(--mut);font-size:12px;white-space:nowrap">' + c.samples.length + '</span><button class="btn sm ghost" title="Quitar" data-del="' + c.id + '">✕</button>';
+    r.querySelector('select').onchange = e => { c.def = e.target.value; c.name = PL.defecto(c.def).n; persist(); };
+    r.querySelector('[data-cap]').onclick = () => capture(c.id, 50, 70);
+    r.querySelector('[data-del]').onclick = () => { if (S.classes.filter(x => x.kind === 'bad').length > 1) S.classes.splice(S.classes.indexOf(c), 1); else { c.samples = []; c.groups = []; } render(); persist(); };
+    dl.appendChild(r);
+  });
+  $('#addDef').disabled = S.classes.filter(c => c.kind === 'bad').length >= 4;
+  const ok = cl('ok').samples.length, bgn = cl('bg').samples.length; $('#trainSt').textContent = ok ? '· lista ✔' : bgn ? '· falta la pieza conforme' : '· empieza por el fondo';
+  renderKpi();
+}
+$('#addDef').onclick = () => { const n = S.classes.filter(c => c.kind === 'bad').length + 1; S.classes.push({ id: 'bad' + Date.now(), kind: 'bad', name: 'Defecto ' + n, samples: [], groups: [] }); render(); };
+$('#cBg').dataset.cap = 'bg'; $('#cOk').dataset.cap = 'ok';
+$('#cBg').onclick = () => capture('bg', 25, 60); $('#cOk').onclick = () => capture('ok', 60, 70);
+$('#btnCam').onclick = () => startCamera($('#camSel').value || null);
+$('#camSel').onchange = () => startCamera($('#camSel').value);
+$('#btnSim').onclick = () => S.sim ? (stopStream(), S.cam = false, S.sim = false, vid.srcObject = null, $('#simbar').classList.remove('on'), $('#btnSim').textContent = 'Modo simulación', $('#noCam').style.display = '', $('#badge').textContent = 'Cámara apagada', $('#badge').classList.remove('sim'), setStatus('idle', 'Esperando cámara', '')) : startSim();
+document.querySelectorAll('[data-sim]').forEach(b => b.onclick = () => { autoLine(false); setSim(b.dataset.sim); });
+$('#simAuto').onclick = () => autoLine(!autoT);
+$('#sSens').oninput = e => { S.sens = +e.target.value; $('#vSens').textContent = S.sens; };
+$('#sRoi').oninput = e => { S.roi = +e.target.value / 100; $('#vRoi').textContent = e.target.value + '%'; };
+$('#sRoi').onchange = () => { toast('Cambiaste el tamaño de la zona: vuelve a enseñar fondo y conforme'); };
+$('#chHeat').onchange = e => S.heat = e.target.checked; $('#chSnd').onchange = e => S.mute = !e.target.checked;
+$('#bRst').onclick = () => { nuevoLote(); resetCounts(); paintCtx(); toast('Nuevo lote ' + CTX.lote); };
+function resetCounts() { S.counts = { n: 0, ok: 0, bad: 0 }; S.piece = null; S.hist = []; $('#piece').className = 'piece'; renderKpi(); }
+$('#bClr').onclick = () => { if (!confirm('¿Borrar todo lo aprendido?')) return; S.classes.forEach(c => { c.samples = []; c.groups = []; }); S.cal = null; S.stable = null; S.votes = []; resetCounts(); render(); persist(); };
+$('#btnPres').onclick = togglePres; $('#btnFs').onclick = toggleFs;
+function togglePres() { document.body.classList.toggle('pres'); setTimeout(resizeOv, 50); }
+function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); setTimeout(resizeOv, 300); }
+document.addEventListener('fullscreenchange', () => setTimeout(resizeOv, 200));
+document.addEventListener('keydown', e => {
+  if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'b') $('#cBg').click(); else if (k === 'c') $('#cOk').click(); else if (k === 'd') { const b = document.querySelector('.defrow [data-cap]'); b && b.click(); }
+  else if (k === 'r') resetCounts(); else if (k === 'f') toggleFs(); else if (k === 'h') togglePres(); else if (k === 'm') { S.mute = !S.mute; $('#chSnd').checked = !S.mute; }
+});
+
+/* ---------------- persistencia (IndexedDB) + archivo ---------------- */
+function idb() { return new Promise((res, rej) => { try { const r = indexedDB.open('alico-vision', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }); }
+async function persist() {
+  try {
+    const db = await idb(), tx = db.transaction('kv', 'readwrite');
+    tx.objectStore('kv').put({ classes: S.classes, roi: S.roi, sens: S.sens }, 'model');
+  } catch (e) {}
+}
+async function restore() {
+  try {
+    const db = await idb();
+    const m = await new Promise(res => { const r = db.transaction('kv').objectStore('kv').get('model'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); });
+    if (m && m.classes && m.classes.some(c => c.samples.length)) { applyModel(m); toast('Modelo anterior restaurado'); }
+  } catch (e) {}
+}
+function applyModel(m) {
+  S.classes = m.classes; S.roi = m.roi || .62; S.sens = m.sens == null ? 50 : m.sens;
+  $('#sRoi').value = Math.round(S.roi * 100); $('#vRoi').textContent = Math.round(S.roi * 100) + '%'; $('#sSens').value = S.sens; $('#vSens').textContent = S.sens;
+  gid = 1 + Math.max(0, ...S.classes.flatMap(c => c.groups)); calibrate(); render();
+}
+function f2b(arr) { const flat = new Float32Array(arr.length * DIM); arr.forEach((a, i) => flat.set(a, i * DIM)); const u = new Uint8Array(flat.buffer); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+function b2f(b) { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); const f = new Float32Array(u.buffer), o = []; for (let i = 0; i < f.length; i += DIM) o.push(f.slice(i, i + DIM)); return o; }
+$('#bExp').onclick = () => {
+  const m = { v: 1, roi: S.roi, sens: S.sens, classes: S.classes.map(c => ({ id: c.id, kind: c.kind, name: c.name, groups: c.groups, samples: f2b(c.samples) })) };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/json' })); a.download = 'modelo-inspeccion-alico.json'; a.click(); toast('Modelo guardado en descargas');
+};
+function modelJSON() { return JSON.stringify({ v: 1, roi: S.roi, sens: S.sens, classes: S.classes.map(c => ({ id: c.id, kind: c.kind, name: c.name, groups: c.groups, samples: f2b(c.samples) })) }); }
+$('#bCloudUp').onclick = () => { if (!AL.hasCloud()) return toast('Conecta la nube en Ajustes'); if (!cl('ok').samples.length) return toast('Primero enseña el empaque conforme'); AL.saveFile('modelo-vision.json', modelJSON()); toast('Modelo enviado a Drive'); };
+$('#bCloudDn').onclick = async () => { if (!AL.hasCloud()) return toast('Conecta la nube en Ajustes'); try { const m = JSON.parse(await AL.loadFile('modelo-vision.json')); m.classes.forEach(c => c.samples = b2f(c.samples)); applyModel(m); persist(); toast('Modelo cargado desde Drive'); } catch (e) { toast('No hay modelo en Drive todavía'); } };
+$('#bImp').onclick = () => $('#fImp').click();
+$('#fImp').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const m = JSON.parse(await f.text()); m.classes.forEach(c => c.samples = b2f(c.samples)); applyModel(m); persist(); toast('Modelo cargado'); } catch (er) { toast('Archivo no válido'); }
+  e.target.value = '';
+};
+
+AL.bar({ id: 'vision', publico: 'Operarios, supervisores de línea y Calidad', area: 'Operaciones · Línea de producción', iniciativa: 'Detección de defectos con visión artificial (Colombia)', chips: false,
+  narra: 'Inspección visual con inteligencia artificial. La cámara mira cada pieza que pasa por la línea. Si está bien, la encierra en un círculo verde, la deja pasar y la registra con su línea, lote, producto, operario y máquina. Si encuentra un defecto, la marca en rojo, la retira y genera un informe con la causa probable. Esos informes alimentan la torre de control, el agente de conocimiento técnico y el centro de inteligencia del cliente.',
+  help: [
+  { ico: '📷', t: 'Pon la cámara frente a la línea', p: 'Pulsa «Activar cámara». Si no hay una a mano, usa «Modo simulación» para ensayar.' },
+  { ico: '🎓', t: 'Enséñale qué es lo bueno', p: 'Captura primero el fondo vacío y luego 2 o 3 empaques conformes. En segundos la IA aprende.' },
+  { ico: '🚨', t: 'Ella avisa lo que se aparta', p: 'Un empaque distinto se marca en rojo con sonido. Con «Preguntar a Maestro» obtienes qué hacer.' }] });
+window.__S = S;
+/* ====================== INFORMES DE CALIDAD ====================== */
+const RF = Object.assign({ per: '7', lin: '', q: '' }, AL.LS.get('vis_rf', {}));
+function datos() {
+  const H = PL.historial(), dias = +RF.per, desde = new Date(); desde.setHours(12, 0, 0, 0); desde.setDate(desde.getDate() - (dias - 1));
+  const dk = diaLocal(desde);
+  const rows = H.rows.filter(r => r.dia >= dk && (!RF.lin || r.linea === RF.lin)).map(r => Object.assign({}, r));
+  const live = AL.hub.list('inspeccion').filter(r => !RF.lin || r.linea === RF.lin), pas = AL.hub.list('pieza').filter(r => !RF.lin || r.linea === RF.lin);
+  /* lo inspeccionado en vivo se suma al día de hoy */
+  const hoy = diaLocal();
+  [...live.map(r => ({ r, bad: true })), ...pas.map(r => ({ r, bad: false }))].forEach(({ r, bad }) => {
+    rows.push({ dia: hoy, linea: r.linea, turno: r.turno || PL.turno(), operario: r.operario || '', sku: r.sku, producto: r.producto || '', lote: r.lote, n: 1, rej: bad ? 1 : 0, por: bad ? { [r.def || 'anom']: 1 } : {}, live: true });
+  });
+  const piezas = [...live.map(x => Object.assign({ live: true }, x)), ...H.piezas.filter(r => r.ts.slice(0, 10) >= dk && (!RF.lin || r.linea === RF.lin))];
+  return { rows, piezas, dk };
+}
+const sum = (a, f) => a.reduce((s, x) => s + f(x), 0), pct = (a, b) => b ? a / b * 100 : 0, f1 = n => n.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+function bars(list, color, fmt = v => v.toLocaleString('es-CO')) { const mx = Math.max(1, ...list.map(x => x[1])); return list.map(([k, v, c]) => `<div class="rbar"><span title="${AL.esc(k)}">${AL.esc(k)}</span><span class="tr"><i style="width:${v / mx * 100}%;background:${c || color}"></i></span><b>${fmt(v)}</b></div>`).join(''); }
+function lineChart(days, series) {
+  const W = 760, H = 230, L = 40, R = 12, T = 12, B = 26, mx = Math.max(1, ...series.flatMap(s => s.v)) * 1.1;
+  const X = i => L + i / Math.max(1, days.length - 1) * (W - L - R), Y = v => T + (1 - v / mx) * (H - T - B);
+  let g = ''; for (let k = 0; k <= 4; k++) { const v = mx * k / 4; g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#ffffff14"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="#9AA6B0">${f1(v)}%</text>`; }
+  days.forEach((d, i) => { if (days.length < 10 || i % Math.ceil(days.length / 8) === 0 || i === days.length - 1) g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#9AA6B0">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
+  series.forEach(s => { g += `<polyline fill="none" stroke="${s.c}" stroke-width="2.5" points="${s.v.map((v, i) => X(i) + ',' + Y(v)).join(' ')}"/>`; const i = s.v.length - 1; g += `<circle cx="${X(i)}" cy="${Y(s.v[i])}" r="4" fill="${s.c}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}</svg><div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut)">${series.map(s => `<span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${s.c};margin-right:4px"></i>${s.n}</span>`).join('')}</div>`;
+}
+function donut(parts) {
+  const tot = sum(parts, p => p[1]) || 1; let a = -Math.PI / 2, g = '';
+  parts.forEach(([n, v, c]) => { const b = a + v / tot * Math.PI * 2, l = b - a > Math.PI ? 1 : 0, r = 70, R = 100; if (v <= 0) return;
+    const p = (ang, rad) => (110 + Math.cos(ang) * rad) + ',' + (110 + Math.sin(ang) * rad);
+    g += `<path d="M${p(a, R)} A${R},${R} 0 ${l} 1 ${p(b - .0001, R)} L${p(b - .0001, r)} A${r},${r} 0 ${l} 0 ${p(a, r)}Z" fill="${c}"><title>${n}: ${f1(v / tot * 100)}%</title></path>`; a = b; });
+  const top = parts.slice().sort((x, y) => y[1] - x[1])[0];
+  return `<div style="display:flex;gap:14px;align-items:center"><svg viewBox="0 0 220 220" style="width:46%;max-width:220px">${g}<text x="110" y="106" text-anchor="middle" font-size="26" font-weight="700" fill="#F3F6F8">${f1(top[1] / tot * 100)}%</text><text x="110" y="128" text-anchor="middle" font-size="12" fill="#9AA6B0">${top[0]}</text></svg>
+   <div style="flex:1">${parts.filter(p => p[1] > 0).map(([n, v, c]) => `<div style="display:flex;gap:8px;align-items:center;font-size:13px;margin:5px 0"><i style="width:12px;height:12px;border-radius:3px;background:${c}"></i>${n}<span class="sp"></span><b>${f1(v / tot * 100)}%</b></div>`).join('')}</div></div>`;
+}
+function renderReports() {
+  const el = $('#vRep'); if (!document.body.classList.contains('vrep')) return;
+  const { rows, piezas } = datos(), N = sum(rows, r => r.n), X = sum(rows, r => r.rej);
+  const porDef = {}, porCausa = {}, porLin = {}, porTur = { A: [0, 0], B: [0, 0], C: [0, 0] }, porOpe = {}, costo = { v: 0 };
+  rows.forEach(r => {
+    (porLin[r.linea] = porLin[r.linea] || [0, 0]); porLin[r.linea][0] += r.n; porLin[r.linea][1] += r.rej;
+    porTur[r.turno][0] += r.n; porTur[r.turno][1] += r.rej; (porOpe[r.operario] = porOpe[r.operario] || [0, 0]); porOpe[r.operario][0] += r.n; porOpe[r.operario][1] += r.rej;
+    costo.v += r.rej * PL.precioUnit(r.sku);
+    Object.entries(r.por).forEach(([d, k]) => { porDef[d] = (porDef[d] || 0) + k; PL.defecto(d).causas.forEach(([c, , p]) => porCausa[c] = (porCausa[c] || 0) + k * p / 100); });
+  });
+  const days = [...new Set(rows.map(r => r.dia))].sort();
+  const series = PL.LINEAS.filter(l => !RF.lin || l.id === RF.lin).map(l => ({ n: l.n, c: l.color, v: days.map(d => { const rr = rows.filter(r => r.dia === d && r.linea === l.id); return pct(sum(rr, r => r.rej), sum(rr, r => r.n)); }) }));
+  const pareto = Object.entries(porDef).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  /* hallazgos automáticos: dónde se concentra el problema */
+  const ins = [];
+  Object.entries(porDef).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([d, k]) => {
+    const rr = rows.filter(r => r.por[d]), byT = { A: 0, B: 0, C: 0 }, byL = {}; rr.forEach(r => { byT[r.turno] += r.por[d]; byL[r.linea] = (byL[r.linea] || 0) + r.por[d]; });
+    const tMax = Object.entries(byT).sort((a, b) => b[1] - a[1])[0], lMax = Object.entries(byL).sort((a, b) => b[1] - a[1])[0], df = PL.defecto(d);
+    const share = tMax[1] / k;
+    ins.push({ r: share > .5, d, t: `<b>${df.n}</b>: ${f1(k / Math.max(1, X) * 100)}% de los rechazos, concentrado en <b>${PL.linea(lMax[0]).n}</b>${share > .45 ? ` y en el <b>turno ${tMax[0]}</b> (${f1(share * 100)}%)` : ''}. Causa más probable: ${czChip(df.causas[0][0])} ${df.causas[0][1].toLowerCase()}.` });
+  });
+  const lv = AL.hub.list('inspeccion').length;
+  const q = RF.q.toLowerCase(), tab = piezas.filter(p => !q || [p.lote, p.serie, p.producto, p.sku, p.operario, p.defecto].join(' ').toLowerCase().includes(q)).slice(0, 40);
+  el.innerHTML = `
+  <div class="rf"><h2 style="font-size:20px">📊 Informes de calidad</h2><span class="sample">HISTÓRICO DE EJEMPLO + LO INSPECCIONADO EN VIVO (${lv})</span><span class="sp"></span>
+    <select id="rPer"><option value="1">Hoy</option><option value="7">7 días</option><option value="30">30 días</option></select>
+    <select id="rLin"><option value="">Todas las líneas</option>${PL.LINEAS.map(l => `<option value="${l.id}">${l.n}</option>`).join('')}</select>
+    <button class="btn sm" id="rIA">🤖 Lectura con IA</button><button class="btn sm" id="rCsv">⬇ CSV</button><a class="btn sm" href="../torre/index.html#calidad" target="_blank">🗼 Torre de control</a></div>
+  <div class="rk">
+    <div class="kpi"><small>Piezas inspeccionadas</small><b>${N.toLocaleString('es-CO')}</b></div>
+    <div class="kpi bad"><small>Retiradas</small><b>${X.toLocaleString('es-CO')}</b></div>
+    <div class="kpi"><small>% defecto</small><b>${f1(pct(X, N))}%</b></div>
+    <div class="kpi ok"><small>Calidad a la primera (FPY)</small><b>${f1(100 - pct(X, N))}%</b></div>
+    <div class="kpi"><small>Costo de no calidad (precio de lista)</small><b>${AL.money(costo.v)}</b></div>
+  </div>
+  <div class="card"><h3>🔎 Lo que encontró la IA en los datos</h3><div id="rIns">${ins.map(i => `<div class="ins ${i.r ? 'r' : ''}"><span>${i.r ? '🚨' : '💡'}</span><div>${i.t}</div><div class="acts"><a class="btn sm" target="_blank" href="../conocimiento/index.html#aprender=def:${i.d}">🧠 A conocimiento</a></div></div>`).join('') || '<p style="color:var(--mut)">Sin rechazos en el período.</p>'}</div><div id="rIAo"></div></div>
+  <div class="rgrid">
+    <div class="card"><h3>📈 % de defecto por día y línea</h3>${days.length ? lineChart(days, series) : ''}</div>
+    <div class="card"><h3>🧭 ¿Dónde nace la falla? (6M)</h3>${donut(Object.entries(PL.CAUSAS).map(([k, c]) => [c.i + ' ' + c.n, porCausa[k] || 0, c.c]))}</div>
+  </div>
+  <div class="rgrid3">
+    <div class="card"><h3>📊 Pareto de defectos</h3>${bars(pareto.map(([d, k]) => [PL.defecto(d).n, k]), '#FF4D4F')}</div>
+    <div class="card"><h3>🏭 Por línea y máquina (% defecto)</h3>${bars(Object.entries(porLin).map(([l, v]) => [PL.linea(l).n, pct(v[1], v[0]), PL.linea(l).color]), '#00BED6', v => f1(v) + '%')}
+      <h3 style="margin-top:12px">🕐 Por turno</h3>${bars(Object.entries(porTur).map(([t, v]) => ['Turno ' + t + ' · ' + PL.TURNOS[t], pct(v[1], v[0])]), '#E99B35', v => f1(v) + '%')}</div>
+    <div class="card"><h3>👷 Por operario (% defecto)</h3>${bars(Object.entries(porOpe).filter(([o]) => o).map(([o, v]) => [o, pct(v[1], v[0])]).sort((a, b) => b[1] - a[1]), '#008AAB', v => f1(v) + '%')}<p style="color:var(--mut);font-size:12px;margin-top:8px">Sirve para acompañar y entrenar, no para culpar: casi siempre la causa está en el método o la máquina.</p></div>
+  </div>
+  <div class="card" style="max-height:620px;overflow:auto"><h3>🔗 Trazabilidad de piezas retiradas <span class="sp"></span><input id="rQ" placeholder="Buscar lote, serie, producto, operario…" value="${AL.esc(RF.q)}" style="background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px;min-width:280px"></h3>
+    <table class="tt"><tr><th>Hora</th><th>Serie · lote</th><th>Producto</th><th>Línea · máquina</th><th>Operario · turno</th><th>Defecto</th><th>Causa probable</th><th></th></tr>
+    ${tab.map(p => `<tr class="${p.live ? 'live' : ''}"><td>${new Date(p.ts).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}${p.live ? '<br><small style="color:var(--cy)">EN VIVO</small>' : ''}</td><td>${p.serie}<br><small style="color:var(--mut)">${p.lote}</small></td><td>${AL.esc(p.producto)}<br><small style="color:var(--mut)">${p.sku}</small></td><td>${AL.esc(PL.linea(p.linea).n)}<br><small style="color:var(--mut)">${AL.esc(p.maquina)}</small></td><td>${AL.esc(p.operario)} · ${p.turno}</td><td>${AL.esc(p.defecto)}</td><td>${czChip(p.causa)}</td><td><button class="btn sm" data-rep="${p.id}">Informe</button></td></tr>`).join('')}</table></div>`;
+  $('#rPer').value = RF.per; $('#rLin').value = RF.lin;
+  const save = () => { AL.LS.set('vis_rf', RF); renderReports(); };
+  $('#rPer').onchange = e => { RF.per = e.target.value; save(); }; $('#rLin').onchange = e => { RF.lin = e.target.value; save(); };
+  $('#rQ').onchange = e => { RF.q = e.target.value; save(); };
+  $('#rCsv').onclick = () => { const cols = ['ts', 'serie', 'lote', 'sku', 'producto', 'linea', 'maquina', 'operario', 'turno', 'defecto', 'causa', 'causa_txt', 'estado']; AL.download('rechazos-vision-alico.csv', 'text/csv', '﻿' + [cols.join(','), ...piezas.map(p => cols.map(c => '"' + String(p[c] ?? '').replace(/"/g, '""') + '"').join(','))].join('\n')); };
+  $('#rIA').onclick = async () => {
+    if (!AL.hasIA()) return toast('Pega la clave de IA en Ajustes');
+    $('#rIAo').innerHTML = '<div class="ins"><span>⏳</span><div>Analizando…</div></div>';
+    const resumen = { periodo_dias: RF.per, piezas: N, rechazos: X, pareto: pareto.map(([d, k]) => [PL.defecto(d).n, k]), por_linea: Object.fromEntries(Object.entries(porLin).map(([l, v]) => [PL.linea(l).n, f1(pct(v[1], v[0])) + '%'])), por_turno: Object.fromEntries(Object.entries(porTur).map(([t, v]) => [t, f1(pct(v[1], v[0])) + '%'])), causas_6M: Object.fromEntries(Object.entries(porCausa).map(([k, v]) => [PL.CAUSAS[k].n, Math.round(v)])) };
+    try { const t = await AL.claude(AL.SYS + ' Eres jefe de calidad en una planta de empaques.', 'Datos de inspección (JSON): ' + JSON.stringify(resumen) + '\nEscribe una lectura ejecutiva en máximo 120 palabras: 3 hallazgos y 3 acciones concretas con responsable (Producción, Mantenimiento, Calidad o Compras). Los datos son de ejemplo.', { max: 500, tag: 'vision-informe' });
+      $('#rIAo').innerHTML = `<div class="ins"><span>🤖</span><div style="white-space:pre-wrap">${AL.esc(t)}</div></div>`; AL.say(t.slice(0, 500)); } catch (e) { $('#rIAo').innerHTML = `<div class="ins r"><span>⚠️</span><div>${AL.esc(e.message)}</div></div>`; }
+  };
+}
+function vista(v) {
+  document.body.classList.toggle('vrep', v === 'rep'); document.querySelectorAll('.vtabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v === 'rep') { renderReports(); history.replaceState(null, '', '#informes'); } else { history.replaceState(null, '', location.pathname); setTimeout(resizeOv, 60); }
+}
+function initReports() {
+  document.addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) vista(b.dataset.v); });
+  if (location.hash === '#informes') vista('rep');
+  window.addEventListener('hashchange', () => vista(location.hash === '#informes' ? 'rep' : 'live'));
+  /* informes en otra pestaña: se refrescan cuando la línea registra algo */
+  AL.hub.on('inspeccion', () => renderReports()); let pt = null; AL.hub.on('pieza', () => { clearTimeout(pt); pt = setTimeout(renderReports, 800); });
+}
+
+paintCtx(); render(); restore(); listCams(); requestAnimationFrame(loop);
+initReports();
+})();
+</script>
+</body>
+</html>

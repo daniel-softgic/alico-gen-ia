@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Centro de inteligencia del cliente · Alico</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/al.css">
+<style>
+body.cli .alb,body.cli .tabs{display:none}
+.split{display:grid;grid-template-columns:23rem minmax(0,1fr);gap:1.1rem;align-items:start}
+.list{max-height:78vh;overflow:auto;display:flex;flex-direction:column;gap:.55rem;padding:.2rem}
+.it{background:#fff;border:2px solid var(--line);border-radius:16px;padding:.7rem .9rem;text-align:left;width:100%}
+.it:hover{border-color:var(--tl)}.it.on{border-color:var(--or);background:#fff8f0}
+.it b{display:block;font-size:.9rem}.it small{color:var(--gr);font-size:.76rem}
+.sev{display:inline-block;width:.7rem;height:.7rem;border-radius:50%;margin-right:.35rem}
+.s1{background:var(--bad)}.s2{background:var(--or)}.s3{background:var(--warn)}.s4{background:var(--ok)}
+.stg{display:flex;gap:.2rem;overflow:auto;padding:.3rem 0 .8rem}
+.st{flex:1;min-width:5.6rem;text-align:center;font-size:.68rem;font-weight:700;color:#9a9a9a;position:relative}
+.st i{display:grid;place-items:center;width:2.1rem;height:2.1rem;margin:0 auto .2rem;border-radius:50%;background:#efe7dc;font-style:normal;font-size:1rem}
+.st.done{color:var(--ok)}.st.done i{background:#d6f3e4}.st.now{color:var(--or-d)}.st.now i{background:var(--or);color:#fff;box-shadow:0 0 0 5px #ffe1c9}
+.st small{display:none}
+.st{min-width:4.2rem;font-size:.62rem}.st i{width:1.7rem;height:1.7rem;font-size:.85rem}
+.kstrip{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}.kstrip span{background:#fff;border:2px solid var(--line);border-radius:99px;padding:.35rem .9rem;font-size:.85rem}.kstrip b{font-size:1rem;margin-right:.25rem}
+.ctxc{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}.ctxc span{font-size:.75rem;background:#f6efe5;border-radius:99px;padding:.2rem .6rem}
+.qrbig{text-align:center;position:sticky;top:1rem}.qrbig #qr{display:inline-block;padding:.8rem;background:#fff;border-radius:18px;border:3px solid var(--or)}
+.qrbig h3{font-size:1.25rem}.qrbig .lnk{font-size:.7rem;word-break:break-all;color:var(--gr);margin-top:.5rem}
+.inc{display:flex;gap:.8rem;align-items:center;background:#1f2326;color:#fff;border-radius:16px;padding:.7rem 1rem;margin-bottom:.9rem}
+.inc .dot{width:.7rem;height:.7rem;border-radius:50%;background:#2BD67B;animation:pl 1.6s infinite}@keyframes pl{70%{box-shadow:0 0 0 10px #2BD67B00}50%{box-shadow:0 0 0 0 #2BD67B88}}
+.proac{border:2px solid #f3d48b;background:#fff3da;border-radius:18px;padding:.8rem 1rem;margin-bottom:.9rem;display:flex;gap:.8rem;align-items:center}
+.box{border:2px solid var(--line);border-radius:18px;padding:.9rem 1.1rem;margin:.7rem 0;background:#fff}
+.box h4{font-size:.92rem;font-weight:800;margin-bottom:.4rem}
+.ai{background:linear-gradient(135deg,#f2fbfd,#fff);border-color:#b9eaf1}
+pre.code{background:#1f2326;color:#d6f3e4;border-radius:14px;padding:.8rem 1rem;font-size:.75rem;overflow:auto;max-height:15rem;margin:.4rem 0}
+.draft{width:100%;min-height:8.5rem;border-radius:14px;border:2px solid var(--line);padding:.7rem .9rem}
+.stars button{font-size:1.8rem;background:none;filter:grayscale(1);opacity:.5}.stars button.on{filter:none;opacity:1}
+.cust{max-width:46rem;margin:0 auto}
+.cust .card{padding:1.4rem 1.6rem}
+.big-ok{text-align:center}.big-ok .e{font-size:4rem}
+.qrb{text-align:center}.qrb #qr{display:inline-block;padding:.6rem;background:#fff;border-radius:14px;border:2px solid var(--line)}
+.pareto{display:flex;align-items:flex-end;gap:.5rem;height:10rem;margin-top:.6rem}
+.pareto div{flex:1;text-align:center;font-size:.68rem;height:100%;display:flex;flex-direction:column;justify-content:flex-end}.pareto i{display:block;border-radius:8px 8px 0 0;background:var(--or);min-height:3px}
+.arch{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem;margin:.8rem 0}
+.arch>div{border:2px solid var(--line);border-radius:14px;padding:.6rem .7rem;font-size:.78rem;background:#fff}.arch b{display:block;font-size:.85rem}
+.sprint{border-left:5px solid var(--or);padding:.5rem 1rem;margin:.6rem 0;background:#fffaf3;border-radius:0 14px 14px 0}
+.photo{max-width:100%;max-height:13rem;border-radius:12px;border:2px solid var(--line)}
+@media (max-width:1100px){.split{grid-template-columns:1fr}.list{max-height:none}}
+</style>
+</head>
+<body>
+<script src="../../shared/al.js"></script>
+<script src="../../shared/catalogo.js"></script>
+<script src="../../shared/planta.js"></script>
+<main class="wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab" data-t="cli">👤 Cliente · Portal</button>
+    <button class="tab on" data-t="agt">🎧 Bandeja del equipo</button>
+    <button class="tab" data-t="ger">📈 Gerencia</button>
+    <button class="tab" data-t="imp">🗺️ Cómo se implementa</button>
+  </div>
+  <section id="v-cli" hidden></section>
+  <section id="v-agt"></section>
+  <section id="v-ger" hidden></section>
+  <section id="v-imp" hidden></section>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = AL.$, LS = AL.LS, esc = AL.esc, $$ = s => [...document.querySelectorAll(s)];
+const PHONE = location.hash.startsWith('#cliente');
+if (PHONE) document.body.classList.add('cli');
+
+/* ============================ catálogos (EJEMPLO) ============================ */
+const PRODUCTOS = ['TZ00562', 'MUZ00221', 'D48999', 'C68701', 'NTC445', 'T00031', 'MUZ00168'].map(k => { const p = (window.ALICO_CAT || []).find(x => x[0] === k) || [k, k]; return { id: k, n: p[1], p: Math.round(window.PLANTA.precioUnit(k)) }; });   // catálogo real de alicoempaques.com · precio unitario de lista (COP)
+const TIPOS = {
+  calidad: { n: 'Defecto de calidad (impresión o sello)', area: 'Calidad', causas: ['Mordaza de sellado con temperatura baja o contaminación', 'Cuchilla rasqueta desgastada / anilox sucio', 'Tratamiento corona insuficiente'], res: 'reposicion' },
+  delam: { n: 'Delaminación del laminado', area: 'Calidad', causas: ['Curado incompleto antes del despacho', 'Gramaje de adhesivo fuera de rango', 'Superficie contaminada por deslizante'], res: 'nota_credito' },
+  faltante: { n: 'Faltante en el despacho', area: 'Logística', causas: ['Error de conteo en la preparación del pedido', 'Pallet incompleto al cargar'], res: 'reposicion' },
+  equivocado: { n: 'Producto equivocado', area: 'Logística', causas: ['Confusión de referencia en picking', 'Orden mal digitada en el ERP'], res: 'reposicion' },
+  dano: { n: 'Daño en transporte', area: 'Logística', causas: ['Embalaje insuficiente para la ruta', 'Manipulación del transportista'], res: 'nota_credito' },
+  tardia: { n: 'Entrega tardía', area: 'Logística', causas: ['Retraso de producción en planta', 'Retraso del transportista'], res: 'informar' },
+  medidas: { n: 'Medidas fuera de tolerancia', area: 'Calidad', causas: ['Desajuste en el corte o rebobinado', 'Variación de espesor en extrusión'], res: 'devolucion' }
+};
+const RES = { reposicion: 'Reposición sin costo', nota_credito: 'Nota de crédito', devolucion: 'Devolución y cambio (RMA)', visita: 'Visita técnica', informar: 'Solo informar / disculpas' };
+const SLA = { 1: 4, 2: 8, 3: 24, 4: 48 }, SEV = { 1: 'Crítica', 2: 'Alta', 3: 'Media', 4: 'Baja' };
+const EST = ['nuevo', 'triage', 'investigacion', 'decision', 'ejecutado', 'respondido', 'cerrado'];
+const EST_N = { nuevo: 'Nuevo', triage: 'Triage listo', investigacion: 'Causa raíz', decision: 'Decisión', ejecutado: 'En Epicor', respondido: 'Respondido', cerrado: 'Cerrado' };
+const STG = [['📥', 'Recepción', 'Portal / WhatsApp'], ['🔎', 'Identificación', 'CRM + Epicor'], ['🤖', 'Triage con IA', 'Inteligencia'], ['👥', 'Asignación', 'Servicio'], ['🧪', 'Causa raíz', 'Calidad'], ['⚖️', 'Decisión', 'Servicio + Finanzas'], ['🏭', 'Ejecución', 'Epicor · Logística'], ['✉️', 'Respuesta', 'Servicio'], ['⭐', 'Cierre', 'Encuesta'], ['📈', 'Aprendizaje', 'Gerencia']];
+const DONE = { nuevo: 2, triage: 3, investigacion: 5, decision: 6, ejecutado: 7, respondido: 8, cerrado: 10 };
+
+/* ============================ datos ============================ */
+const CLIENTES = ['Alimentos Cordillera SpA', 'Distribuidora Pacífico Sur', 'Lácteos del Maule', 'Snacks Atacama', 'Agroexport Los Andes', 'Panificadora Bío-Bío'];
+let R = LS.get('al_rec_v', 0) === 2 ? LS.get('al_rec', null) : null;
+function seed() {
+  const r = AL.rng(7), out = [], now = Date.now(), keys = Object.keys(TIPOS);
+  const pick = a => a[Math.floor(r() * a.length)];
+  for (let i = 0; i < 18; i++) {
+    const k = r() < .55 ? pick(['calidad', 'calidad', 'delam', 'delam']) : pick(keys), t = TIPOS[k];
+    const prod = k === 'delam' ? pick([PRODUCTOS[2], PRODUCTOS[3]]) : k === 'calidad' ? pick([PRODUCTOS[1], PRODUCTOS[1], PRODUCTOS[0], PRODUCTOS[2]]) : pick(PRODUCTOS);
+    const qty = Math.round((200 + r() * 5000) / 50) * 50, ago = Math.floor(r() * 34) * 864e5 + Math.floor(r() * 8) * 36e5, ts = now - ago, sev = k === 'calidad' || k === 'delam' ? (qty > 3000 ? 1 : 2) : (r() < .5 ? 3 : 4);
+    const st = ago > 9 * 864e5 ? 'cerrado' : (i < 3 ? 'nuevo' : pick(['respondido', 'ejecutado', 'decision', 'investigacion', 'triage', 'nuevo']));
+    const cause = pick(t.causas), hrs = Math.round(6 + r() * 50);
+    const rec = { id: 'R-' + (2400 + i), ts: new Date(ts).toISOString(), upd: ts, cliente: pick(CLIENTES), contacto: 'compras@ejemplo.cl', pais: 'Chile', pedido: 'PV-' + (7000 + Math.floor(r() * 900)), producto: prod.id, tipo: k, cantidad: qty,
+      desc: ['Las fundas llegaron con el sello abierto en varias cajas.', 'La impresión tiene manchas en el borde inferior.', 'El laminado se separa al abrir el empaque.', 'Faltaron cajas en el pallet entregado.', 'Recibimos una referencia distinta a la pedida.', 'Las bobinas llegaron golpeadas por el transporte.', 'El ancho está fuera de la tolerancia pactada.'][Math.floor(r() * 7)],
+      canal: pick(['Portal', 'WhatsApp', 'Correo']), estado: st, ejemplo: true, hist: [], sesion: 'EJEMPLO' };
+    if (st !== 'nuevo') rec.triage = { categoria: t.n, severidad: sev, area: t.area, causas: t.causas.map((c, j) => ({ causa: c, prob: [60, 25, 15][j] || 10 })), resumen: 'Reclamo de ' + t.n.toLowerCase() + ' en ' + prod.n + ' (' + qty + ' uds).', accion: RES[t.res], res: t.res, similares: Math.floor(r() * 5), via: 'ejemplo' };
+    if (EST.indexOf(st) >= 2) rec.causa = cause;
+    if (EST.indexOf(st) >= 3) rec.decision = { res: t.res, valor: t.res === 'informar' ? 0 : Math.round(qty * prod.p * (r() < .5 ? 1 : .6)), por: 'Servicio al cliente' };
+    if (EST.indexOf(st) >= 4 && t.res !== 'informar') rec.epicor = { num: 'RMA-' + (10200 + i), res: t.res };
+    if (st === 'cerrado') { rec.cierre = { csat: pick([3, 4, 4, 5, 5]), horas: hrs, ts: ts + hrs * 36e5 }; rec.upd = ts + hrs * 36e5; }
+    out.push(rec);
+  }
+  return out.sort((x, y) => new Date(y.ts) - new Date(x.ts));
+}
+if (!R) { const old = (LS.get('al_rec', []) || []).filter(r => !r.ejemplo); R = old.concat(seed()); LS.set('al_rec', R); LS.set('al_rec_v', 2); }
+const save = () => { try { LS.set('al_rec', R); } catch (e) { AL.toast('Memoria del navegador llena: borra fotos antiguas'); } };
+const byId = id => R.find(x => x.id === id);
+const prodN = id => (PRODUCTOS.find(p => p.id === id) || { n: id }).n, prodP = id => (PRODUCTOS.find(p => p.id === id) || { p: 0 }).p;
+function pushCloud(rec) {
+  const c = Object.assign({}, rec); delete c.foto; c.titulo = (TIPOS[rec.tipo] ? TIPOS[rec.tipo].n : rec.tipo) + ' · ' + prodN(rec.producto); c.sesion = rec.sesion || AL.cfg.sesion;
+  AL.queue('reclamo', c);
+}
+function touch(rec, txt) { rec.upd = Date.now(); (rec.hist = rec.hist || []).push({ ts: new Date().toISOString(), txt }); save(); pushCloud(rec); }
+async function pull() {
+  if (!AL.hasCloud()) return;
+  try {
+    const rows = await AL.rows('reclamo', 300); let ch = false;
+    rows.forEach(x => { const l = byId(x.id); if (!l) { R.unshift(x); ch = true; } else if ((x.upd || 0) > (l.upd || 0)) { Object.assign(l, x, { foto: l.foto }); ch = true; } });
+    if (ch) { save(); refresh(); }
+  } catch (e) {}
+}
+setInterval(pull, 8000);
+
+/* ============================ IA: triage ============================ */
+function similares(rec) { const lim = Date.now() - 90 * 864e5; return R.filter(x => x.id !== rec.id && x.producto === rec.producto && x.tipo === rec.tipo && new Date(x.ts) > lim).length; }
+function basicTriage(rec) {
+  const t = TIPOS[rec.tipo], valor = rec.cantidad * prodP(rec.producto), sim = similares(rec);
+  const sev = (rec.tipo === 'calidad' || rec.tipo === 'delam' || rec.tipo === 'medidas') ? (rec.cantidad > 3000 || sim >= 2 ? 1 : 2) : (rec.tipo === 'tardia' ? 4 : 3);
+  return { categoria: t.n, severidad: sev, area: t.area, causas: t.causas.map((c, j) => ({ causa: c, prob: [55, 30, 15][j] || 10 })), resumen: `Reclamo de ${t.n.toLowerCase()} en ${prodN(rec.producto)}: ${rec.cantidad} uds, valor aprox. ${AL.money(valor)}.`, accion: RES[t.res], res: t.res, similares: sim, riesgo: sim >= 2 ? 'Posible problema recurrente: ' + sim + ' reclamos similares en 90 días.' : 'Sin recurrencia visible.', respuesta: draft(rec, t.res), via: 'reglas' };
+}
+function draft(rec, res) {
+  const acc = { reposicion: 'Ya estamos preparando la reposición sin costo de las unidades afectadas.', nota_credito: 'Vamos a emitir una nota de crédito por las unidades afectadas.', devolucion: 'Coordinaremos el retiro de las unidades y su cambio.', visita: 'Un técnico de nuestro equipo irá a revisar el caso en sus instalaciones.', informar: 'Estamos gestionando la entrega y le informaremos la nueva fecha.' }[res];
+  return `Hola ${rec.cliente}, gracias por avisarnos y lamentamos el inconveniente con ${prodN(rec.producto)} (pedido ${rec.pedido}).\n\nYa registramos su reclamo ${rec.id}. ${acc} Le confirmaremos cada avance por este mismo medio.\n\nEquipo de Servicio al Cliente · Alico`;
+}
+async function triage(rec) {
+  let tr = null;
+  if (AL.hasIA()) {
+    const imgs = rec.foto ? [{ media_type: 'image/jpeg', data: rec.foto.split(',')[1] }] : [];
+    const sys = AL.SYS + `\nEres el analista de reclamos del Centro de inteligencia del cliente. Devuelve SOLO un JSON con: categoria (texto corto), severidad (1 crítica,2 alta,3 media,4 baja), area (Calidad|Logística|Comercial|Finanzas), causas (arreglo de 3 objetos {causa, prob} con prob sumando 100, causas plausibles en fabricación de empaques flexibles), resumen (1 frase), accion (1 frase), res (reposicion|nota_credito|devolucion|visita|informar), riesgo (1 frase sobre recurrencia), respuesta (borrador de correo al cliente, empático, ≤90 palabras, sin prometer más de lo que indica res), foto (si hay imagen: qué se observa en 1 frase, si no, ""). Tipos de reclamo válidos: ${Object.keys(TIPOS).join(', ')}.`;
+    const u = `Cliente: ${rec.cliente} (${rec.pais}). Producto: ${prodN(rec.producto)}. Tipo reportado: ${TIPOS[rec.tipo].n}. Cantidad afectada: ${rec.cantidad}. Descripción del cliente: «${rec.desc}». Reclamos similares del mismo producto y tipo en 90 días: ${similares(rec)}.`;
+    try { tr = AL.parseJSON(await AL.claude(sys, u, { max: 900, images: imgs, tag: 'reclamo-triage' })); tr.via = 'ia'; tr.severidad = +tr.severidad || 3; tr.similares = similares(rec); if (!RES[tr.res]) tr.res = TIPOS[rec.tipo].res; if (!Array.isArray(tr.causas) || !tr.causas.length) tr.causas = basicTriage(rec).causas; }
+    catch (e) { tr = null; AL.toast('La IA no respondió: usé reglas de respaldo'); }
+  }
+  tr = tr || basicTriage(rec);
+  rec.triage = tr; rec.estado = 'triage'; touch(rec, 'Triage ' + (tr.via === 'ia' ? 'con IA' : 'por reglas') + ': severidad ' + SEV[tr.severidad]);
+  AL.log('reclamo_triage', { caso_id: 'reclamos', area: 'Calidad y servicio · Chile', detalle: rec.id + ' ' + tr.categoria, ok: 'si' });
+  return tr;
+}
+
+/* ============================ Epicor (simulado) ============================ */
+function epicorCall(rec) {
+  const d = rec.decision, p = PRODUCTOS.find(x => x.id === rec.producto) || {}, num = (10000 + Math.floor(Math.random() * 89999));
+  const base = 'https://erp.ejemplo.alico.cl/api/v2/odata/ALICO/';
+  const map = {
+    reposicion: ['POST', base + 'Erp.BO.SalesOrderSvc/SalesOrders', { Company: 'ALICO', CustNum: rec.cliente, OrderComment: 'Reposición por reclamo ' + rec.id, OrderDtl: [{ PartNum: p.id, OrderQty: rec.cantidad, UnitPrice: 0, ReasonCode: 'RECLAMO' }] }, { OrderNum: num }],
+    nota_credito: ['POST', base + 'Erp.BO.ARInvoiceSvc/ARInvoices', { InvoiceType: 'CRM', CustNum: rec.cliente, InvoiceRef: rec.pedido, InvoiceAmt: d.valor, Currency: 'COP', Comment: rec.id }, { InvoiceNum: num }],
+    devolucion: ['POST', base + 'Erp.BO.RMAProcSvc/RMAHeads', { CustNum: rec.cliente, RMADtl: [{ PartNum: p.id, ReturnQty: rec.cantidad, ReasonCode: rec.tipo.toUpperCase() }], Warehouse: 'CALIDAD' }, { RMANum: num }],
+    visita: ['POST', 'https://crm.ejemplo.alico.cl/api/tasks', { tipo: 'Visita técnica', cliente: rec.cliente, ref: rec.id }, { TaskId: num }]
+  };
+  const m = map[d.res]; if (!m) return null;
+  return { metodo: m[0], url: m[1], payload: m[2], respuesta: Object.assign({ Status: 'Created', Msg: 'Registro creado (SIMULADO)' }, m[3]), num: (d.res === 'nota_credito' ? 'NC-' : d.res === 'reposicion' ? 'PV-' : d.res === 'devolucion' ? 'RMA-' : 'TASK-') + num };
+}
+
+/* ============================ vistas ============================ */
+let view = PHONE ? 'cli' : 'agt', sel = null, flt = { e: 'todos', q: '' };
+function tab(t) { view = t; $$('#tabs .tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); ['cli', 'agt', 'ger', 'imp'].forEach(k => $('#v-' + k).hidden = k !== t); refresh(); }
+$('#tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (b) tab(b.dataset.t); };
+function refresh() { ({ cli: vCli, agt: vAgt, ger: vGer, imp: vImp })[view](); }
+const fecha = ts => new Date(ts).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const stepper = rec => { const n = DONE[rec.estado] || 2; return `<div class="stg">${STG.map((s, i) => `<div class="st ${i < n ? 'done' : i === n ? 'now' : ''}"><i>${i < n ? '✓' : s[0]}</i>${s[1]}<small>${s[2]}</small></div>`).join('')}</div>`; };
+
+/* ---------- cliente ---------- */
+let lastCreated = null;
+function vCli() {
+  const el = $('#v-cli');
+  const link = qrLink();
+  el.innerHTML = `<div class="${PHONE ? 'cust' : 'split'}" ${PHONE ? '' : 'style="grid-template-columns:minmax(0,1.6fr) 20rem"'}>
+  <div class="${PHONE ? '' : 'cust'}" style="width:100%">
+    <div class="guide"><span class="gi">👤</span><div><b>Cuéntanos qué pasó con tu pedido</b><span>Toma 1 minuto. Con una foto lo resolvemos más rápido y te avisamos cada paso.</span></div></div>
+    <div class="card" id="cform">
+      <div class="two"><div class="field"><label>Empresa</label><input id="c-emp" list="dl-emp" placeholder="Ej.: Alimentos Cordillera SpA"><datalist id="dl-emp">${CLIENTES.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div><div class="field"><label>Correo o WhatsApp</label><input id="c-con" placeholder="nombre@empresa.cl"></div></div>
+      <div class="two"><div class="field"><label>N.º de pedido o factura</label><input id="c-ped" placeholder="PV-7421"></div><div class="field"><label>Producto</label><select id="c-prod">${PRODUCTOS.map(p => `<option value="${p.id}">${esc(p.n)}</option>`).join('')}</select></div></div>
+      <div class="field"><label>¿Qué pasó?</label><div class="pick" id="c-tipo">${Object.entries(TIPOS).map(([k, t], i) => `<button type="button" class="pk ${i ? '' : 'on'}" data-k="${k}">${esc(t.n)}</button>`).join('')}</div></div>
+      <div class="two"><div class="field"><label>Cantidad afectada (unidades)</label><input id="c-qty" type="number" min="1" value="500"></div><div class="field"><label>Foto (opcional)</label><input id="c-foto" type="file" accept="image/*" capture="environment"></div></div>
+      <div class="field"><label>Cuéntanos con tus palabras</label><textarea id="c-desc" placeholder="Ej.: En 3 cajas las fundas llegaron con el sello abierto…"></textarea></div>
+      <label class="small muted" style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.8rem"><input type="checkbox" id="c-ok" style="margin-top:.2rem"> Autorizo el tratamiento de mis datos para gestionar este reclamo, conforme a la política de protección de datos personales.</label>
+      <button class="btn lg" id="c-send" style="width:100%">Enviar reclamo ➤</button>
+    </div>
+    <div id="cres"></div>
+    <div class="card" style="margin-top:1rem"><h3>🔎 Consultar mi reclamo</h3><div style="display:flex;gap:.5rem"><input class="inp" id="c-code" placeholder="Código, ej.: R-2417"><button class="btn tl" id="c-find">Ver estado</button></div><div id="c-st"></div></div>
+  </div>
+  ${PHONE ? '' : `<div class="card qrbig"><h3>📱 Escanea y cuéntanos un caso real</h3><p class="small muted" style="margin:.3rem 0 .7rem">Con la cámara del celular. Llega a la bandeja del equipo en segundos.</p><div id="qr"></div><div class="lnk">${esc(link)}</div>${/^https:/.test(location.href) ? '' : '<p class="small" style="color:var(--bad);margin-top:.5rem">⚠ Estás abriendo el portal desde este equipo (no desde internet): el celular no podrá abrir este enlace. Usa el enlace publicado (GitHub Pages).</p>'}<p class="small muted" style="margin-top:.6rem">Canal: ${canalTxt()}</p></div>`}</div>`;
+  let tipo = 'calidad';
+  $('#c-tipo').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; tipo = b.dataset.k; $$('#c-tipo .pk').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#c-send').onclick = async () => {
+    const emp = $('#c-emp').value.trim(), con = $('#c-con').value.trim(), desc = $('#c-desc').value.trim();
+    if (!emp || !con || !desc) return AL.toast('Completa empresa, contacto y qué pasó');
+    if (!$('#c-ok').checked) return AL.toast('Falta autorizar el tratamiento de datos');
+    const f = $('#c-foto').files[0], foto = f ? await shrink(f) : null;
+    const rec = { id: 'R-' + (2400 + R.length + Math.floor(Math.random() * 90)), ts: new Date().toISOString(), upd: Date.now(), cliente: emp, contacto: con, pais: 'Chile', pedido: $('#c-ped').value || 'sin dato', producto: $('#c-prod').value, tipo, cantidad: +$('#c-qty').value || 1, desc, canal: PHONE ? 'Celular (QR)' : 'Portal', estado: 'nuevo', hist: [], sesion: AL.cfg.sesion };
+    if (foto) { rec.foto = foto; rec.fotoRef = 'reclamo-' + rec.id + '.foto'; if (AL.hasCloud()) AL.saveFile(rec.fotoRef, foto, 'text/plain'); }
+    if (PHONE && (PH.cloud || PH.relay)) {
+      $('#c-send').disabled = true; $('#c-send').innerHTML = '<span class="spin"></span> Enviando…';
+      try { rec.hist = [{ ts: rec.ts, txt: 'Reclamo recibido por celular (QR)' }]; await enviarDesdeCelular(rec); }
+      catch (e) { $('#c-send').disabled = false; $('#c-send').textContent = 'Enviar reclamo ➤'; return AL.toast('No pude enviarlo: revisa tu conexión e intenta de nuevo'); }
+      R.unshift(rec); save();
+    } else { R.unshift(rec); touch(rec, 'Reclamo recibido por ' + rec.canal); }
+    AL.log('reclamo_nuevo', { caso_id: 'reclamos', area: 'Servicio al cliente · Chile', detalle: rec.id + ' ' + tipo, ok: 'si' });
+    $('#cform').hidden = true; lastCreated = rec;
+    $('#cres').innerHTML = `<div class="card big-ok"><div class="e">✅</div><h2>¡Recibimos tu reclamo!</h2><p class="muted">Tu código es</p><p style="font-size:2.2rem;font-weight:800;color:var(--or-d)">${rec.id}</p><div style="text-align:left">${stepper({ estado: 'nuevo' })}</div><div id="auto" class="box ai" style="text-align:left"><span class="spin"></span> Preparando tu respuesta…</div><button class="btn gr" id="again">Reportar otro</button></div>`;
+    $('#again').onclick = () => { $('#cres').innerHTML = ''; $('#cform').hidden = false; $('#c-desc').value = ''; };
+    const tr = PHONE ? basicTriage(rec) : AL.hasIA() ? await triage(rec) : (rec.triage = basicTriage(rec), rec.estado = 'triage', touch(rec, 'Triage por reglas'), rec.triage);
+    $('#auto').innerHTML = `<h4>Lo que ya hicimos por ti</h4><p>${esc(tr.resumen || '')}</p><div style="white-space:pre-wrap;margin-top:.5rem">${esc(tr.respuesta || draft(rec, tr.res))}</div>`;
+  };
+  $('#c-find').onclick = async () => {
+    const code = $('#c-code').value.trim().toUpperCase(); let r = byId(code);
+    if (!r && AL.hasCloud()) { try { (await AL.rows('reclamo', 300)).forEach(x => { if (x.id === code) r = x; }); } catch (e) {} }
+    if (!r && PHONE && PH.cloud && PH.key) { try { const j = await (await fetch(PH.cloud + '?action=estado&portal=' + PH.key + '&id=' + encodeURIComponent(code))).json(); if (j.ok && j.reclamo) r = j.reclamo; } catch (e) {} }
+    $('#c-st').innerHTML = r ? `<div style="margin-top:.8rem"><b>${esc(TIPOS[r.tipo].n)}</b> · ${esc(prodN(r.producto))}<div class="chip or" style="margin-left:.5rem">${EST_N[r.estado]}</div>${stepper(r)}</div>` : '<p class="muted" style="margin-top:.6rem">No encontré ese código.</p>';
+  };
+  if (!PHONE && window.QRCode === undefined) { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; s.onload = () => drawQR(link); document.head.appendChild(s); } else if (!PHONE) drawQR(link);
+}
+function drawQR(l) { const q = $('#qr'); if (!q || !window.QRCode) return; q.innerHTML = ''; new QRCode(q, { text: l, width: 260, height: 260, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); }
+
+/* ===== canal celular → bandeja: Apps Script (nube) o relevo público ntfy.sh (sin configuración) ===== */
+const HP = new URLSearchParams(location.hash.replace(/^#cliente&?/, '').replace(/^#/, ''));
+const b64u = { e: t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''), d: t => decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/')))) };
+let RELAY = LS.get('al_relay', null); if (!RELAY) { RELAY = 'alico-' + Array.from(crypto.getRandomValues(new Uint8Array(9)), b => b.toString(36).padStart(2, '0')).join(''); LS.set('al_relay', RELAY); }
+const PH = PHONE ? { cloud: HP.get('c') ? b64u.d(HP.get('c')) : '', key: HP.get('k') || '', relay: HP.get('r') || '' } : null;
+let PORTAL_KEY = '';
+async function portalKey() { if (PORTAL_KEY || !AL.cfg.cloudSecret) return PORTAL_KEY; const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('portal:' + AL.cfg.cloudSecret)); PORTAL_KEY = [...new Uint8Array(h)].slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join(''); return PORTAL_KEY; }
+portalKey().then(() => { if (view === 'cli' && !PHONE) vCli(); });
+function qrLink() { const base = location.href.split('#')[0] + '#cliente'; return AL.hasCloud() && PORTAL_KEY ? base + '&c=' + b64u.e(AL.cfg.cloudUrl) + '&k=' + PORTAL_KEY : base + '&r=' + RELAY; }
+function canalTxt() { return AL.hasCloud() ? '☁️ Google Sheets (nube conectada)' : '📡 relevo público ntfy.sh, sin configuración (para el taller)'; }
+async function enviarDesdeCelular(rec) {
+  const c = Object.assign({}, rec); delete c.foto; c.desc = String(c.desc).slice(0, 1500);
+  if (PH.cloud && PH.key) {
+    const items = [{ kind: 'reclamo', data: Object.assign({ titulo: c.id }, c) }]; if (rec.foto) items.push({ kind: 'archivo', data: { name: 'reclamo-' + rec.id + '.foto', content: rec.foto, mime: 'text/plain' } });
+    const r = await fetch(PH.cloud, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ portal: PH.key, items }) }); const j = await r.json(); if (!j.ok) throw new Error(j.error || 'nube'); return;
+  }
+  if (PH.relay) {
+    const r = await fetch('https://ntfy.sh/' + PH.relay, { method: 'POST', body: JSON.stringify(c) }); if (!r.ok) throw new Error('relevo ' + r.status);
+    if (rec.foto) { const blob = await (await fetch(rec.foto)).blob(); fetch('https://ntfy.sh/' + PH.relay + '?message=' + encodeURIComponent('FOTO:' + rec.id) + '&filename=' + rec.id + '.jpg', { method: 'PUT', body: blob }).catch(() => {}); }
+    return;
+  }
+  throw new Error('sin canal');
+}
+let since = LS.get('al_relay_since', String(Math.floor(Date.now() / 1000) - 3600));
+async function pollRelay() {
+  if (PHONE || AL.hasCloud()) return;
+  try {
+    const t = await (await fetch('https://ntfy.sh/' + RELAY + '/json?poll=1&since=' + since)).text(); let ch = false;
+    t.split('\n').filter(Boolean).forEach(l => { let m; try { m = JSON.parse(l); } catch (e) { return; } if (m.event !== 'message') return; since = m.id;
+      if (/^FOTO:/.test(m.message || '') && m.attachment) { const x = byId(m.message.slice(5)); if (x) { x.foto = m.attachment.url; ch = true; } return; }
+      let x; try { x = JSON.parse(m.message); } catch (e) { return; } if (!x.id || byId(x.id)) return; x.hist = x.hist || []; R.unshift(x); ch = true; entrante(x); });
+    LS.set('al_relay_since', since); if (ch) { save(); refresh(); }
+  } catch (e) {}
+}
+if (!PHONE) setInterval(pollRelay, 4000);
+function entrante(x) {
+  AL.toast('📥 Nuevo reclamo desde el celular: ' + x.cliente); AL.say('Nuevo reclamo de ' + x.cliente + '. ' + (TIPOS[x.tipo] ? TIPOS[x.tipo].n : ''));
+  sel = x.id; if (view !== 'agt') tab('agt');
+  if (x.estado === 'nuevo') setTimeout(async () => { await triage(x); if (view === 'agt') vAgt(); }, 600);
+}
+/* aviso preventivo desde la planta: la visión artificial retiró piezas de un lote */
+function proactivo() {
+  const lote = decodeURIComponent((location.hash.match(/lote=([^&]+)/) || [])[1] || ''); if (!lote || R.some(r => r.lote === lote)) return '';
+  const v = AL.hub.list('inspeccion').filter(x => x.lote === lote), h = window.PLANTA.historial().piezas.filter(x => x.lote === lote), a = v[0] || h[0];
+  if (!a) return '';
+  return `<div class="proac"><span style="font-size:1.8rem">🔬</span><div><b>Aviso desde la planta: lote ${esc(lote)}</b><div class="small">La visión artificial retiró ${v.length + h.length} piezas por <b>${esc(a.defecto)}</b> (${esc(a.producto)}). Epicor <span class="sample">SIMULADO</span>: parte del lote ya se despachó a <b>Café Origen del Huila</b>, pedido PV-${7000 + (lote.length * 37) % 900}.</div></div><span class="sp"></span><button class="btn sm" id="prv">Crear aviso preventivo al cliente</button></div>`;
+}
+function bindProactivo() {
+  const b = $('#prv'); if (!b) return;
+  b.onclick = async () => {
+    const lote = decodeURIComponent(location.hash.match(/lote=([^&]+)/)[1]), a = AL.hub.list('inspeccion').find(x => x.lote === lote) || window.PLANTA.historial().piezas.find(x => x.lote === lote);
+    const pr = PRODUCTOS.find(p => p.id === a.sku) ? a.sku : PRODUCTOS[0].id;
+    const rec = { id: 'R-' + (2500 + Math.floor(Math.random() * 400)), ts: new Date().toISOString(), upd: Date.now(), cliente: 'Café Origen del Huila', contacto: 'compras@ejemplo.co', pais: 'Colombia', pedido: 'PV-' + (7000 + (lote.length * 37) % 900), producto: pr, tipo: 'calidad', cantidad: 500, lote, desc: `Aviso preventivo generado por la planta: la visión artificial detectó «${a.defecto}» en el lote ${lote}. Aún no hay reclamo del cliente.`, canal: 'Proactivo (planta)', estado: 'nuevo', hist: [], sesion: AL.cfg.sesion };
+    R.unshift(rec); touch(rec, 'Aviso preventivo desde visión artificial'); sel = rec.id; history.replaceState(null, '', location.pathname); await triage(rec); vAgt(); AL.toast('Aviso preventivo creado: el cliente se entera por nosotros, no por el problema.');
+  };
+}
+
+function shrink(f) { return new Promise(res => { const im = new Image(); im.onload = () => { const k = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = im.width * k; c.height = im.height * k; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .72)); }; im.onerror = () => res(null); im.src = URL.createObjectURL(f); }); }
+
+/* ---------- bandeja ---------- */
+function slaInfo(r) { const t = r.triage ? r.triage.severidad : 3, lim = SLA[t] * 36e5, used = (r.cierre ? r.cierre.ts : Date.now()) - new Date(r.ts); return { left: lim - used, over: used > lim, t }; }
+function vAgt() {
+  const el = $('#v-agt'); if (!sel || !byId(sel)) sel = (R.slice().sort((x, y) => new Date(y.ts) - new Date(x.ts))[0] || {}).id;
+  const L = R.slice().sort((x, y) => new Date(y.ts) - new Date(x.ts)).filter(r => (flt.e === 'todos' || (flt.e === 'abiertos' ? r.estado !== 'cerrado' : r.estado === flt.e)) && (!flt.q || (r.id + r.cliente + r.desc + prodN(r.producto)).toLowerCase().includes(flt.q.toLowerCase())));
+  const open = R.filter(r => r.estado !== 'cerrado'), venc = open.filter(r => slaInfo(r).over).length;
+  el.innerHTML = `<div class="inc"><span class="dot"></span><b>Escuchando reclamos entrantes</b><span class="small" style="opacity:.8">${canalTxt()}</span><span class="sp"></span><button class="btn sm" id="goqr">📱 Mostrar QR</button></div>${proactivo()}
+  <div class="kstrip"><span><b>${open.length}</b>abiertos</span><span><b>${R.filter(r => r.estado === 'nuevo').length}</b>sin triage</span><span><b style="color:${venc ? 'var(--bad)' : 'var(--ok)'}">${venc}</b>fuera de SLA</span><span><b>${AL.money(open.reduce((s, r) => s + r.cantidad * prodP(r.producto), 0))}</b>en disputa</span></div>
+  <div class="split"><div class="card"><div style="display:flex;gap:.4rem;margin-bottom:.6rem"><input class="inp" id="f-q" placeholder="Buscar cliente, código…" value="${esc(flt.q)}"><select class="inp" id="f-e" style="width:9rem"><option value="todos">Todos</option><option value="abiertos">Abiertos</option>${EST.map(e => `<option value="${e}">${EST_N[e]}</option>`).join('')}</select></div>
+  <div class="list">${L.map(r => { const s = slaInfo(r); return `<button class="it ${r.id === sel ? 'on' : ''}" data-id="${r.id}"><b><span class="sev s${s.t}"></span>${r.id} · ${esc(r.cliente)} ${r.ejemplo ? '<span class="sample">EJEMPLO</span>' : ''}</b><small>${esc(TIPOS[r.tipo].n)} · ${r.cantidad} uds</small><br><small>${EST_N[r.estado]} · ${fecha(r.ts)}${r.estado !== 'cerrado' && s.over ? ' · <b style="color:var(--bad)">vencido</b>' : ''}</small></button>`; }).join('') || '<p class="muted">Sin resultados.</p>'}</div></div>
+  <div id="det"></div></div>`;
+  $('#f-e').value = flt.e; $('#goqr').onclick = () => tab('cli'); bindProactivo();
+  $('#f-q').oninput = e => { flt.q = e.target.value; clearTimeout(vAgt.t); vAgt.t = setTimeout(() => { vAgt(); $('#f-q').focus(); }, 250); };
+  $('#f-e').onchange = e => { flt.e = e.target.value; vAgt(); };
+  $$('.it').forEach(b => b.onclick = () => { sel = b.dataset.id; vAgt(); });
+  if (sel) detalle(byId(sel));
+}
+async function detalle(r) {
+  const d = $('#det'); if (!d) return; const tr = r.triage, T = TIPOS[r.tipo];
+  if (r.fotoRef && !r.foto && AL.hasCloud()) AL.loadFile(r.fotoRef).then(f => { r.foto = f; save(); if (sel === r.id) detalle(r); }).catch(() => {});
+  const s = slaInfo(r);
+  d.innerHTML = `<div class="card"><div style="display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap"><div><h2 style="font-size:1.35rem">${r.id} · ${esc(r.cliente)}</h2><div class="small muted">${esc(r.pais)} · ${esc(r.contacto)} · pedido ${esc(r.pedido)} · canal ${esc(r.canal)} · ${fecha(r.ts)}</div></div><div class="sp"></div><span class="chip ${s.over && r.estado !== 'cerrado' ? 'bad' : 'ok'}">${r.estado === 'cerrado' ? 'Cerrado' : s.over ? '⏱ SLA vencido' : '⏱ ' + Math.max(1, Math.round(s.left / 36e5)) + ' h restantes'}</span></div>
+  ${stepper(r)}
+  <div class="two"><div class="box"><h4>📦 Lo que reporta el cliente</h4><p><b>${esc(T.n)}</b> · ${esc(prodN(r.producto))} · ${r.cantidad} uds · <b>${AL.money(r.cantidad * prodP(r.producto))}</b></p><p style="margin-top:.4rem;white-space:pre-wrap">«${esc(r.desc)}»</p>${r.foto ? `<img class="photo" src="${r.foto}" style="margin-top:.5rem">` : r.fotoRef ? '<p class="small muted">📷 Foto en la nube (cargando…)</p>' : ''}</div>
+  <div class="box"><h4>🔗 Contexto (CRM + Epicor <span class="sample">SIMULADO</span>)</h4><div class="ctxc"><span>Pedido ${esc(r.pedido)} · entregado</span><span>${R.filter(x => x.cliente === r.cliente && x.id !== r.id).length} reclamos previos</span><span>${similares(r)} similares en 90 d</span>${r.lote ? `<span>Lote ${esc(r.lote)}</span>` : ''}</div>${similares(r) >= 2 ? '<span class="chip bad" style="margin-top:.5rem">⚠ posible recurrencia</span>' : ''}</div></div>
+  <div id="acc"></div></div>`;
+  const acc = $('#acc');
+  const hist = `<details class="box"><summary><b>🕘 Trazabilidad</b></summary>${(r.hist || []).map(h => `<div class="small" style="padding:.2rem 0">${fecha(h.ts)} · ${esc(h.txt)}</div>`).join('') || '<div class="small muted">Sin movimientos.</div>'}</details>`;
+  const trOpen = ['triage', 'investigacion'].includes(r.estado);
+  const trBox = tr ? `<details class="box ai" ${trOpen ? 'open' : ''}><summary style="cursor:pointer"><b>🤖 Triage:</b> ${esc(tr.categoria)} · severidad ${SEV[tr.severidad] || tr.severidad} · ${esc(tr.area)}</summary><div class="box ai" style="border:0;padding:.4rem 0;margin:0"><h4>🤖 Triage ${tr.via === 'ia' ? 'con IA' : tr.via === 'ejemplo' ? '(ejemplo)' : 'por reglas (modo básico)'}</h4><p><b>${esc(tr.categoria)}</b> · severidad <span class="sev s${tr.severidad}"></span><b>${SEV[tr.severidad] || tr.severidad}</b> · área <b>${esc(tr.area)}</b></p><p class="small" style="margin:.3rem 0">${esc(tr.resumen || '')}</p>${tr.foto ? `<p class="small">📷 <i>${esc(tr.foto)}</i></p>` : ''}<h4 style="margin-top:.6rem">Causa raíz probable</h4>${(tr.causas || []).map(c => `<div class="bar"><span class="lb" style="width:17rem" title="${esc(c.causa)}">${esc(c.causa)}</span><span class="tr"><i class="fl" style="width:${c.prob}%"></i></span><span class="vl">${c.prob}%</span></div>`).join('')}<p class="small" style="margin-top:.4rem">⚠️ ${esc(tr.riesgo || '')}</p></div></details>` : '';
+  if (r.estado === 'nuevo') { acc.innerHTML = `<div class="box"><p class="muted" style="margin-bottom:.6rem">Este reclamo aún no tiene triage. La IA lo clasifica, estima severidad, propone causas y redacta la respuesta.</p><button class="btn lg" id="a-tri">🤖 Hacer triage ${AL.hasIA() ? 'con IA' : '(modo básico)'}</button></div>${hist}`; $('#a-tri').onclick = async e => { e.target.disabled = true; e.target.innerHTML = '<span class="spin"></span> Analizando…'; await triage(r); vAgt(); }; return; }
+  if (r.estado === 'triage') { acc.innerHTML = `${trBox}<div class="box"><h4>👥 Asignación</h4><p>Se asigna a <b>${esc(tr.area)}</b> para investigar la causa raíz.</p><button class="btn" id="a-as">Asignar y pasar a causa raíz ➤</button></div>${hist}`; $('#a-as').onclick = () => { r.estado = 'investigacion'; touch(r, 'Asignado a ' + tr.area); vAgt(); }; return; }
+  if (r.estado === 'investigacion') { acc.innerHTML = `${trBox}<div class="box"><h4>🧪 Causa raíz confirmada por ${esc(tr.area)}</h4><div class="pick" id="a-cr">${(tr.causas || []).map((c, i) => `<button class="pk ${i ? '' : 'on'}" data-c="${esc(c.causa)}">${esc(c.causa)}</button>`).join('')}</div><div class="field" style="margin-top:.6rem"><label>Acción correctiva / preventiva</label><input id="a-ac" placeholder="Ej.: cambiar teflón de la selladora 3 y ajustar receta"></div><button class="btn" id="a-cf">Confirmar causa y pasar a decisión ➤</button></div>${hist}`;
+    let cr = (tr.causas && tr.causas[0] ? tr.causas[0].causa : ''); $('#a-cr').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cr = b.dataset.c; $$('#a-cr .pk').forEach(x => x.classList.toggle('on', x === b)); };
+    $('#a-cf').onclick = () => { r.causa = cr; r.accion_correctiva = $('#a-ac').value; r.estado = 'decision'; touch(r, 'Causa raíz: ' + cr); vAgt(); }; return; }
+  if (r.estado === 'decision') { const val = r.decision ? r.decision.valor : r.cantidad * prodP(r.producto); acc.innerHTML = `${trBox}<div class="box"><h4>⚖️ Decisión comercial</h4><div class="pick" id="a-rs">${Object.entries(RES).map(([k, v]) => `<button class="pk ${k === (tr.res) ? 'on' : ''}" data-r="${k}">${v}</button>`).join('')}</div><div class="field" style="margin-top:.6rem;max-width:20rem"><label>Valor a reconocer (COP)</label><input id="a-v" type="number" value="${Math.round(val)}"></div><p class="small muted">La IA sugiere: <b>${esc(tr.accion || '')}</b>. La decisión final es siempre de una persona.</p><button class="btn ok" id="a-ap">✅ Aprobar y ejecutar en Epicor</button></div>${hist}`;
+    let rs = tr.res; $('#a-rs').onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; rs = b.dataset.r; $$('#a-rs .pk').forEach(x => x.classList.toggle('on', x === b)); };
+    $('#a-ap').onclick = async e => { r.decision = { res: rs, valor: rs === 'informar' ? 0 : +$('#a-v').value || 0, por: 'Servicio al cliente' }; e.target.disabled = true; e.target.innerHTML = '<span class="spin"></span> Conectando con Epicor…'; await new Promise(z => setTimeout(z, 1100)); const ep = epicorCall(r); if (ep) r.epicor = ep; r.estado = 'ejecutado'; touch(r, 'Aprobado: ' + RES[rs] + (ep ? ' · ' + ep.num : '')); AL.log('reclamo_epicor', { caso_id: 'reclamos', area: 'Logística y finanzas', detalle: r.id + ' ' + rs, ok: 'si' }); vAgt(); }; return; }
+  if (r.estado === 'ejecutado') { const ep = r.epicor; acc.innerHTML = `${trBox}<div class="box"><h4>🏭 Ejecución en Epicor <span class="sample">SIMULADO</span></h4>${ep && ep.url ? `<div class="small">${ep.metodo} ${esc(ep.url)}</div><pre class="code">${esc(JSON.stringify(ep.payload, null, 2))}</pre><div class="small">Respuesta del ERP:</div><pre class="code">${esc(JSON.stringify(ep.respuesta, null, 2))}</pre>` : `<p>La decisión (<b>${RES[r.decision.res]}</b>) no genera movimiento en el ERP.</p>`}<p class="small muted">En el Sprint 2 este bloque se conecta a la API REST real de Epicor mediante un flujo automatizado.</p></div>
+    <div class="box"><h4>✉️ Respuesta al cliente (borrador editable)</h4><textarea class="draft" id="a-dr">${esc((tr.respuesta && r.decision.res === tr.res) ? tr.respuesta : draft(r, r.decision.res))}</textarea><button class="btn" id="a-en" style="margin-top:.5rem">Enviar al cliente ➤</button></div>${hist}`;
+    $('#a-en').onclick = () => { r.respuesta = $('#a-dr').value; r.estado = 'respondido'; touch(r, 'Respuesta enviada al cliente'); AL.toast('Respuesta enviada (simulada: B2Chat / correo)'); vAgt(); }; return; }
+  if (r.estado === 'respondido') { acc.innerHTML = `${trBox}<div class="box"><h4>⭐ Cierre y satisfacción</h4><p class="muted small">Registra qué tan satisfecho quedó el cliente (en producción, llega por encuesta automática).</p><div class="stars" id="a-st">${[1, 2, 3, 4, 5].map(i => `<button data-s="${i}">⭐</button>`).join('')}</div><button class="btn ok" id="a-cl" style="margin-top:.5rem">Cerrar reclamo</button></div>${hist}`;
+    let cs = 5; const paint = () => $$('#a-st button').forEach((b, i) => b.classList.toggle('on', i < cs)); paint(); $('#a-st').onclick = e => { const b = e.target.closest('[data-s]'); if (b) { cs = +b.dataset.s; paint(); } };
+    $('#a-cl').onclick = () => { r.cierre = { csat: cs, horas: Math.max(1, Math.round((Date.now() - new Date(r.ts)) / 36e5)), ts: Date.now() }; r.estado = 'cerrado'; touch(r, 'Cerrado · satisfacción ' + cs + '/5'); AL.toast('Cerrado. El aprendizaje ya está en Gerencia.'); vAgt(); }; return; }
+  acc.innerHTML = `${trBox}<div class="box" style="border-color:var(--ok)"><h4>✅ Cerrado</h4><p>Causa raíz: <b>${esc(r.causa || '-')}</b>${r.accion_correctiva ? ' · acción: ' + esc(r.accion_correctiva) : ''}</p><p>Resolución: <b>${RES[(r.decision || {}).res] || '-'}</b> · ${AL.money((r.decision || {}).valor || 0)} ${r.epicor ? '· ' + esc(r.epicor.num) : ''}</p><p>Satisfacción: ${'⭐'.repeat((r.cierre || {}).csat || 0)} · cerrado en <b>${(r.cierre || {}).horas || '-'} h</b></p></div>${hist}`;
+}
+
+/* ---------- gerencia ---------- */
+function vGer() {
+  const el = $('#v-ger'), cl = R.filter(r => r.cierre), conq = R.reduce((s, r) => s + (r.decision ? r.decision.valor : 0), 0);
+  const cs = cl.length ? cl.reduce((s, r) => s + r.cierre.csat, 0) / cl.length : 0, hr = cl.length ? cl.reduce((s, r) => s + r.cierre.horas, 0) / cl.length : 0, sla = cl.length ? cl.filter(r => !slaInfo(r).over).length / cl.length : 0;
+  const cnt = (f) => { const o = {}; R.forEach(r => { const k = f(r); o[k] = (o[k] || 0) + 1; }); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+  const tipos = cnt(r => TIPOS[r.tipo].n), prods = cnt(r => prodN(r.producto)), causas = cnt(r => r.causa || '(en análisis)').filter(x => x[0] !== '(en análisis)').slice(0, 6), cli = cnt(r => r.cliente).slice(0, 5);
+  const mx = a => a[0] ? a[0][1] : 1;
+  const wk = [4, 3, 2, 1, 0].map(w => R.filter(r => { const a = (Date.now() - new Date(r.ts)) / 864e5; return a >= w * 7 && a < (w + 1) * 7; }).length);
+  const bars = (a, c) => a.map(([k, v]) => `<div class="bar"><span class="lb" style="width:15rem" title="${esc(k)}">${esc(k)}</span><span class="tr"><i class="fl" style="width:${v / mx(a) * 100}%;--c:${c}"></i></span><span class="vl">${v}</span></div>`).join('');
+  el.innerHTML = `<div class="guide"><span class="gi">📈</span><div><b>De apagar incendios a prevenirlos</b><span>Cada reclamo cerrado alimenta este tablero: qué falla, dónde, cuánto cuesta y qué corregir primero.</span></div><div class="sp"></div><span class="sample">DATOS DE EJEMPLO + LOS QUE CREES</span></div>
+  <div class="kpis"><div class="kpi"><small>Reclamos (total)</small><b>${R.length}</b></div><div class="kpi"><small>Costo de no calidad</small><b>${AL.money(conq)}</b><em>reconocido al cliente (COP)</em></div><div class="kpi"><small>Tiempo medio de resolución</small><b>${hr ? AL.fmt(hr) + ' h' : '–'}</b></div><div class="kpi"><small>Resueltos dentro de SLA</small><b>${cl.length ? Math.round(sla * 100) + '%' : '–'}</b></div><div class="kpi"><small>Satisfacción (CSAT)</small><b>${cs ? AL.fmt(cs) + '/5' : '–'}</b></div></div>
+  <div class="two"><div class="card"><h3>🧱 Causas raíz más frecuentes</h3>${bars(causas, 'var(--or)') || '<p class="muted">Aún no hay causas confirmadas.</p>'}</div><div class="card"><h3>📦 Productos con más reclamos</h3>${bars(prods, 'var(--tl2)')}</div></div>
+  <div class="two" style="margin-top:1rem"><div class="card"><h3>🧾 Tipos de reclamo</h3>${bars(tipos, 'var(--or2)')}</div><div class="card"><h3>🏢 Clientes con más reclamos</h3>${bars(cli, 'var(--gr)')}<h3 style="margin-top:1rem">📅 Últimas 5 semanas</h3><div class="pareto">${wk.map((v, i) => `<div><i style="height:${v / Math.max(...wk, 1) * 100}%"></i>${v}<br><span class="muted">S-${4 - i}</span></div>`).join('')}</div></div></div>
+  <div class="card ai" style="margin-top:1rem"><h3>🤖 Lectura ejecutiva <span class="muted small">(${AL.hasIA() ? 'IA' : 'modo básico'})</span></h3><div id="ins" style="white-space:pre-wrap">${'Pulsa para generar'}</div><button class="btn tl" id="g-ins" style="margin-top:.6rem">Generar lectura</button></div>`;
+  const stats = { total: R.length, costo_no_calidad_clp: conq, csat: +cs.toFixed(1), horas_medias: +hr.toFixed(1), sla_pct: Math.round(sla * 100), causas, productos: prods, tipos, clientes: cli, semanas: wk };
+  $('#g-ins').onclick = async e => {
+    const o = $('#ins'); o.innerHTML = '<span class="spin"></span> Analizando…';
+    let t = `• Principal fuente de reclamos: ${tipos[0][0]} (${tipos[0][1]}).\n• Producto más afectado: ${prods[0][0]}.\n• Costo de no calidad acumulado: ${AL.money(conq)}.\n• Acción sugerida: atacar primero la causa raíz más frecuente${causas[0] ? ' («' + causas[0][0] + '»)' : ''} y revisar al cliente ${cli[0][0]}.`;
+    if (AL.hasIA()) { try { t = await AL.claude(AL.SYS + ' Eres analista de calidad y servicio. Con las estadísticas de reclamos, escribe una lectura ejecutiva en 4 viñetas (qué pasa, dónde duele más, cuánto cuesta, 3 acciones priorizadas). Máx. 130 palabras. Usa solo los datos dados.', JSON.stringify(stats), { max: 500, tag: 'reclamos-ger' }); } catch (er) { t += '\n(La IA no respondió: mostré la lectura básica.)'; } }
+    o.textContent = t;
+  };
+}
+
+/* ---------- implementación ---------- */
+function vImp() {
+  $('#v-imp').innerHTML = `<div class="guide"><span class="gi">🗺️</span><div><b>De este demo a producción: cómo se implementa</b><span>La misma lógica que ves aquí, conectada a los sistemas reales de Alico. Fase 1 de 1,5 meses (3 sprints).</span></div></div>
+  <div class="card"><h3>Problema y solución</h3><p>Hoy los reclamos y devoluciones llegan por varios canales, se gestionan de forma parcialmente manual y sin trazabilidad integral: cuesta saber qué se repite, cuánto cuesta y quién debe actuar. El <b>Centro de inteligencia del cliente</b> integra procesos, datos, IA y analítica sobre las plataformas actuales (sin reemplazarlas) para recibir, clasificar, resolver en Epicor y aprender de cada caso.</p>
+  <h3 style="margin-top:1rem">Arquitectura propuesta</h3><div class="arch"><div><b>1 · Canales</b>Portal, WhatsApp (B2Chat), correo</div><div><b>2 · Automatización</b>n8n / APIs REST y Webhooks</div><div><b>3 · IA</b>Modelo de lenguaje + RAG sobre políticas y fichas en Drive</div><div><b>4 · Sistemas</b>Epicor ERP (pedidos, NC, RMA) · CRM</div><div><b>5 · Datos</b>Google Sheets/Drive → PostgreSQL / Cloud SQL</div><div><b>6 · Analítica</b>Looker Studio / Power BI</div></div>
+  <p class="small muted">Stack de referencia: Google Workspace + Drive, B2Chat, Epicor, CRM, modelos GPT/Claude o Azure OpenAI, Vertex AI Search o RAG sobre Drive, n8n, PostgreSQL/Cloud SQL, Looker/Power BI y GCP. Se ajusta en el diseño detallado.</p></div>
+  <div class="card" style="margin-top:1rem"><h3>Las 10 etapas del ciclo del reclamo</h3><div class="stg" style="flex-wrap:wrap">${STG.map((s, i) => `<div class="st done" style="min-width:8.5rem"><i>${s[0]}</i>${i + 1}. ${s[1]}<small>${s[2]}</small></div>`).join('')}</div></div>
+  <div class="two" style="margin-top:1rem"><div class="card"><h3>Ruta en 3 sprints (10 días hábiles c/u)</h3>
+  <div class="sprint"><b>Sprint 1 · Cimientos</b><br>Descubrimiento con Servicio, Calidad y Logística · modelo de datos del reclamo · portal y canal de entrada · base de conocimiento de políticas · triage con IA.</div>
+  <div class="sprint"><b>Sprint 2 · Integración</b><br>Conexión a Epicor (RMA, nota de crédito, reposición) y CRM · flujos automáticos de asignación y SLA · respuestas al cliente por B2Chat/correo.</div>
+  <div class="sprint"><b>Sprint 3 · Inteligencia y adopción</b><br>Tablero gerencial, causa raíz y recurrencias · pruebas con usuarios clave · capacitación · transferencia de conocimiento · salida a producción.</div></div>
+  <div class="card"><h3>Equipo y gobierno</h3><p class="small">Product Owner del cliente · Arquitecto · Líder técnico · Desarrollador · UX/UI · Analista funcional / QA · Scrum Master. Comité de seguimiento que aprueba entregables, riesgos y cambios.</p>
+  <h3 style="margin-top:1rem">Lo que se necesita de Alico antes de empezar</h3><ul class="small" style="padding-left:1.1rem;line-height:1.7"><li>Product Owner y usuarios clave de Servicio, Calidad, Logística y Finanzas.</li><li>Accesos y documentación de API de Epicor, CRM y WhatsApp/B2Chat.</li><li>Políticas de devoluciones, notas de crédito y garantías; catálogo vigente.</li><li>Histórico de reclamos (aunque sea en Excel) para entrenar y validar.</li><li>Ambientes de pruebas, base de datos y servicios cloud habilitados.</li></ul></div></div>
+  <div class="card" style="margin-top:1rem"><h3>Riesgos principales y cómo se mitigan</h3><table class="tb"><tr><th>Riesgo</th><th>Mitigación</th></tr><tr><td>Datos incompletos o inconsistentes entre sistemas</td><td>Depurar y definir una fuente oficial antes de entrenar; gobierno de datos.</td></tr><tr><td>Respuestas de IA con baja precisión al inicio</td><td>IA solo con políticas validadas; revisión humana en la decisión; mejora continua.</td></tr><tr><td>Retraso en accesos a Epicor / APIs</td><td>Validar prerrequisitos y conectividad desde el kickoff.</td></tr><tr><td>Baja adopción del equipo</td><td>Capacitación, acompañamiento y campeones por área.</td></tr><tr><td>Privacidad de datos del cliente</td><td>Consentimiento, control de acceso por perfil y trazabilidad de cada acción.</td></tr><tr><td>Crecimiento de alcance</td><td>Roadmap priorizado y gestión formal de cambios.</td></tr></table></div>
+  <div class="card" style="margin-top:1rem"><h3>Qué es real en este demo y qué es simulado</h3><div class="two"><div><b>Real</b><ul class="small" style="padding-left:1.1rem;line-height:1.7"><li>Portal del cliente con foto y QR hacia el celular.</li><li>Triage, causa raíz y borrador de respuesta con IA (con tu clave).</li><li>Flujo completo de 10 etapas y trazabilidad.</li><li>Guardado en Google Sheets/Drive y sincronía entre equipos.</li></ul></div><div><b>Simulado (EJEMPLO)</b><ul class="small" style="padding-left:1.1rem;line-height:1.7"><li>Conexión a Epicor, CRM y WhatsApp/B2Chat.</li><li>Clientes, pedidos, precios e historial inicial.</li><li>Encuesta de satisfacción (se registra a mano).</li></ul></div></div></div>`;
+}
+
+/* ============================ arranque ============================ */
+AL.bar({ id: 'reclamos', publico: 'Servicio al cliente, Calidad, Logística, Ventas y Finanzas', area: 'Calidad y servicio · Chile', iniciativa: 'Reclamos y devoluciones (Caso 1 Alico) + Epicor',
+  narra: 'Centro de inteligencia del cliente. El cliente reporta desde el portal o escaneando el código QR con su celular, con foto. La inteligencia artificial clasifica el caso, mide la severidad, propone la causa raíz y redacta la respuesta; las personas deciden. La decisión se ejecuta en Epicor y cada caso cerrado alimenta el tablero de gerencia. Y si la visión artificial de la planta detecta un lote con defectos, podemos avisarle al cliente antes de que reclame.',
+  help: [
+  { ico: '📱', t: 'El cliente reporta en 1 minuto', p: 'Desde el portal o escaneando el QR con el celular, con foto. Recibe su código y respuesta al instante.' },
+  { ico: '🤖', t: 'La IA hace el trabajo pesado', p: 'Clasifica, mide severidad, propone causas raíz y redacta la respuesta. Las personas deciden.' },
+  { ico: '🏭', t: 'Se resuelve y se aprende', p: 'La decisión se ejecuta en Epicor (simulado) y cada caso cerrado alimenta el tablero de Gerencia.' }] });
+tab(PHONE ? 'cli' : 'agt'); pull(); pollRelay();
+window.__rec = { R: () => R, triage, basicTriage };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Torre de control de negocios · Alico</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/al.css">
+<style>
+svg text{font-family:Poppins,sans-serif}
+.tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding:.6rem 0;margin-bottom:.6rem}
+/* diagnóstico */
+.hero{display:grid;grid-template-columns:17rem 1fr auto;gap:1.6rem;align-items:center;background:linear-gradient(120deg,#00475a 0%,#00758D 55%,#008AAB 100%);color:#fff;border-radius:26px;padding:1.4rem 1.8rem;margin-bottom:1rem;box-shadow:0 12px 30px rgba(0,117,141,.25)}
+.hero h2{font-size:1.55rem;font-weight:800;line-height:1.2}.hero p{opacity:.92;font-size:1rem;line-height:1.55;margin-top:.4rem}
+.hero .hb{display:flex;flex-direction:column;gap:.6rem}
+.gauge text{fill:#fff}
+.areas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
+.ac{background:#fff;border:2px solid var(--line);border-radius:22px;padding:1rem 1.1rem;box-shadow:var(--sh);text-align:left;display:grid;grid-template-columns:auto 1fr auto;gap:.2rem .8rem;align-items:center;position:relative;overflow:hidden;transition:transform .12s}
+.ac:hover{transform:translateY(-3px);border-color:var(--tl)}
+.ac::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--st)}
+.ac .ic{font-size:1.8rem;grid-row:span 2}
+.ac h4{font-size:.95rem;font-weight:800}.ac .k{font-size:1.45rem;font-weight:800;line-height:1.1}
+.ac .k small{font-size:.75rem;font-weight:600;color:var(--gr);margin-left:.3rem}
+.ac .sc{grid-row:span 2;text-align:center;font-weight:800;font-size:1.05rem;color:var(--st)}
+.ac .sc small{display:block;font-size:.62rem;color:var(--gr);font-weight:600}
+.ac .dx{grid-column:1/-1;font-size:.8rem;color:var(--gr);line-height:1.4;margin-top:.3rem}
+.ac svg{grid-column:1/-1;width:100%;height:34px;margin-top:.2rem}
+.st-g{--st:#1c9a5b}.st-y{--st:#e9a100}.st-r{--st:#d6403a}
+/* tarjetas con selector de gráfico */
+.vz{background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:1rem 1.2rem;box-shadow:var(--sh);min-width:0}
+.vz .vh{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}.vz .vh h3{font-size:1rem;font-weight:800;margin:0}
+.vsel{margin-left:auto;display:flex;gap:2px;background:#f6efe5;border-radius:12px;padding:3px}
+.vsel button{width:2rem;height:1.8rem;border-radius:9px;font-size:.85rem;background:transparent;color:var(--gr)}
+.vsel button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px #0002}
+.vsel button:hover{background:#fff}
+.cht{width:100%;height:auto;display:block}
+.hb2 .hr{display:grid;grid-template-columns:minmax(0,40%) 1fr auto;gap:.6rem;align-items:center;margin:.42rem 0;font-size:.84rem;font-weight:600}
+.hb2 .hr span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb2 .tr{height:.95rem;background:#f6efe5;border-radius:99px;overflow:hidden}.hb2 .tr i{display:block;height:100%;border-radius:99px}
+.hb2 b{font-size:.84rem;min-width:3.5rem;text-align:right}
+.legend{display:flex;gap:1rem;font-size:.78rem;color:var(--gr);flex-wrap:wrap;margin-top:.3rem}.legend i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;margin-right:.3rem;vertical-align:-1px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-bottom:1rem}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-bottom:1rem}
+.g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin-bottom:1rem}
+@media (max-width:1100px){.hero,.areas,.g3,.g2,.g21{grid-template-columns:1fr}}
+.alc{display:flex;gap:.8rem;align-items:center;border-radius:16px;padding:.7rem 1rem;margin:.5rem 0;border:2px solid;font-size:.9rem}
+.alc.r{background:#fde6e5;border-color:#f1b3b0}.alc.y{background:#fff3da;border-color:#f3d48b}.alc.g{background:#e2f6ec;border-color:#a9dfc3}
+.alc b{display:block}.alc .i{font-size:1.4rem}.alc button{margin-left:auto;white-space:nowrap}
+.qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.55rem;margin:.8rem 0}
+.qs button{background:#fff;border:2px solid var(--line);border-radius:16px;padding:.7rem .95rem;text-align:left;font-weight:600;font-size:.88rem}
+.qs button:hover{border-color:var(--tl);transform:translateY(-2px)}
+.askrow{display:flex;gap:.6rem}.askrow input{flex:1;padding:.9rem 1.2rem;border-radius:99px;border:2px solid var(--line);font-size:1.05rem}
+.mic{width:3.4rem;height:3.4rem;border-radius:50%;background:#fff;border:2px solid var(--line);font-size:1.3rem}.mic.on{background:var(--bad);border-color:var(--bad)}
+.ans{margin-top:1rem}.ans .nar{font-size:1.05rem;line-height:1.55;white-space:pre-wrap;margin-bottom:.8rem}
+.plan{font-size:.74rem;background:#1f2326;color:#d6f3e4;border-radius:12px;padding:.7rem .9rem;overflow:auto;max-height:11rem}
+.sl2{display:grid;grid-template-columns:15rem 1fr 4.5rem;gap:.8rem;align-items:center;margin:.6rem 0;font-size:.9rem;font-weight:600}
+.sl2 input{width:100%;accent-color:var(--or)}.sl2 output{font-weight:800;text-align:right}
+.cov{height:.9rem;border-radius:99px;background:#f3ece2;position:relative;overflow:hidden}.cov i{position:absolute;left:0;top:0;bottom:0;border-radius:99px}
+.cov u{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--ink)}
+.brief{font-size:1.05rem;line-height:1.6;white-space:pre-wrap}
+.prod{display:grid;grid-template-columns:auto 1fr auto;gap:.2rem .8rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.prod .rk{width:1.7rem;height:1.7rem;border-radius:50%;background:#fff3e6;color:var(--or-d);font-weight:800;display:grid;place-items:center;font-size:.8rem}
+.prod a{color:var(--ink);font-weight:700;text-decoration:none}.prod a:hover{color:var(--tl2)}
+.prod small{color:var(--gr)}
+.live{display:flex;gap:.6rem;align-items:center;background:#1f2326;color:#fff;border-radius:16px;padding:.6rem 1rem;margin-bottom:1rem;font-size:.9rem}
+.live .dot{width:.7rem;height:.7rem;border-radius:50%;background:#2BD67B;box-shadow:0 0 0 0 #2BD67B88;animation:pl 1.6s infinite}
+@keyframes pl{70%{box-shadow:0 0 0 10px #2BD67B00}}
+</style>
+</head>
+<body>
+<script src="../../shared/al.js"></script>
+<script src="../../shared/catalogo.js"></script>
+<script src="../../shared/planta.js"></script>
+<main class="wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="dia">🩺 Diagnóstico</button>
+    <button class="tab" data-t="ven">💰 Ventas</button>
+    <button class="tab" data-t="cal">🏭 Producción y calidad</button>
+    <button class="tab" data-t="dis">🚚 Distribución</button>
+    <button class="tab" data-t="cad">📦 Cadena de suministro</button>
+    <button class="tab" data-t="cli">🎧 Clientes</button>
+    <button class="tab" data-t="sim">🎛️ Simulador</button>
+    <button class="tab" data-t="ask">💬 Pregúntale a tus datos</button>
+    <span class="sp"></span><span class="sample" style="align-self:center">PRODUCTOS REALES · CIFRAS DE EJEMPLO</span>
+  </div>
+  <section id="v-dia"></section><section id="v-ven" hidden></section><section id="v-cal" hidden></section><section id="v-dis" hidden></section><section id="v-cad" hidden></section><section id="v-cli" hidden></section><section id="v-sim" hidden></section><section id="v-ask" hidden></section>
+</main>
+<script src="data.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = AL.$, esc = AL.esc, $$ = s => [...document.querySelectorAll(s)], D = window.TD, PL = window.PLANTA;
+const COL = ['#EE7623', '#008AAB', '#E99B35', '#00BED6', '#B15E14', '#53575A', '#8E5BD6', '#1c9a5b', '#d6403a'];
+const mm = v => '$' + AL.fmt(v) + ' M', pc = v => (v * 100).toFixed(1) + '%', f1 = v => AL.fmt(v);
+const sum = (rows, f) => rows.reduce((s, x) => s + (typeof f === 'function' ? f(x) : x[f]), 0);
+const last = D.M[11].k, prev = D.M[10].k, V = k => D.ventas.filter(x => x.mes === k), ML = D.M.map(m => m.l);
+const tienda = h => 'https://alicoempaques.com/products/' + h;
+
+/* ============================ gráficos: el usuario elige el tipo ============================ */
+const VT = AL.LS.get('torre_vt', {}), SPECS = {};
+const TIPOS = { line: ['📈', 'Líneas'], area: ['〰️', 'Área'], bar: ['📊', 'Barras'], hbar: ['☰', 'Barras horizontales'], pie: ['🥧', 'Torta'], donut: ['🍩', 'Dona'], table: ['▦', 'Tabla'] };
+function viz(id, title, spec) {
+  SPECS[id] = spec; const t = VT[id] || spec.def || 'line', allow = spec.tipos || Object.keys(TIPOS);
+  return `<div class="vz" id="vz-${id}"><div class="vh"><h3>${title}</h3><div class="vsel">${allow.map(k => `<button data-vz="${id}" data-ty="${k}" class="${k === t ? 'on' : ''}" title="${TIPOS[k][1]}">${TIPOS[k][0]}</button>`).join('')}</div></div><div class="vb">${draw(spec, t)}</div>${spec.nota ? `<p class="small muted" style="margin-top:.4rem">${spec.nota}</p>` : ''}</div>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-vz]'); if (!b) return;
+  const id = b.dataset.vz, t = b.dataset.ty; VT[id] = t; AL.LS.set('torre_vt', VT);
+  const box = $('#vz-' + id); box.querySelectorAll('.vsel button').forEach(x => x.classList.toggle('on', x === b)); box.querySelector('.vb').innerHTML = draw(SPECS[id], t);
+});
+function draw(s, t) {
+  const fmt = s.fmt || f1;
+  if (t === 'table') return `<div style="max-height:20rem;overflow:auto"><table class="tb"><tr><th>${esc(s.eje || '')}</th>${s.series.map(x => `<th>${esc(x.n)}</th>`).join('')}</tr>${s.labels.map((l, i) => `<tr><td>${esc(l)}</td>${s.series.map(x => `<td>${fmt(x.v[i])}</td>`).join('')}</tr>`).join('')}</table></div>`;
+  if (t === 'pie' || t === 'donut') {
+    const parts = s.series.length === 1 ? s.labels.map((l, i) => [l, s.series[0].v[i], s.colors ? s.colors[i] : COL[i % COL.length]]) : s.series.map((x, i) => [x.n, s.pieUltimo ? x.v[x.v.length - 1] : sum(x.v, v => v), x.c || COL[i % COL.length]]);
+    return pie(parts.filter(p => p[1] > 0), t === 'donut', fmt);
+  }
+  if (t === 'hbar') { const v = s.series.length === 1 ? s.labels.map((l, i) => [l, s.series[0].v[i], s.colors ? s.colors[i] : s.series[0].c || COL[0]]) : s.series.map((x, i) => [x.n, x.v[x.v.length - 1], x.c || COL[i]]); return hbars(v, fmt); }
+  if (t === 'bar') return vbars(s.labels, s.series, fmt);
+  return line(s.labels, s.series, { fmt, area: t === 'area', zero: s.zero });
+}
+function line(labels, series, o = {}) {
+  const W = 760, H = 250, L = 56, R = 18, T = 16, B = 32, all = series.flatMap(s => s.v), mn = o.zero === false ? Math.min(...all) * .96 : Math.min(0, ...all), mx = Math.max(...all) * 1.06 || 1, n = labels.length;
+  const x = i => L + i * (W - L - R) / Math.max(1, n - 1), y = v => T + (1 - (v - mn) / (mx - mn || 1)) * (H - T - B);
+  const grid = [0, .25, .5, .75, 1].map(t => { const v = mn + (mx - mn) * t; return `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#eadfce" stroke-dasharray="3 4"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#777">${o.fmt(v)}</text>`; }).join('');
+  const lb = labels.map((l, i) => (n > 8 && i % 2 && i !== n - 1) ? '' : `<text x="${x(i)}" y="${H - 9}" text-anchor="middle" font-size="11" fill="#777">${esc(l)}</text>`).join('');
+  const ss = series.map((s, k) => { const c = s.c || COL[k], p = s.v.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    return `${o.area || series.length === 1 ? `<path d="${p} L${x(n - 1)} ${y(Math.max(mn, 0))} L${x(0)} ${y(Math.max(mn, 0))}Z" fill="${c}" opacity="${o.area ? .22 : .1}"/>` : ''}<path d="${p}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(n - 1)}" cy="${y(s.v[n - 1])}" r="5" fill="${c}"><title>${esc(s.n)}: ${o.fmt(s.v[n - 1])}</title></circle>`; }).join('');
+  return `<svg class="cht" viewBox="0 0 ${W} ${H}">${grid}${lb}${ss}</svg>${legend(series)}`;
+}
+function vbars(labels, series, fmt) {
+  const W = 760, H = 250, L = 56, R = 10, T = 14, B = 32, mx = Math.max(...series.flatMap(s => s.v), 0) * 1.08 || 1, n = labels.length, gw = (W - L - R) / n, bw = Math.min(26, gw * .8 / series.length);
+  const y = v => T + (1 - v / mx) * (H - T - B);
+  let g = [0, .5, 1].map(t => `<line x1="${L}" x2="${W - R}" y1="${y(mx * t)}" y2="${y(mx * t)}" stroke="#eadfce" stroke-dasharray="3 4"/><text x="${L - 8}" y="${y(mx * t) + 4}" text-anchor="end" font-size="11" fill="#777">${fmt(mx * t)}</text>`).join('');
+  labels.forEach((l, i) => { const x0 = L + i * gw + (gw - bw * series.length) / 2; series.forEach((s, k) => { const v = s.v[i]; g += `<rect x="${x0 + k * bw}" y="${y(Math.max(0, v))}" width="${bw - 2}" height="${Math.abs(y(0) - y(v))}" rx="4" fill="${s.c || COL[k]}"><title>${esc(l)} · ${esc(s.n)}: ${fmt(v)}</title></rect>`; });
+    if (!(n > 10 && i % 2 && i !== n - 1)) g += `<text x="${L + i * gw + gw / 2}" y="${H - 9}" text-anchor="middle" font-size="11" fill="#777">${esc(String(l).slice(0, 12))}</text>`; });
+  return `<svg class="cht" viewBox="0 0 ${W} ${H}">${g}</svg>${legend(series)}`;
+}
+function hbars(rows, fmt) {
+  const mx = Math.max(...rows.map(r => Math.abs(r[1])), 1e-9);
+  return `<div class="hb2">${rows.map(r => `<div class="hr"><span title="${esc(r[0])}">${esc(r[0])}</span><span class="tr"><i style="width:${Math.abs(r[1]) / mx * 100}%;background:${r[1] < 0 ? '#d6403a' : r[2]}"></i></span><b>${fmt(r[1])}</b></div>`).join('')}</div>`;
+}
+function pie(parts, donut, fmt) {
+  const tot = sum(parts, p => p[1]) || 1; let a = -Math.PI / 2, g = '';
+  parts.forEach(([n, v, c]) => { const b = a + v / tot * Math.PI * 2, l = b - a > Math.PI ? 1 : 0, R = 100, r0 = donut ? 62 : 0, P = (ang, rad) => (110 + Math.cos(ang) * rad).toFixed(2) + ',' + (110 + Math.sin(ang) * rad).toFixed(2);
+    g += donut ? `<path d="M${P(a, R)} A${R},${R} 0 ${l} 1 ${P(b - 1e-4, R)} L${P(b - 1e-4, r0)} A${r0},${r0} 0 ${l} 0 ${P(a, r0)}Z" fill="${c}" stroke="#fff" stroke-width="2"><title>${esc(n)}</title></path>` : `<path d="M110,110 L${P(a, R)} A${R},${R} 0 ${l} 1 ${P(b - 1e-4, R)}Z" fill="${c}" stroke="#fff" stroke-width="2"><title>${esc(n)}</title></path>`; a = b; });
+  const top = parts.slice().sort((x, y) => y[1] - x[1])[0] || ['', 0];
+  return `<div style="display:flex;gap:1rem;align-items:center"><svg viewBox="0 0 220 220" style="width:44%;max-width:230px;flex:none">${g}${donut ? `<text x="110" y="108" text-anchor="middle" font-size="24" font-weight="800" fill="#2b2e30">${(top[1] / tot * 100).toFixed(0)}%</text><text x="110" y="128" text-anchor="middle" font-size="10.5" fill="#777">${esc(String(top[0]).slice(0, 22))}</text>` : ''}</svg>
+  <div style="flex:1;min-width:0">${parts.map(([n, v, c]) => `<div style="display:flex;gap:.5rem;align-items:center;font-size:.82rem;margin:.3rem 0"><i style="width:.8rem;height:.8rem;border-radius:3px;background:${c};flex:none"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n)}</span><span class="sp"></span><b>${(v / tot * 100).toFixed(1)}%</b></div>`).join('')}</div></div>`;
+}
+const legend = series => series.length > 1 ? `<div class="legend">${series.map((s, k) => `<span><i style="background:${s.c || COL[k]}"></i>${esc(s.n)}</span>`).join('')}</div>` : '';
+function spark(v, c) { const W = 300, H = 34, mn = Math.min(...v), mx = Math.max(...v), x = i => i * W / (v.length - 1), y = t => 3 + (1 - (t - mn) / (mx - mn || 1)) * (H - 6); return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${v.map((t, i) => (i ? 'L' : 'M') + x(i) + ' ' + y(t)).join(' ')}" fill="none" stroke="${c}" stroke-width="2.5"/></svg>`; }
+
+/* ============================ fuentes vivas de los otros casos ============================ */
+const diaLocal = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+function calidad(dias = 7) {
+  const H = PL.historial(), d0 = new Date(); d0.setHours(12); d0.setDate(d0.getDate() - (dias - 1)); const dk = diaLocal(d0);
+  const rows = H.rows.filter(r => r.dia >= dk), vivo = AL.hub.list('inspeccion'), pas = AL.hub.list('pieza');
+  const n = sum(rows, 'n') + vivo.length + pas.length, x = sum(rows, 'rej') + vivo.length;
+  return { rows, vivo, pas, n, x, pct: n ? x / n : 0 };
+}
+function reclamos() {
+  const R = AL.LS.get('al_rec', null);
+  if (!R) return { n: 14, abiertos: 5, vencidos: 2, csat: 4.3, tipos: { 'Defecto de calidad': 6, 'Delaminación': 3, 'Faltante': 2, 'Entrega tardía': 3 }, real: false };
+  const ab = R.filter(r => r.estado !== 'cerrado'), cs = R.filter(r => r.cierre && r.cierre.csat), tipos = {};
+  R.forEach(r => { const k = (r.triage && r.triage.categoria) || r.tipo; tipos[k] = (tipos[k] || 0) + 1; });
+  const SLA = { 1: 4, 2: 8, 3: 24, 4: 48 }, venc = ab.filter(r => Date.now() - new Date(r.ts) > (SLA[r.triage ? r.triage.severidad : 3] || 24) * 36e5).length;
+  return { n: R.length, abiertos: ab.length, vencidos: venc, csat: cs.length ? sum(cs, r => r.cierre.csat) / cs.length : 0, tipos, real: true };
+}
+
+/* ============================ diagnóstico de todas las áreas ============================ */
+const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
+function areas() {
+  const vA = sum(V(last), 'venta'), meta = D.META[last], vs = D.M.map(m => sum(V(m.k), 'venta'));
+  const mg = D.M.map(m => { const v = V(m.k); return sum(v, 'margen') / sum(v, 'venta'); }), F = D.fin[11];
+  const P = D.produccion, cq = calidad(7), cq30 = PL.historial().rows, dd = D.despachos.filter(x => x.tri === 'T0'), otif = sum(dd, 'otif_ok') / sum(dd, 'pedidos');
+  const otifM = D.M.map(m => { const r = D.despachos.filter(x => x.mes === m.k); return sum(r, 'otif_ok') / sum(r, 'pedidos'); });
+  const ries = D.inventario.filter(x => x.cobertura_dias < x.lead_dias && x.tipo !== 'Producto terminado'), rc = reclamos(), Pe = D.personas;
+  const dias = [...new Set(cq30.map(r => r.dia))].sort(), defD = dias.map(d => { const r = cq30.filter(x => x.dia === d); return sum(r, 'rej') / sum(r, 'n') * 100; });
+  const sinAcc = (() => { let k = 0; for (let i = 11; i >= 0 && !Pe[i].accidentes; i--) k += 30; return k; })();
+  const A = [
+    { id: 'ven', ic: '💰', n: 'Comercial', k: mm(vA), s: `${vA >= meta ? '▲' : '▼'} ${pc(vA / meta)} de la meta`, score: clamp(60 + (vA / meta - .95) * 400), sp: vs, dx: vA >= meta ? 'Ventas sobre la meta; café y Línea Nativa empujan el crecimiento.' : 'Por debajo de la meta del mes: revisar clientes en caída (Snacks Atacama).' },
+    { id: 'ven', ic: '🏦', n: 'Finanzas', k: pc(mg[11]), s: `margen bruto · cartera vencida ${pc(F.cartera_vencida_pct)}`, score: clamp(100 - (mg[0] - mg[11]) * 900 - (F.cartera_vencida_pct - .07) * 900), sp: mg.map(v => v * 100), dx: `El margen cae ${((mg[8] - mg[11]) * 100).toFixed(1)} pts en 3 meses por la resina; la cartera vencida sube (DSO ${F.dso} días).` },
+    { id: 'cal', ic: '⚙️', n: 'Producción', k: pc(P[11].oee), s: `OEE · ${AL.fmt(P[11].toneladas)} t/mes`, score: clamp((P[11].oee - .6) / .25 * 100), sp: P.map(p => p.oee * 100), dx: `Paros: ${AL.fmt(P[11].min_paro)} min en el mes (${P[11].min_paro < P[0].min_paro ? 'bajan' : 'suben'} vs. hace un año).` },
+    { id: 'cal', ic: '🔬', n: 'Calidad', k: pc(cq.pct), s: `defecto 7 días${cq.vivo.length ? ' · ' + cq.vivo.length + ' en vivo hoy' : ''}`, score: clamp(100 - (cq.pct - .008) * 6000), sp: defD, dx: 'Sello abierto en Conversión 3, turno C, concentra los rechazos: mordaza por revisar.' },
+    { id: 'dis', ic: '🚚', n: 'Logística', k: pc(otif), s: 'OTIF trimestre · meta 90 %', score: clamp(56 + (otif - .9) * 500), sp: otifM.map(v => v * 100), dx: 'Paraguay y LogiCaribe arrastran el OTIF: retrasos en aduana y transporte.' },
+    { id: 'cad', ic: '📦', n: 'Abastecimiento', k: ries.length + ' insumos', s: 'con cobertura menor a la reposición', score: clamp(100 - ries.length * 21), sp: D.resina.map(x => x.precio_usd_ton), dx: ries.length ? `${ries.map(x => x.item).slice(0, 2).join(' y ')}: adelantar pedidos. Resina +${((D.resina[11].precio_usd_ton / D.resina[8].precio_usd_ton - 1) * 100).toFixed(0)} % en 3 meses.` : 'Cobertura sana.' },
+    { id: 'cli', ic: '🎧', n: 'Servicio al cliente', k: rc.abiertos + ' abiertos', s: `${rc.vencidos} fuera de SLA · CSAT ${rc.csat ? rc.csat.toFixed(1) : '–'}`, score: clamp(90 - rc.vencidos * 12 - rc.abiertos * 2), sp: [9, 11, 8, 12, 10, 9, 13, 11, 10, 12, rc.n - 3, rc.n], dx: rc.real ? 'Datos en vivo del Centro de inteligencia del cliente.' : 'Abre el caso 4 para ver los reclamos en vivo.' },
+    { id: 'dia', ic: '👥', n: 'Talento humano', k: pc(Pe[11].ausentismo_pct), s: `ausentismo · ${sinAcc} días sin accidentes`, score: clamp(100 - (Pe[11].ausentismo_pct - .02) * 1500 - (Pe[11].accidentes * 15)), sp: Pe.map(p => p.ausentismo_pct * 100), dx: `${AL.fmt(Pe[11].horas_capacitacion)} horas de formación en el mes; el ausentismo subió en el último mes.` },
+    { id: 'ven', ic: '♻️', n: 'Sostenibilidad', k: D.reciclables + ' de ' + D.catalogo, s: 'referencias eco/papel/reciclables en tienda', score: clamp(50 + D.reciclables / D.catalogo * 100 + (P[11].scrap_pct < .03 ? 15 : 5)), sp: P.map(p => p.scrap_pct * 100), dx: `Scrap de ${pc(P[11].scrap_pct)}. Portafolio RECIPLUS y Eco-amigable es la palanca comercial.` }
+  ];
+  A.forEach(a => a.st = a.score >= 75 ? 'g' : a.score >= 55 ? 'y' : 'r');
+  return A;
+}
+function gauge(v) {
+  const a0 = Math.PI * .8, a1 = Math.PI * 2.2, a = a0 + (a1 - a0) * v / 100, R = 90, P = ang => (110 + Math.cos(ang) * R).toFixed(1) + ',' + (110 + Math.sin(ang) * R).toFixed(1);
+  const c = v >= 75 ? '#2BD67B' : v >= 55 ? '#FFC94D' : '#FF6B6B';
+  return `<svg class="gauge" viewBox="0 0 220 200" style="width:100%"><path d="M${P(a0)} A${R},${R} 0 1 1 ${P(a1)}" fill="none" stroke="#ffffff33" stroke-width="18" stroke-linecap="round"/><path d="M${P(a0)} A${R},${R} 0 ${a - a0 > Math.PI ? 1 : 0} 1 ${P(a)}" fill="none" stroke="${c}" stroke-width="18" stroke-linecap="round"/><text x="110" y="112" text-anchor="middle" font-size="52" font-weight="800">${v}</text><text x="110" y="138" text-anchor="middle" font-size="13" opacity=".85">salud de la compañía</text><text x="110" y="190" text-anchor="middle" font-size="12" opacity=".8">de 100</text></svg>`;
+}
+function alertas() {
+  const A = [];
+  D.inventario.filter(x => x.cobertura_dias < x.lead_dias && x.tipo !== 'Producto terminado').forEach(x => A.push({ s: 'r', i: '📦', t: `${x.item}: alcanza para ${x.cobertura_dias} días y reponer toma ${x.lead_dias}`, d: `Proveedor ${x.proveedor}. Riesgo de parar línea.`, q: '¿Qué insumos están en riesgo de quedarse sin stock?' }));
+  const cq = calidad(7); if (cq.vivo.length) A.push({ s: 'r', i: '🔬', t: `Visión artificial: ${cq.vivo.length} piezas retiradas hoy en vivo`, d: `Último: ${cq.vivo[0].defecto} en ${cq.vivo[0].linea_n}, lote ${cq.vivo[0].lote}.`, tab: 'cal' });
+  const pCol = D.despachos.filter(x => x.pais === 'Paraguay'), o0 = sum(pCol.filter(x => x.tri === 'T0'), 'otif_ok') / sum(pCol.filter(x => x.tri === 'T0'), 'pedidos'); if (o0 < .9) A.push({ s: 'r', i: '🚚', t: `Paraguay: OTIF de ${pc(o0)} en el trimestre`, d: 'Bajo la meta de 90 %. Revisar transportista y aduana.', q: '¿Cuál es el OTIF por país y por transportista?' });
+  const rs = D.resina; if (rs[11].precio_usd_ton / rs[8].precio_usd_ton > 1.05) A.push({ s: 'y', i: '🛢️', t: `Resina subió ${((rs[11].precio_usd_ton / rs[8].precio_usd_ton - 1) * 100).toFixed(1)} % en 3 meses`, d: 'Presiona el margen de termoformados y vacío. Simular traspaso de precio.', tab: 'sim' });
+  const cA = new Map(), cB = new Map(); D.ventas.forEach(x => { const m = x.tri === 'T0' ? cA : x.tri === 'T1' ? cB : null; if (m) m.set(x.cliente, (m.get(x.cliente) || 0) + x.venta); });
+  [...cB].map(([c, b]) => [c, ((cA.get(c) || 0) - b) / b]).filter(([, d]) => d < -.15).forEach(([c, d]) => A.push({ s: 'y', i: '📉', t: `${c}: ventas ${(d * 100).toFixed(0)} % vs. trimestre anterior`, d: '¿Servicio, precio o competencia? Revisar reclamos abiertos.', q: '¿Qué clientes cayeron más en el último trimestre?' }));
+  return A;
+}
+function briefBasic(A, Z) {
+  const s = Math.round(sum(A, a => a.score) / A.length), bien = A.filter(a => a.st === 'g').map(a => a.n), mal = A.filter(a => a.st === 'r').map(a => a.n), med = A.filter(a => a.st === 'y').map(a => a.n);
+  return `La compañía está en ${s} de 100. ${bien.length ? 'Fuerte en ' + bien.join(', ') + '. ' : ''}${mal.length ? 'Requiere atención inmediata: ' + mal.join(', ') + '. ' : ''}${med.length ? 'En observación: ' + med.join(', ') + '.' : ''}\n\nPrioridades de hoy:\n${Z.slice(0, 3).map((a, i) => (i + 1) + '. ' + a.t).join('\n')}`;
+}
+
+/* ============================ vistas ============================ */
+const view = {}; let cur = 'dia';
+function tab(t) { cur = t; $$('#tabs .tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); Object.keys(view).forEach(k => $('#v-' + k).hidden = k !== t); view[t](); }
+$('#tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (b) tab(b.dataset.t); };
+
+view.dia = () => {
+  const A = areas(), Z = alertas(), s = Math.round(sum(A, a => a.score) / A.length);
+  $('#v-dia').innerHTML = `<div class="hero"><div>${gauge(s)}</div><div><h2>Diagnóstico de la compañía en 10 segundos</h2><p id="dtxt">${esc(briefBasic(A, Z)).replace(/\n/g, '<br>')}</p></div>
+    <div class="hb"><button class="btn lg" id="bf">🔊 Escuchar el briefing</button><button class="btn gr" id="bia" style="color:var(--ink)">🤖 Diagnóstico con IA</button></div></div>
+  <div class="areas">${A.map(a => `<button class="ac st-${a.st}" data-go="${a.id}"><span class="ic">${a.ic}</span><div><h4>${a.n}</h4><div class="k">${a.k}</div></div><div class="sc">${a.score}<small>/100</small></div><div style="grid-column:2/3;font-size:.74rem;color:var(--gr)">${a.s}</div>${spark(a.sp, a.st === 'g' ? '#1c9a5b' : a.st === 'y' ? '#e9a100' : '#d6403a')}<div class="dx">${esc(a.dx)}</div></button>`).join('')}</div>
+  <div class="g21" style="margin-top:1rem">${viz('d-ventas', '📈 Ventas vs. meta (millones COP)', { labels: ML, series: [{ n: 'Ventas', v: D.M.map(m => sum(V(m.k), 'venta')), c: COL[0] }, { n: 'Meta', v: D.M.map(m => D.META[m.k]), c: COL[5] }], fmt: v => AL.fmt(v), zero: false, def: 'bar', tipos: ['bar', 'line', 'area', 'table'] })}
+  <div class="card"><h3>🚨 Alertas de hoy</h3><div style="max-height:19rem;overflow:auto">${Z.map((a, i) => `<div class="alc ${a.s}"><span class="i">${a.i}</span><div><b>${esc(a.t)}</b><span class="small">${esc(a.d)}</span></div><button class="btn gr sm" data-z="${i}">${a.q ? 'Preguntar' : 'Ver'}</button></div>`).join('')}</div></div></div>`;
+  $$('[data-go]').forEach(b => b.onclick = () => tab(b.dataset.go));
+  $$('[data-z]').forEach(b => b.onclick = () => { const a = Z[+b.dataset.z]; if (a.q) { tab('ask'); ask(a.q); } else tab(a.tab); });
+  $('#bf').onclick = () => AL.narrar($('#dtxt').innerText);
+  $('#bia').onclick = async () => {
+    if (!AL.hasIA()) return AL.toast('Pega la clave de IA en Ajustes');
+    $('#dtxt').innerHTML = '<span class="spin"></span> Analizando todas las áreas…';
+    try { const t = await AL.claude(AL.SYS + ' Eres el analista de la Torre de control de Alico (empaques). Escribe para la gerencia, en español, máx. 110 palabras: 1 frase de estado general con el puntaje, 3 prioridades numeradas (área, por qué, acción) y 1 oportunidad. Solo con los datos dados; son datos de ejemplo.', JSON.stringify({ puntaje: s, areas: A.map(a => ({ area: a.n, puntaje: a.score, kpi: a.k, detalle: a.s, lectura: a.dx })), alertas: Z.map(a => a.t) }), { max: 500, tag: 'torre-diagnostico' });
+      $('#dtxt').innerText = t; AL.narrar(t.replace(/[#*]/g, '')); } catch (e) { $('#dtxt').innerText = briefBasic(A, Z); AL.toast('IA sin respuesta'); }
+  };
+};
+
+view.ven = () => {
+  const T0 = D.ventas.filter(x => x.tri === 'T0'), by = (rows, f) => { const o = {}; rows.forEach(x => { const m = o[x[f]] || (o[x[f]] = { v: 0, m: 0, p: 0, x }); m.v += x.venta; m.m += x.margen; m.p += x.paquetes; }); return Object.entries(o).sort((a, b) => b[1].v - a[1].v); };
+  const fams = by(D.ventas, 'familia').map(f => f[0]), inds = by(T0, 'industria'), paises = by(T0, 'pais'), prods = by(T0, 'sku'), cls = by(T0, 'cliente');
+  const vA = sum(V(last), 'venta'), vP = sum(V(prev), 'venta'), ytd = sum(D.ventas.filter(x => x.mes.slice(0, 4) === last.slice(0, 4)), 'venta'), mg = sum(V(last), 'margen') / vA;
+  $('#v-ven').innerHTML = `<div class="kpis"><div class="kpi"><small>Ventas de ${D.M[11].l}</small><b>${mm(vA)}</b><span class="d ${vA >= vP ? 'up' : 'dn'}">${vA >= vP ? '▲' : '▼'} ${Math.abs((vA / vP - 1) * 100).toFixed(1)} % vs. mes anterior</span></div><div class="kpi"><small>Ventas del año</small><b>${mm(ytd)}</b><em>${D.CL.length} clientes · ${D.PORT.length} referencias</em></div><div class="kpi"><small>Margen bruto del mes</small><b>${pc(mg)}</b><em>presionado por resina</em></div><div class="kpi"><small>Cumplimiento de meta</small><b style="color:${vA >= D.META[last] ? 'var(--ok)' : 'var(--bad)'}">${pc(vA / D.META[last])}</b><em>meta ${mm(D.META[last])}</em></div></div>
+  <div class="g21">${viz('v-fam', '🧺 Ventas por familia de producto (millones COP)', { labels: ML, series: fams.map((f, i) => ({ n: f.replace(/ \(.*\)/, ''), v: D.M.map(m => sum(V(m.k).filter(x => x.familia === f), 'venta')), c: COL[i] })), fmt: v => AL.fmt(v), def: 'area', pieUltimo: true })}
+   <div class="card"><h3>🏆 Productos que más venden <span class="muted small">(último trimestre · catálogo real)</span></h3><div style="max-height:22rem;overflow:auto">${prods.slice(0, 10).map(([s, o], i) => `<div class="prod"><span class="rk">${i + 1}</span><div><a href="${tienda(D.PORT.find(p => p.sku === s).handle)}" target="_blank" rel="noopener">${esc(o.x.producto)} ↗</a><br><small>${s} · ${esc(o.x.familia)} · lista ${AL.money(D.PORT.find(p => p.sku === s).precio)}/paq</small></div><div style="text-align:right"><b>${mm(o.v)}</b><br><small>${AL.fmt(o.p)} paq · ${pc(o.m / o.v)}</small></div></div>`).join('')}</div></div></div>
+  <div class="g3">${viz('v-ind', '🏭 Ventas por industria del cliente', { labels: inds.map(x => x[0]), series: [{ n: 'Venta', v: inds.map(x => x[1].v) }], fmt: mm, def: 'donut', tipos: ['donut', 'pie', 'hbar', 'table'] })}
+   ${viz('v-pais', '🌎 Ventas por país', { labels: paises.map(x => x[0]), series: [{ n: 'Venta', v: paises.map(x => x[1].v) }], fmt: mm, def: 'pie', tipos: ['pie', 'donut', 'hbar', 'table'], colors: [COL[1], COL[0], COL[2]] })}
+   ${viz('v-cli', '🤝 Clientes principales', { labels: cls.slice(0, 8).map(x => x[0]), series: [{ n: 'Venta', v: cls.slice(0, 8).map(x => x[1].v), c: COL[0] }], fmt: mm, def: 'hbar', tipos: ['hbar', 'donut', 'table'] })}</div>
+  <div class="g2">${viz('v-mg', '💹 Margen bruto % por familia', { labels: ML, series: fams.slice(0, 4).map((f, i) => ({ n: f.replace(/ \(.*\)/, ''), v: D.M.map(m => { const r = V(m.k).filter(x => x.familia === f); return sum(r, 'margen') / sum(r, 'venta') * 100; }), c: COL[i] })), fmt: v => v.toFixed(0) + '%', zero: false, tipos: ['line', 'bar', 'table'] })}
+   <div class="card"><h3>⬆️ Trae tus propias ventas</h3><p class="muted small" style="margin-bottom:.5rem">CSV con columnas <code>mes,pais,cliente,producto,venta,margen</code> (millones). Se suma a los datos y el asistente lo usa de inmediato.</p><input type="file" id="csv" accept=".csv"> <button class="btn gr sm" id="csvx">Quitar mis datos</button> <span id="csvr" class="small muted"></span>
+   <p class="small muted" style="margin-top:1rem">Fuente de productos y precios de lista: <a href="https://alicoempaques.com/collections/linea-nativa" target="_blank" rel="noopener">alicoempaques.com</a>. Volúmenes, clientes y márgenes son de ejemplo.</p></div></div>`;
+  $('#csv').onchange = async e => { const f = e.target.files[0]; if (!f) return; const L = (await f.text()).trim().split(/\r?\n/), H = L.shift().split(',').map(s => s.trim().toLowerCase()); let n = 0; L.forEach(l => { const c = l.split(','), o = {}; H.forEach((h, i) => o[h] = c[i]); if (!o.mes || isNaN(+o.venta)) return; D.ventas.push({ mes: o.mes, tri: 'T0', pais: o.pais || 'Colombia', cliente: o.cliente || 'Cliente', industria: o.industria || 'Otra', familia: o.familia || 'Otros', sku: o.sku || '', producto: o.producto || 'Otros', paquetes: +o.paquetes || 0, venta: +o.venta, margen: +o.margen || 0, propio: 1 }); n++; }); $('#csvr').textContent = n + ' filas agregadas'; };
+  $('#csvx').onclick = () => { for (let i = D.ventas.length - 1; i >= 0; i--) if (D.ventas[i].propio) D.ventas.splice(i, 1); AL.toast('Datos propios quitados'); };
+};
+
+view.cal = () => {
+  const cq = calidad(30), H = PL.historial().rows, dias = [...new Set(H.map(r => r.dia))].sort(), P = D.produccion;
+  const porDef = {}, porCausa = {}; H.forEach(r => Object.entries(r.por).forEach(([d, k]) => { porDef[d] = (porDef[d] || 0) + k; PL.defecto(d).causas.forEach(([c, , p]) => porCausa[c] = (porCausa[c] || 0) + k * p / 100); }));
+  cq.vivo.forEach(r => { porDef[r.def || 'anom'] = (porDef[r.def || 'anom'] || 0) + 1; porCausa[r.causa] = (porCausa[r.causa] || 0) + 1; });
+  const par = Object.entries(porDef).sort((a, b) => b[1] - a[1]).slice(0, 8), cz = Object.entries(PL.CAUSAS);
+  const ult = cq.vivo[0];
+  $('#v-cal').innerHTML = `<div class="live"><span class="dot"></span><b>Visión artificial en línea</b><span>${cq.vivo.length ? `${cq.vivo.length} piezas retiradas y ${cq.pas.length} aprobadas en vivo · último: <b>${esc(ult.defecto)}</b> en ${esc(ult.linea_n)} (${new Date(ult.ts).toLocaleTimeString('es-CO')})` : 'Esperando datos: abre el caso 1 y pasa piezas por la cámara; aparecen aquí al instante.'}</span><span class="sp"></span><a class="btn sm" href="../vision/index.html#informes" target="_blank">Informes de calidad ↗</a></div>
+  <div class="kpis"><div class="kpi"><small>OEE del mes</small><b>${pc(P[11].oee)}</b><span class="d ${P[11].oee >= P[10].oee ? 'up' : 'dn'}">${P[11].oee >= P[10].oee ? '▲' : '▼'} vs. mes anterior</span></div><div class="kpi"><small>% defecto (30 días)</small><b>${pc(cq.pct)}</b><em>${AL.fmt(cq.n)} piezas inspeccionadas</em></div><div class="kpi"><small>Minutos de paro</small><b>${AL.fmt(P[11].min_paro)}</b><em>reportados a Maestro</em></div><div class="kpi"><small>Scrap</small><b>${pc(P[11].scrap_pct)}</b><em>${AL.fmt(P[11].toneladas)} t producidas</em></div></div>
+  <div class="g21">${viz('c-lin', '📉 % de defecto diario por línea', { labels: dias.map(d => d.slice(8) + '/' + d.slice(5, 7)), series: PL.LINEAS.map(l => ({ n: l.n, c: l.color, v: dias.map(d => { const r = H.filter(x => x.dia === d && x.linea === l.id); return sum(r, 'rej') / Math.max(1, sum(r, 'n')) * 100; }) })), fmt: v => v.toFixed(1) + '%', def: 'line', tipos: ['line', 'area', 'bar', 'table'] })}
+   ${viz('c-6m', '🧭 ¿Dónde nace la falla? (6M)', { labels: cz.map(([, c]) => c.n), series: [{ n: 'Rechazos', v: cz.map(([k]) => porCausa[k] || 0) }], colors: cz.map(([, c]) => c.c), fmt: v => AL.fmt(v), def: 'donut', tipos: ['donut', 'pie', 'hbar', 'table'] })}</div>
+  <div class="g2">${viz('c-par', '📊 Pareto de defectos (30 días)', { labels: par.map(x => PL.defecto(x[0]).n), series: [{ n: 'Piezas', v: par.map(x => x[1]), c: '#d6403a' }], fmt: v => AL.fmt(v), def: 'hbar', tipos: ['hbar', 'bar', 'pie', 'table'] })}
+   ${viz('c-oee', '⚙️ OEE y paros, 12 meses', { labels: ML, series: [{ n: 'OEE %', v: P.map(p => p.oee * 100), c: COL[1] }, { n: 'Scrap % ×10', v: P.map(p => p.scrap_pct * 1000), c: COL[0] }], fmt: v => v.toFixed(0), zero: false, tipos: ['line', 'bar', 'table'], nota: 'Los paros y su causa llegan del asistente Maestro (caso 2); los rechazos, de la visión artificial (caso 1).' })}</div>`;
+};
+
+view.dis = () => {
+  const g = f => { const m = {}; D.despachos.filter(x => x.tri === 'T0').forEach(x => { const o = m[x[f]] || (m[x[f]] = { p: 0, ok: 0 }); o.p += x.pedidos; o.ok += x.otif_ok; }); return Object.entries(m).map(([k, o]) => [k, o.ok / o.p * 100]).sort((a, b) => a[1] - b[1]); };
+  const mo = pais => D.M.map(m => { const r = D.despachos.filter(x => x.mes === m.k && (!pais || x.pais === pais)); return sum(r, 'otif_ok') / sum(r, 'pedidos') * 100; });
+  const gp = g('pais'), gt = g('transportista');
+  $('#v-dis').innerHTML = `<div class="guide"><span class="gi">🎯</span><div><b>OTIF = a tiempo y completo</b><span>Un pedido cuenta solo si llegó en la fecha prometida y con todo lo pedido. Meta de ejemplo: 90 %.</span></div></div>
+  <div class="g21">${viz('d-otif', '📉 Evolución del OTIF (%)', { labels: ML, series: [{ n: 'Total', v: mo(), c: COL[5] }, { n: 'Paraguay', v: mo('Paraguay'), c: COL[0] }, { n: 'Colombia', v: mo('Colombia'), c: COL[1] }, { n: 'Chile', v: mo('Chile'), c: COL[2] }], fmt: v => v.toFixed(0) + '%', zero: false, tipos: ['line', 'bar', 'table'] })}
+   ${viz('d-pais', '🌎 OTIF por país (trimestre)', { labels: gp.map(x => x[0]), series: [{ n: 'OTIF', v: gp.map(x => x[1]), c: COL[1] }], fmt: v => v.toFixed(1) + '%', def: 'hbar', tipos: ['hbar', 'bar', 'table'] })}</div>
+  <div class="g2">${viz('d-tr', '🚛 OTIF por transportista', { labels: gt.map(x => x[0]), series: [{ n: 'OTIF', v: gt.map(x => x[1]), c: COL[0] }], fmt: v => v.toFixed(1) + '%', def: 'hbar', tipos: ['hbar', 'bar', 'table'] })}
+   ${viz('d-ped', '📦 Pedidos despachados por país', { labels: ML, series: ['Colombia', 'Chile', 'Paraguay'].map((p, i) => ({ n: p, v: D.M.map(m => sum(D.despachos.filter(x => x.mes === m.k && x.pais === p), 'pedidos')), c: [COL[1], COL[2], COL[0]][i] })), fmt: v => AL.fmt(v), def: 'bar', pieUltimo: true })}</div>`;
+};
+
+view.cad = () => {
+  const inv = D.inventario, col = x => x.cobertura_dias < x.lead_dias ? 'var(--bad)' : x.cobertura_dias < x.lead_dias * 1.4 ? 'var(--warn)' : 'var(--ok)';
+  $('#v-cad').innerHTML = `<div class="card" style="margin-bottom:1rem"><h3>📦 Cobertura de inventario vs. tiempo de reposición</h3><p class="muted small" style="margin-bottom:.6rem">La barra son los días que alcanza el stock; la línea negra, lo que tarda el proveedor en reponer.</p>
+  ${inv.map(x => `<div class="sl2" style="grid-template-columns:19rem 1fr 11rem"><span>${esc(x.item)}<br><span class="small muted">${esc(x.proveedor)}</span></span><div class="cov"><i style="width:${Math.min(100, x.cobertura_dias / 45 * 100)}%;background:${col(x)}"></i><u style="left:${Math.min(99, x.lead_dias / 45 * 100)}%"></u></div><span><b style="color:${col(x)}">${x.cobertura_dias} d</b> <span class="small muted">· repone en ${x.lead_dias} d</span></span></div>`).join('')}</div>
+  <div class="g2">${viz('s-res', '🛢️ Precio de la resina (USD/ton)', { labels: ML, series: [{ n: 'Resina', v: D.resina.map(x => x.precio_usd_ton), c: COL[0] }], fmt: v => AL.fmt(v), zero: false, tipos: ['line', 'area', 'bar', 'table'] })}
+   ${viz('s-prov', '🤝 Cumplimiento de proveedores', { labels: D.proveedores.map(p => p.proveedor), series: [{ n: 'Cumplimiento', v: D.proveedores.map(p => p.cumplimiento * 100), c: COL[1] }], colors: D.proveedores.map(p => p.riesgo === 'Alto' ? '#d6403a' : p.riesgo === 'Medio' ? '#e9a100' : '#1c9a5b'), fmt: v => v.toFixed(0) + '%', def: 'hbar', tipos: ['hbar', 'table'] })}</div>`;
+};
+
+view.cli = () => {
+  const rc = reclamos(), t = Object.entries(rc.tipos).sort((a, b) => b[1] - a[1]);
+  $('#v-cli').innerHTML = `<div class="kpis"><div class="kpi"><small>Reclamos registrados</small><b>${rc.n}</b><em>${rc.real ? 'en vivo desde el caso 4' : 'ejemplo'}</em></div><div class="kpi"><small>Abiertos</small><b>${rc.abiertos}</b></div><div class="kpi"><small>Fuera de SLA</small><b style="color:${rc.vencidos ? 'var(--bad)' : 'var(--ok)'}">${rc.vencidos}</b></div><div class="kpi"><small>Satisfacción (CSAT)</small><b>${rc.csat ? rc.csat.toFixed(1) : '–'}<span style="font-size:1rem"> /5</span></b></div></div>
+  <div class="g2">${viz('k-tip', '🧾 Reclamos por tipo', { labels: t.map(x => x[0]), series: [{ n: 'Reclamos', v: t.map(x => x[1]) }], fmt: v => AL.fmt(v), def: 'donut', tipos: ['donut', 'pie', 'hbar', 'table'] })}
+  <div class="card"><h3>🔗 Conexión con la planta</h3><p class="muted" style="margin-bottom:.6rem">Cuando la visión artificial retira piezas de un lote que ya se despachó, el Centro de inteligencia del cliente puede avisar al cliente antes de que reclame.</p>${AL.hub.list('inspeccion').slice(0, 4).map(r => `<div class="alc y"><span class="i">🔬</span><div><b>Lote ${esc(r.lote)}</b><span class="small">${esc(r.defecto)} · ${esc(r.producto)}</span></div><a class="btn gr sm" href="../reclamos/index.html#lote=${encodeURIComponent(r.lote)}" target="_blank">Revisar</a></div>`).join('') || '<p class="small muted">Sin rechazos en vivo todavía.</p>'}<a class="btn tl" style="margin-top:.6rem" href="../reclamos/index.html" target="_blank">Abrir el Centro de inteligencia del cliente ↗</a></div></div>`;
+};
+
+view.sim = () => {
+  const base = D.ventas.filter(x => x.tri === 'T0'), V0 = sum(base, 'venta') / 3, m0 = sum(base, 'margen') / sum(base, 'venta'), mp = .52;
+  $('#v-sim').innerHTML = `<div class="two"><div class="card"><h3>🎛️ ¿Y si cambia la resina, el precio o el volumen?</h3><p class="muted small">Estimación sobre el promedio mensual del último trimestre. Supone que la materia prima pesa ${mp * 100} % de la venta y la resina el 65 % de ella.</p>
+  <div class="sl2"><span>Precio de la resina</span><input type="range" id="s1" min="-20" max="40" value="10"><output id="o1"></output></div>
+  <div class="sl2"><span>Precio de venta</span><input type="range" id="s2" min="-10" max="15" value="0"><output id="o2"></output></div>
+  <div class="sl2"><span>Volumen vendido</span><input type="range" id="s3" min="-25" max="25" value="0"><output id="o3"></output></div>
+  <button class="btn gr sm" id="sr">Restablecer</button></div><div class="card" id="sres"></div></div>
+  <div class="card" style="margin-top:1rem"><h3>🧯 Stress de abastecimiento: ¿y si el consumo sube?</h3><div class="sl2"><span>Consumo de insumos</span><input type="range" id="s4" min="0" max="50" value="15"><output id="o4"></output></div><div id="sinv"></div></div>`;
+  const upd = () => {
+    const r = +$('#s1').value / 100, p = +$('#s2').value / 100, v = +$('#s3').value / 100, ss = n => (n > 0 ? '+' : '') + n + '%';
+    $('#o1').textContent = ss(+$('#s1').value); $('#o2').textContent = ss(+$('#s2').value); $('#o3').textContent = ss(+$('#s3').value);
+    const vn = V0 * (1 + v) * (1 + p), cmp = V0 * mp * (1 + v) * (1 + .65 * r), oth = V0 * (1 - m0 - mp) * (1 + v), mg = vn - cmp - oth, mgp = mg / vn, mg0 = V0 * m0, need = ((mp * (1 + .65 * r) + (1 - m0 - mp)) / (1 - m0) - 1) * 100;
+    $('#sres').innerHTML = `<h3>Resultado mensual estimado</h3><div class="kpis" style="margin:.6rem 0"><div class="kpi"><small>Ventas</small><b>${mm(vn)}</b><em>antes ${mm(V0)}</em></div><div class="kpi"><small>Margen</small><b>${mm(mg)}</b><span class="d ${mg >= mg0 ? 'up' : 'dn'}">${mg >= mg0 ? '▲' : '▼'} ${mm(Math.abs(mg - mg0))}</span></div><div class="kpi"><small>Margen %</small><b>${pc(mgp)}</b><em>antes ${pc(m0)}</em></div></div>
+    ${vbars(['Antes', 'Después'], [{ n: 'Ventas', v: [V0, vn], c: COL[1] }, { n: 'Margen', v: [mg0, mg], c: COL[0] }], v => AL.fmt(v))}
+    <div class="alc ${mgp >= m0 - .002 ? 'g' : 'y'}"><span class="i">💡</span><div><b>${need > .2 ? `Para mantener el margen % habría que subir el precio ${need.toFixed(1)} %` : 'El margen % se mantiene o mejora'}</b><span class="small">Guía para la conversación comercial; depende de la elasticidad de cada cliente.</span></div></div>`;
+    const c = +$('#s4').value / 100; $('#o4').textContent = '+' + $('#s4').value + '%';
+    $('#sinv').innerHTML = D.inventario.filter(x => x.tipo !== 'Producto terminado').map(x => { const cb = x.stock / (x.consumo_dia * (1 + c)), bad = cb < x.lead_dias; return `<div class="sl2" style="grid-template-columns:19rem 1fr 11rem;margin:.3rem 0"><span>${esc(x.item)}</span><div class="cov"><i style="width:${Math.min(100, cb / 45 * 100)}%;background:${bad ? 'var(--bad)' : 'var(--ok)'}"></i><u style="left:${Math.min(99, x.lead_dias / 45 * 100)}%"></u></div><span><b style="color:${bad ? 'var(--bad)' : 'var(--ok)'}">${cb.toFixed(1)} d</b> <span class="small muted">/ ${x.lead_dias} d</span></span></div>`; }).join('');
+  };
+  ['s1', 's2', 's3', 's4'].forEach(i => $('#' + i).oninput = upd); $('#sr').onclick = () => { $('#s1').value = 10; $('#s2').value = 0; $('#s3').value = 0; $('#s4').value = 15; upd(); }; upd();
+};
+
+/* ============================ pregúntale a tus datos (IA o reglas) ============================ */
+D.calidad = PL.historial().rows.map(r => ({ dia: r.dia, linea: PL.linea(r.linea).n, turno: r.turno, operario: r.operario, producto: r.producto, piezas: r.n, rechazos: r.rej }));
+const SCHEMA = {
+  ventas: { campos: { mes: `YYYY-MM (${D.M[0].k} a ${last})`, tri: 'T0 últimos 3 meses, T1 los 3 anteriores, T2, T3', pais: 'Colombia|Chile|Paraguay', cliente: 'texto', industria: [...new Set(D.CL.map(c => c.ind))].join('|'), familia: [...new Set(D.PORT.map(p => p.fam))].join('|'), producto: 'nombre real del catálogo Alico', sku: 'texto', paquetes: 'n', venta: 'millones COP (suma)', margen: 'millones COP (suma)' }, ratios: { margen_pct: ['margen', 'venta'] } },
+  despachos: { campos: { mes: 'texto', tri: 'T0..T3', pais: 'texto', transportista: 'TransAndes|Rápido Sur|LogiCaribe|Ruta Guaraní|Cordillera Cargo', pedidos: 'n', a_tiempo: 'n', completos: 'n', otif_ok: 'n' }, ratios: { otif: ['otif_ok', 'pedidos'], puntualidad: ['a_tiempo', 'pedidos'], completitud: ['completos', 'pedidos'] } },
+  inventario: { campos: { item: 'texto', tipo: 'Materia prima|Insumo|Producto terminado', stock: 'n', consumo_dia: 'n', lead_dias: 'días de reposición', cobertura_dias: 'días', proveedor: 'texto' }, ratios: {} },
+  resina: { campos: { mes: 'texto', tri: 'T0..T3', precio_usd_ton: 'USD por tonelada', tc: 'COP por USD' }, ratios: {} },
+  calidad: { campos: { dia: 'YYYY-MM-DD (últimos 30 días)', linea: PL.LINEAS.map(l => l.n).join('|'), turno: 'A|B|C', operario: 'texto', producto: 'texto', piezas: 'n', rechazos: 'n' }, ratios: { defecto_pct: ['rechazos', 'piezas'] } },
+  produccion: { campos: { mes: 'texto', tri: 'T0..T3', oee: 'fracción', min_paro: 'n', toneladas: 'n', scrap_pct: 'fracción' }, ratios: {} }
+};
+function agg(rows, med, S) {
+  if (S.ratios[med.alias] || (med.ratio && S.ratios[med.ratio])) { const [a, b] = S.ratios[med.ratio || med.alias]; const sa = sum(rows, x => +x[a] || 0), sb = sum(rows, x => +x[b] || 0); return sb ? sa / sb : 0; }
+  const v = rows.map(x => +x[med.campo]).filter(x => !isNaN(x));
+  switch (med.agg) { case 'avg': return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; case 'count': return rows.length; case 'min': return Math.min(...v); case 'max': return Math.max(...v); default: return v.reduce((a, b) => a + b, 0); }
+}
+function ok(x, f) { const a = x[f.campo], b = f.valor; switch (f.op) { case '=': return String(a) === String(b); case '!=': return String(a) !== String(b); case '>': return a > b; case '<': return a < b; case '>=': return a >= b; case '<=': return a <= b; case 'in': return (b || []).map(String).includes(String(a)); case 'contains': return String(a).toLowerCase().includes(String(b).toLowerCase()); default: return true; } }
+function run(plan) {
+  const S = SCHEMA[plan.tabla]; if (!S) throw new Error('tabla desconocida');
+  let rows = D[plan.tabla].filter(x => (plan.filtros || []).every(f => ok(x, f)));
+  const g = plan.agrupar || [], meds = (plan.medidas && plan.medidas.length ? plan.medidas : [{ ratio: Object.keys(S.ratios)[0], campo: Object.keys(S.campos).pop(), agg: 'sum' }]).map(m => Object.assign({ alias: m.alias || m.ratio || (m.agg || 'sum') + '_' + m.campo }, m));
+  const build = rs => { const m = new Map(); rs.forEach(x => { const k = g.map(c => x[c]).join('¦'); (m.get(k) || m.set(k, []).get(k)).push(x); }); return m; };
+  let out;
+  if (plan.comparar) {
+    const A = build(rows.filter(x => x[plan.comparar.campo] === plan.comparar.a)), B = build(rows.filter(x => x[plan.comparar.campo] === plan.comparar.b)), keys = new Set([...A.keys(), ...B.keys()]);
+    out = [...keys].map(k => { const o = {}; g.forEach((c, i) => o[c] = k.split('¦')[i]); const m = meds[0], va = A.has(k) ? agg(A.get(k), m, S) : 0, vb = B.has(k) ? agg(B.get(k), m, S) : 0; o.antes = vb; o.ahora = va; o.cambio_pct = vb ? (va - vb) / vb : 0; return o; });
+    plan = Object.assign({}, plan, { ordenar: plan.ordenar || { campo: 'cambio_pct', dir: 'asc' } });
+  } else if (g.length) out = [...build(rows)].map(([, rs]) => { const o = {}; g.forEach(c => o[c] = rs[0][c]); meds.forEach(m => o[m.alias] = agg(rs, m, S)); return o; });
+  else if (plan.tabla === 'inventario' || plan.tabla === 'resina' || plan.tabla === 'produccion') out = rows.map(x => Object.assign({}, x)); else { const o = {}; meds.forEach(m => o[m.alias] = agg(rows, m, S)); out = [o]; }
+  if (plan.ordenar && plan.ordenar.campo) { const f = plan.ordenar.campo, d = plan.ordenar.dir === 'asc' ? 1 : -1; out.sort((a, b) => (a[f] > b[f] ? 1 : a[f] < b[f] ? -1 : 0) * d); }
+  else if (g.length && !g.includes('mes') && !g.includes('dia')) { const f = meds[0].alias; out.sort((a, b) => b[f] - a[f]); } else if (g.includes('mes') || g.includes('dia')) out.sort((a, b) => String(a[g[0]]) > String(b[g[0]]) ? 1 : -1);
+  if (plan.limite) out = out.slice(0, plan.limite);
+  return { rows: out, meds, g, comparar: !!plan.comparar };
+}
+const PCT = new Set(['margen_pct', 'otif', 'puntualidad', 'completitud', 'cambio_pct', 'defecto_pct', 'oee', 'scrap_pct']);
+function fmtV(k, v) { if (typeof v !== 'number') return esc(v); if (PCT.has(k)) return pc(v); if (/venta|margen/.test(k) && !/pct/.test(k)) return mm(v); return AL.fmt(v); }
+function schemaTxt() { return Object.entries(SCHEMA).map(([t, s]) => `- ${t}(${Object.entries(s.campos).map(([k, v]) => k + ': ' + v).join('; ')})${Object.keys(s.ratios).length ? ' · medidas derivadas con {"ratio":"' + Object.keys(s.ratios).join('|') + '"}' : ''}`).join('\n'); }
+async function planIA(q) {
+  const sys = `Convierte la pregunta de negocio en un plan de consulta JSON sobre estas tablas (último mes cerrado = ${last}):\n${schemaTxt()}\nFormato: {"tabla":"","filtros":[{"campo":"","op":"=|!=|>|<|>=|<=|in|contains","valor":""}],"agrupar":["campo"],"medidas":[{"campo":"","agg":"sum|avg|count|min|max","alias":""}] o [{"ratio":"..."}],"ordenar":{"campo":"","dir":"asc|desc"},"limite":10,"comparar":{"campo":"tri","a":"T0","b":"T1"}(solo para cambios entre periodos; una sola medida)}. Para evolución agrupa por ["mes"]. Para nombres de producto usa op "contains". Responde SOLO el JSON.`;
+  return AL.parseJSON(await AL.claude(sys, q, { max: 500, tag: 'torre-plan' }));
+}
+function planBasico(q) {
+  const t = AL.norm(q), has = (...w) => w.some(x => t.includes(x));
+  const dim = has('pais') ? 'pais' : has('industria', 'sector') ? 'industria' : has('familia', 'linea de producto') ? 'familia' : has('cliente') ? 'cliente' : has('producto', 'referencia', 'vende mas') ? 'producto' : has('transportista') ? 'transportista' : has('mes', 'evolucion', 'tendencia', 'como han ido', 'historico') ? 'mes' : null;
+  if (has('defecto', 'rechazo', 'calidad', 'vision')) return { tabla: 'calidad', agrupar: [has('turno') ? 'turno' : has('operario') ? 'operario' : has('dia') ? 'dia' : 'linea'], medidas: [{ ratio: 'defecto_pct' }] };
+  if (has('oee', 'paro', 'scrap', 'produccion')) return { tabla: 'produccion' };
+  if (has('resina', 'precio de la materia')) return { tabla: 'resina' };
+  if (has('inventario', 'cobertura', 'stock', 'insumo', 'quedarse sin', 'agot')) return { tabla: 'inventario', filtros: [{ campo: 'tipo', op: '!=', valor: 'Producto terminado' }], ordenar: { campo: 'cobertura_dias', dir: 'asc' }, limite: 9 };
+  if (has('otif', 'despacho', 'entrega', 'puntual', 'transportista', 'distribucion', 'logistic')) return { tabla: 'despachos', agrupar: [dim || 'transportista'], medidas: [{ ratio: 'otif' }], ordenar: dim === 'mes' ? undefined : { campo: 'otif', dir: 'asc' } };
+  const f = []; if (has('nativa')) f.push({ campo: 'familia', op: 'contains', valor: 'Nativa' }); if (has('cafe')) f.push({ campo: 'industria', op: '=', valor: 'Café' }); if (has('chile')) f.push({ campo: 'pais', op: '=', valor: 'Chile' }); if (has('este ano')) f.push({ campo: 'mes', op: '>=', valor: last.slice(0, 4) + '-01' });
+  if (has('cayeron', 'caida', 'cayo', 'bajaron', 'crecieron', 'crecimiento', 'subieron', 'trimestre')) return { tabla: 'ventas', filtros: f, agrupar: [dim && dim !== 'mes' ? dim : 'cliente'], medidas: [{ campo: 'venta', agg: 'sum', alias: 'venta' }], comparar: { campo: 'tri', a: 'T0', b: 'T1' }, limite: 8, ordenar: { campo: 'cambio_pct', dir: has('crecieron', 'crecimiento', 'subieron') ? 'desc' : 'asc' } };
+  const med = has('margen', 'rentab', 'utilidad') ? [{ ratio: 'margen_pct' }] : [{ campo: 'venta', agg: 'sum', alias: 'venta' }];
+  return { tabla: 'ventas', filtros: f, agrupar: [dim || 'familia'], medidas: med, limite: 10 };
+}
+const QS = ['¿Qué productos de la Línea Nativa venden más?', '¿Cómo van las ventas por industria este año?', '¿Qué clientes cayeron más en el último trimestre?', '¿Cuál es el % de defecto por línea?', '¿En qué turno hay más defectos?', '¿Cuál es el OTIF por transportista?', '¿Qué insumos están en riesgo de quedarse sin stock?', '¿Cómo va el margen por familia?', '¿Cómo han ido las ventas de café mes a mes?'];
+view.ask = () => {
+  if ($('#v-ask').dataset.on) return; $('#v-ask').dataset.on = 1;
+  $('#v-ask').innerHTML = `<div class="card"><h3>💬 Pregúntale a tus datos</h3><p class="muted small">Escribe o habla como hablas. El asistente arma la consulta, la ejecuta, la grafica y te la lee.</p>
+  <div class="askrow"><button class="mic" id="am" title="Hablar">🎤</button><input id="aq" placeholder="Ej.: ¿Qué clientes de café crecieron más este trimestre?"><button class="btn lg" id="ab">Preguntar ➤</button></div><div class="qs">${QS.map(q => `<button data-p="${esc(q)}">${esc(q)}</button>`).join('')}</div><div id="aa"></div></div>`;
+  $('#ab').onclick = () => ask($('#aq').value); $('#aq').onkeydown = e => { if (e.key === 'Enter') ask($('#aq').value); }; $('.qs').onclick = e => { const b = e.target.closest('[data-p]'); if (b) ask(b.dataset.p); };
+  $('#am').onclick = () => { if (AL.listening()) return AL.stopListen(); if (AL.listen({ onText: t => $('#aq').value = t, onEnd: t => { $('#am').classList.remove('on'); if (t) ask(t); } })) $('#am').classList.add('on'); };
+};
+async function ask(q) {
+  q = (q || '').trim(); if (!q) return; view.ask(); $('#aq').value = q; const out = $('#aa'); out.innerHTML = '<div class="ans card"><span class="spin"></span> Armando la consulta…</div>';
+  let plan, via = 'IA';
+  try { if (!AL.hasIA()) throw 0; plan = await planIA(q); if (!SCHEMA[plan.tabla]) throw 0; } catch (e) { plan = planBasico(q); via = 'reglas'; }
+  let res; try { res = run(plan); } catch (e) { plan = planBasico(q); via = 'reglas'; res = run(plan); }
+  if (!res.rows.length) { out.innerHTML = '<div class="ans card">No encontré datos para esa consulta. Prueba con otra pregunta.</div>'; return; }
+  const cols = Object.keys(res.rows[0]).filter(c => !['tri', 'tc', 'unidad', 'costo_unit'].includes(c)), main = res.comparar ? 'cambio_pct' : (res.meds[0] && res.rows[0][res.meds[0].alias] !== undefined ? res.meds[0].alias : cols.filter(c => typeof res.rows[0][c] === 'number').pop());
+  const top = res.rows.slice(0, 12).map(r => { const o = {}; cols.forEach(c => o[c] = typeof r[c] === 'number' ? +r[c].toFixed(3) : r[c]); return o; });
+  let nar = '';
+  if (AL.hasIA()) { try { nar = await AL.claude(AL.SYS + ' Eres analista de negocio. Con el resultado responde en español: 1) la respuesta directa con cifras, 2) una observación útil, 3) una acción sugerida. Máx. 80 palabras. Ventas y márgenes en millones de COP; porcentajes como fracción (0.93=93%). Datos de ejemplo con productos reales del catálogo.', `Pregunta: ${q}\nResultado: ${JSON.stringify(top)}`, { max: 350, tag: 'torre-narrar' }); } catch (e) { nar = ''; } }
+  if (!nar) { const r0 = res.rows[0], k0 = cols[0]; nar = res.comparar ? `Mayor cambio: ${r0[k0]} (${pc(r0.cambio_pct)} entre el trimestre anterior y el último).` : `Primero en la lista: ${r0[k0]} con ${fmtV(main, r0[main])}.${AL.hasIA() ? '' : ' (Modo básico: conecta la IA en Ajustes para el análisis y las recomendaciones.)'}`; }
+  const key = cols[0], isT = res.g.includes('mes') || res.g.includes('dia') || ['resina', 'produccion'].includes(plan.tabla), isP = PCT.has(main);
+  const spec = { labels: res.rows.slice(0, 24).map(r => String(r[isT && !res.g.length ? 'mes' : key])), series: [{ n: main, v: res.rows.slice(0, 24).map(r => isP ? r[main] * 100 : r[main]), c: COL[1] }], fmt: v => isP ? v.toFixed(1) + '%' : AL.fmt(v), def: isT ? 'line' : 'hbar', zero: false };
+  out.innerHTML = `<div class="ans card ai"><div class="nar">${esc(nar)}</div><button class="btn gr sm" id="asay">🔊 Escuchar</button><div style="margin-top:.6rem">${plan.tabla === 'inventario' ? '' : viz('ask', esc(q), spec)}</div><details style="margin-top:.6rem"><summary><b>Ver datos</b></summary><table class="tb"><tr>${cols.map(c => `<th>${esc(c.replace(/_/g, ' '))}</th>`).join('')}</tr>${res.rows.slice(0, 14).map(r => `<tr>${cols.map(c => `<td>${fmtV(c, r[c])}</td>`).join('')}</tr>`).join('')}</table></details><details style="margin-top:.5rem"><summary><b>Cómo armó la consulta</b> <span class="muted small">(${via})</span></summary><pre class="plan">${esc(JSON.stringify(plan, null, 1))}</pre></details></div>`;
+  $('#asay').onclick = () => AL.narrar(nar); if (AL.cfg.voz) AL.say(nar.slice(0, 400));
+  AL.queue('pregunta', { id: AL.uid(), ts: new Date().toISOString(), sesion: AL.cfg.sesion, titulo: q, estado: 'torre', json: JSON.stringify({ q, via, plan }) });
+  AL.log('pregunta_datos', { caso_id: 'torre', area: 'Gerencia', via, ok: 'si', detalle: q.slice(0, 120) });
+}
+
+AL.bar({ id: 'torre', publico: 'Gerencia y líderes de todas las áreas', area: 'Gerencia · toda la compañía', iniciativa: 'BI y analítica con IA para la gerencia',
+  narra: 'Torre de control de negocios. En la primera pantalla ves la salud de toda la compañía, de cero a cien, y el estado de cada área: comercial, finanzas, producción, calidad, logística, abastecimiento, servicio al cliente, talento humano y sostenibilidad. Toca un área para ver el detalle, cambia el tipo de gráfico con los íconos de cada tarjeta, y pregúntale a tus datos en español, escribiendo o hablando. Los productos son los reales del catálogo de Alico.',
+  help: [
+  { ico: '🩺', t: 'Diagnóstico en 10 segundos', p: 'La salud de la compañía y de cada área, con semáforo. Toca un área para ver el detalle.' },
+  { ico: '📊', t: 'Tú eliges el gráfico', p: 'Cada tarjeta tiene íconos para verla en líneas, barras, torta, dona o tabla.' },
+  { ico: '💬', t: 'Habla con tus datos', p: 'Pregunta en español, escribiendo o con el micrófono, y recibe cifras, gráfico y recomendación.' }] });
+window.__torre = { run, planBasico, areas, alertas };
+AL.hub.on('inspeccion', () => { if (cur === 'cal' || cur === 'dia') view[cur](); });
+const h = location.hash.slice(1), map = { calidad: 'cal', ventas: 'ven', clientes: 'cli' };
+tab(map[h] || (view[h] ? h : 'dia'));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+[
+  {
+    "id": "tinta-corrida", "area": "Impresión", "icono": "🎨", "titulo": "Tinta corrida o manchada",
+    "sintoma": "La tinta se ve corrida, manchada o se pasa a otra zona de la funda.",
+    "claves": "tinta corrida manchada mancha borrosa chorreada pasa sucia",
+    "causas": ["Tinta muy líquida", "Secado insuficiente", "Rodillo o rasqueta sucios"],
+    "pasos": [
+      {"ico": "🌡️", "texto": "Revisa que el secador esté en la temperatura de la ficha."},
+      {"ico": "🧪", "texto": "Mide la viscosidad de la tinta con la copa y compárala con la ficha."},
+      {"ico": "🧽", "texto": "Mira que el rodillo y la rasqueta estén limpios."},
+      {"ico": "🔁", "texto": "Imprime 5 metros y compara con la muestra aprobada."}
+    ],
+    "llamar_lider": "Si sigue igual después de ajustar dos veces.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "color-diferente", "area": "Impresión", "icono": "🖨️", "titulo": "Color diferente al aprobado",
+    "sintoma": "El color de la funda no se parece al color aprobado por el cliente.",
+    "claves": "color diferente tono distinto pálido fuerte oscuro claro aprobado",
+    "causas": ["Viscosidad fuera de rango", "Lote de tinta distinto", "Rodillo equivocado"],
+    "pasos": [
+      {"ico": "📋", "texto": "Compara la funda contra el patrón aprobado con la luz de la cabina."},
+      {"ico": "🧪", "texto": "Revisa el lote de la tinta y su viscosidad."},
+      {"ico": "🔍", "texto": "Verifica que el rodillo corresponda al color del trabajo."},
+      {"ico": "🙋", "texto": "Pide aprobación a Calidad antes de seguir imprimiendo."}
+    ],
+    "llamar_lider": "Siempre que el color no coincida con el patrón.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "registro", "area": "Impresión", "icono": "🎯", "titulo": "Colores desalineados (registro)",
+    "sintoma": "Los colores no coinciden: se ven bordes dobles o corridos.",
+    "claves": "registro desalineado desalineacion doble borde corrido colores no coinciden",
+    "causas": ["Tensión de la película", "Registro desajustado", "Marca de registro mal leída"],
+    "pasos": [
+      {"ico": "🎞️", "texto": "Revisa la tensión de la película."},
+      {"ico": "👀", "texto": "Mira las marcas de registro: ¿se ven alineadas?"},
+      {"ico": "⚙️", "texto": "Ajusta el registro en el panel, en pasos pequeños."},
+      {"ico": "📏", "texto": "Revisa de nuevo cada 10 metros."}
+    ],
+    "llamar_lider": "Si el desajuste vuelve a aparecer en menos de 10 minutos.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "sello-abierto", "area": "Sellado", "icono": "🔥", "titulo": "Sello abierto o con arrugas",
+    "sintoma": "El sello queda abierto, débil o con arrugas.",
+    "claves": "sello abierto sellado debil arrugas arruga no sella despega se abre",
+    "causas": ["Temperatura baja", "Poco tiempo o presión", "Residuos en la barra"],
+    "pasos": [
+      {"ico": "🌡️", "texto": "Compara la temperatura de sellado con la ficha."},
+      {"ico": "⏱️", "texto": "Revisa el tiempo y la presión de la barra."},
+      {"ico": "🧼", "texto": "Limpia la barra de sellado si tiene residuos."},
+      {"ico": "✋", "texto": "Haz la prueba de tirón con 3 fundas."}
+    ],
+    "llamar_lider": "Si alguna funda se abre en la prueba de tirón. Separa lo producido.",
+    "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "fuga", "area": "Sellado", "icono": "💨", "titulo": "Fuga en la bolsa",
+    "sintoma": "La bolsa pierde aire o líquido.",
+    "claves": "fuga fuga de aire gotea pierde aire liquido hermetica hermeticidad perforacion agujero",
+    "causas": ["Sello incompleto", "Esquina débil", "Perforación en la película"],
+    "pasos": [
+      {"ico": "🫧", "texto": "Haz la prueba de hermeticidad con 3 bolsas."},
+      {"ico": "🔍", "texto": "Mira por dónde sale: sello, esquina o agujero."},
+      {"ico": "🚧", "texto": "Separa las bolsas dudosas con etiqueta roja."},
+      {"ico": "📣", "texto": "Avisa a tu líder de turno."}
+    ],
+    "llamar_lider": "Siempre. Una fuga puede afectar al cliente.",
+    "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "ojos-de-pez", "area": "Extrusión", "icono": "🫧", "titulo": "Puntos o burbujas en la película",
+    "sintoma": "La película tiene puntos, geles o burbujas (ojos de pez).",
+    "claves": "ojos de pez puntos burbujas geles gel pelicula manchas transparentes",
+    "causas": ["Material húmedo o contaminado", "Mezcla mal hecha", "Filtro saturado"],
+    "pasos": [
+      {"ico": "🌾", "texto": "Revisa el lote de material y si estuvo bien guardado."},
+      {"ico": "🔥", "texto": "Compara la temperatura de extrusión con la ficha."},
+      {"ico": "🧹", "texto": "Pregunta si ya toca cambiar el filtro."},
+      {"ico": "📝", "texto": "Anota el lote para Calidad."}
+    ],
+    "llamar_lider": "Si los puntos aparecen en más de un rollo.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "espesor", "area": "Extrusión", "icono": "📏", "titulo": "Espesor irregular o película que se rasga",
+    "sintoma": "La película está más gruesa de un lado, o se rasga con facilidad.",
+    "claves": "espesor irregular grueso delgado rasga rasgado rompe roto burbuja inestable calibre",
+    "causas": ["Burbuja descentrada", "Aire de enfriamiento desigual", "Labio del dado desajustado"],
+    "pasos": [
+      {"ico": "🎈", "texto": "Mira la burbuja: ¿está centrada y estable?"},
+      {"ico": "🌬️", "texto": "Revisa el aire de enfriamiento."},
+      {"ico": "📐", "texto": "Mide el espesor en 4 puntos del ancho."},
+      {"ico": "🔧", "texto": "Si hay diferencia, pide al líder ajustar el dado."}
+    ],
+    "llamar_lider": "Antes de mover el dado: siempre con el líder.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "delaminacion", "area": "Laminado", "icono": "🧻", "titulo": "Capas que se separan",
+    "sintoma": "Las capas del material se despegan una de otra (delaminación).",
+    "claves": "delaminacion delaminado capas despega separan pegante adhesivo laminado",
+    "causas": ["Adhesivo mal mezclado", "Curado incompleto", "Superficie sucia"],
+    "pasos": [
+      {"ico": "🧪", "texto": "Revisa la mezcla y la cantidad de adhesivo."},
+      {"ico": "⏳", "texto": "Confirma el tiempo de reposo (curado) del rollo."},
+      {"ico": "✋", "texto": "Haz la prueba de pelado con una muestra."},
+      {"ico": "🚫", "texto": "Separa el lote hasta que Calidad lo revise."}
+    ],
+    "llamar_lider": "Siempre que se separen las capas.",
+    "critico": true, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "zipper-valvula", "area": "Conversión", "icono": "🤐", "titulo": "Zipper o válvula con falla",
+    "sintoma": "El zipper no cierra bien o la válvula no queda pegada.",
+    "claves": "zipper cierre valvula cierra no cierra pegada suelta aditamento troquel",
+    "causas": ["Posición equivocada", "Temperatura del aditamento", "Residuos"],
+    "pasos": [
+      {"ico": "🔍", "texto": "Revisa que el zipper o la válvula estén en su posición."},
+      {"ico": "🌡️", "texto": "Compara la temperatura de sellado del aditamento con la ficha."},
+      {"ico": "🧼", "texto": "Limpia la zona de pegado."},
+      {"ico": "🔁", "texto": "Abre y cierra 10 bolsas para probar."}
+    ],
+    "llamar_lider": "Si falla más de 1 de cada 10.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "bandeja", "area": "Termoformado", "icono": "🍽️", "titulo": "Bandeja deformada o delgada",
+    "sintoma": "La bandeja sale deformada, con esquinas delgadas o sin forma completa.",
+    "claves": "bandeja deformada delgada esquinas termoformado forma molde lamina",
+    "causas": ["Lámina mal calentada", "Enfriamiento corto", "Molde sucio"],
+    "pasos": [
+      {"ico": "🌡️", "texto": "Revisa la temperatura de la lámina."},
+      {"ico": "⏱️", "texto": "Revisa el tiempo de calentamiento."},
+      {"ico": "🧊", "texto": "Confirma que el molde se enfríe lo suficiente."},
+      {"ico": "📏", "texto": "Mide el espesor en las esquinas."}
+    ],
+    "llamar_lider": "Si el espesor de la esquina está fuera de la ficha.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  },
+  {
+    "id": "sleeve", "area": "Fundas", "icono": "🧴", "titulo": "Manga termoencogible con arrugas",
+    "sintoma": "La manga (sleeve) queda con arrugas o se encoge de forma desigual.",
+    "claves": "sleeve manga termoencogible encoge arrugas arruga tunel fundas desigual",
+    "causas": ["Temperatura del túnel", "Envase mal ubicado", "Flujo de aire desigual"],
+    "pasos": [
+      {"ico": "🔥", "texto": "Compara la temperatura del túnel con la ficha."},
+      {"ico": "🧭", "texto": "Mira que el envase pase centrado."},
+      {"ico": "💨", "texto": "Revisa el flujo de aire o vapor."},
+      {"ico": "👀", "texto": "Compara con la muestra aprobada."}
+    ],
+    "llamar_lider": "Si el problema sigue después de revisar la temperatura.",
+    "critico": false, "autor": "Ejemplo (por validar con Alico)", "ejemplo": true, "estado": "validado"
+  }
+]

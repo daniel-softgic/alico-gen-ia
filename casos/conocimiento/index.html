@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agente de conocimiento técnico · Alico</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/al.css">
+<style>
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+.chat{display:flex;flex-direction:column;min-height:62vh}
+.msgs{flex:1;display:flex;flex-direction:column;gap:.9rem;padding:.2rem .1rem 1rem;max-height:62vh;overflow:auto}
+.m{max-width:92%;padding:.85rem 1.1rem;border-radius:20px;font-size:1rem;line-height:1.5;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:var(--tl2);color:#fff;border-bottom-right-radius:6px}
+.m.a{align-self:flex-start;background:#fff;border:2px solid var(--line);border-bottom-left-radius:6px;box-shadow:var(--sh)}
+.m.a b{font-weight:700}
+.m .src{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.7rem}
+.src button{background:#eef6f8;color:var(--tl-d);border-radius:99px;padding:.25rem .75rem;font-size:.78rem;font-weight:700}
+.src button:hover{background:#d6f0f5}
+.m .act{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.m .conf{font-size:.72rem;font-weight:700;padding:.1rem .6rem;border-radius:99px;display:inline-block;margin-bottom:.4rem}
+.conf.hi{background:#e2f6ec;color:var(--ok)}.conf.mid{background:#fff3da;color:#8a6200}.conf.lo{background:#fde6e5;color:var(--bad)}
+.ask{display:flex;gap:.6rem;align-items:flex-end;border-top:2px solid var(--line);padding-top:.8rem}
+.ask textarea{flex:1;min-height:3.2rem;max-height:8rem;border-radius:16px;border:2px solid var(--line);padding:.7rem 1rem;font-size:1rem}
+.mic{width:3.2rem;height:3.2rem;border-radius:50%;background:#fff;border:2px solid var(--line);font-size:1.3rem}
+.mic.on{background:var(--bad);border-color:var(--bad);animation:pul 1s infinite}
+@keyframes pul{50%{box-shadow:0 0 0 10px rgba(214,64,58,.2)}}
+.quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:.6rem;margin-bottom:1rem}
+.q{background:#fff;border:2px solid var(--line);border-radius:18px;padding:.8rem 1rem;text-align:left;font-weight:600;font-size:.9rem;display:flex;gap:.6rem;align-items:center;box-shadow:var(--sh)}
+.q:hover{border-color:var(--tl);transform:translateY(-2px)}
+.q span.i{font-size:1.5rem}
+.doc{position:sticky;top:1rem;max-height:84vh;overflow:auto}
+.doc h4{font-size:1.05rem;font-weight:800;margin:.2rem 0 .2rem}
+.doc .sec{border-left:4px solid var(--line);padding:.2rem 0 .2rem .8rem;margin:.7rem 0;white-space:pre-wrap;font-size:.92rem}
+.doc .sec.hit{border-color:var(--or);background:#fff6ea;border-radius:0 12px 12px 0}
+.doc .sec h5{margin:0 0 .2rem;font-size:.9rem;font-weight:800}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.9rem}
+.dgc{background:#fff;border:2px solid var(--line);border-radius:22px;padding:1.2rem;text-align:left;box-shadow:var(--sh)}
+.dgc:hover{border-color:var(--or)}.dgc .i{font-size:2.4rem;display:block}.dgc b{font-size:1.05rem}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:.9rem 1.1rem;margin:.5rem 0;font-weight:600;font-size:1rem}
+.opt:hover{border-color:var(--tl);background:#f2fbfd}
+.crumb{color:var(--gr);font-size:.82rem;margin-bottom:.4rem}
+.res{background:#e2f6ec;border:2px solid var(--ok);border-radius:20px;padding:1.1rem 1.3rem}
+.res h3{color:#11703f}.res ol{margin:.4rem 0 .8rem 1.1rem;padding:0}.res li{margin:.3rem 0}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.8rem}
+.lib .card{padding:.9rem 1.1rem;cursor:pointer}.lib .card:hover{border-color:var(--tl)}
+.lib h4{font-size:.95rem;margin:.3rem 0}
+.drop{border:3px dashed var(--line);border-radius:22px;padding:1.2rem;text-align:center;background:#fffdf9}
+.drop.over{border-color:var(--tl);background:#f2fbfd}
+.ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;margin-bottom:1rem}
+.ladder div{background:#fff;border:2px solid var(--line);border-radius:18px;padding:.7rem .9rem;position:relative;box-shadow:var(--sh)}
+.ladder div b{display:block;font-size:.92rem}.ladder div span{font-size:.76rem;color:var(--gr);line-height:1.35;display:block}
+.ladder div i{font-style:normal;font-size:.64rem;font-weight:800;letter-spacing:.06em;color:var(--tl-d)}
+.ladder div:not(:last-child)::after{content:"➜";position:absolute;right:-.62rem;top:50%;transform:translateY(-50%);color:var(--or);font-weight:800;z-index:2}
+.ladder .n1{border-color:#b9eaf1}.ladder .n2{border-color:#f3d48b}.ladder .n3{border-color:#f1b3b0}.ladder .n4{border-color:#a9dfc3}
+.lv{display:inline-flex;gap:.35rem;align-items:center;font-size:.72rem;font-weight:800;border-radius:99px;padding:.15rem .65rem;margin-bottom:.45rem}
+.lv.n1{background:#e6f9fc;color:var(--tl-d)}.lv.n2{background:#fff3da;color:#8a6200}.lv.n3{background:#fde6e5;color:var(--bad)}.lv.n4{background:#e2f6ec;color:var(--ok)}
+.vs{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}.vs span{font-size:.8rem;background:#fff;border:2px dashed var(--line);border-radius:14px;padding:.4rem .8rem}
+.web a{display:block;font-size:.8rem;color:var(--tl-d);margin:.15rem 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.esp{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin:.6rem 0}.esp label{border:2px solid var(--line);border-radius:14px;padding:.55rem .7rem;font-size:.84rem;cursor:pointer;display:flex;gap:.5rem}
+.esp label:has(input:checked){border-color:var(--or);background:#fff6ea}.esp small{display:block;color:var(--gr)}
+.esp label input[type=radio]{width:1.1rem;height:1.1rem;padding:0;margin:.2rem 0 0;flex:none;accent-color:var(--or)}
+@media (max-width:1100px){.ladder,.esp{grid-template-columns:1fr}}
+.tk{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+@media (max-width:1100px){.layout{grid-template-columns:1fr}.doc{position:static}}
+</style>
+</head>
+<body>
+<script src="../../shared/al.js"></script>
+<script src="../../shared/catalogo.js"></script>
+<script src="../../shared/planta.js"></script>
+<main class="wrap">
+  <div class="ladder" title="Cómo resuelve el agente">
+    <div class="n1"><i>NIVEL 1</i><b>📚 Base técnica de Alico</b><span>Fichas, manuales, procedimientos y casos resueltos. Responde con la fuente exacta.</span></div>
+    <div class="n2"><i>NIVEL 2</i><b>🌐 Investiga en fuentes confiables</b><span>Normas (ASTM, ISO), fabricantes, proveedores y literatura técnica, citadas.</span></div>
+    <div class="n3"><i>NIVEL 3</i><b>🧑‍🔬 Escala al especialista</b><span>Fabricante de la máquina, proveedor de materia prima o laboratorio: última instancia.</span></div>
+    <div class="n4"><i>NIVEL 4</i><b>🌱 Aprende</b><span>La solución validada entra a la base. La próxima vez responde en el nivel 1.</span></div>
+  </div>
+  <div class="vs"><span>🧰 <b>Maestro</b> = el operario en la máquina: <i>qué hago ya</i>, con dibujos y voz.</span><span>🧠 <b>Agente técnico</b> = técnicos, ingeniería y calidad: <i>por qué pasa, cómo se mide, qué dice la norma y a quién escalo</i>.</span><span class="sample" style="align-self:center">BASE DE EJEMPLO</span></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="chat">💬 Preguntar</button>
+    <button class="tab" data-t="diag">🩺 Diagnóstico guiado</button>
+    <button class="tab" data-t="lib">📚 Biblioteca</button>
+    <button class="tab" data-t="esc">🎫 Escalados</button>
+    <button class="tab" data-t="uso">📊 Qué se pregunta</button>
+  </div>
+
+  <section id="t-chat">
+    <div class="layout">
+      <div class="card chat">
+        <div class="quick" id="quick"></div>
+        <div class="msgs" id="msgs"></div>
+        <div class="ask"><button class="mic" id="mic" title="Hablar">🎤</button><textarea id="q" placeholder="Ej.: El sello de las bolsas sale abierto, ¿qué reviso?" rows="2"></textarea><button class="btn lg" id="send">Preguntar ➤</button></div>
+      </div>
+      <div class="card doc" id="doc"><h3>📄 Fuente</h3><p class="muted small">Cuando el agente responda, toca una fuente [1] para ver el documento y el fragmento exacto.</p></div>
+    </div>
+  </section>
+
+  <section id="t-diag" hidden></section>
+
+  <section id="t-lib" hidden>
+    <div class="two" style="margin-bottom:1rem">
+      <div class="drop" id="drop"><b>➕ Agregar documentos propios</b><p class="muted small" style="margin:.3rem 0 .7rem">Arrastra o elige archivos PDF, TXT o MD (manuales, fichas, procedimientos). Quedan en este navegador y el agente los usa de inmediato.</p><button class="btn" id="pick">Elegir archivos</button><input type="file" id="file" multiple accept=".pdf,.txt,.md" hidden></div>
+      <div class="drop"><b>☁️ Traer de Google Drive</b><p class="muted small" style="margin:.3rem 0 .7rem">Lee los documentos de la carpeta <i>Alico-Taller-IA/Conocimiento</i> (Docs, TXT, MD). Así el equipo alimenta la base sin tocar código.</p><button class="btn tl" id="drive">Sincronizar Drive</button><div class="small muted" id="driveRes" style="margin-top:.4rem"></div></div>
+    </div>
+    <div class="tabs" id="cats"></div>
+    <div class="lib" id="lib"></div>
+  </section>
+
+  <section id="t-esc" hidden></section>
+  <section id="t-uso" hidden></section>
+</main>
+
+<script src="kb.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = AL.$, LS = AL.LS, esc = AL.esc, norm = AL.norm;
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+
+/* ====================== base de conocimiento + índice BM25 ====================== */
+const STOP = new Set('de la el en y a los las un una unos unas que por con para se del al es lo como mas pero sus le ya o este si porque esta entre cuando muy sin sobre tambien me hasta hay donde quien desde todo nos durante todos uno les ni contra otros ese eso ante ellos e esto mi antes algunos que unos yo otro otras otra el tanto esa estos mucho quienes nada muchos cual poco ella estar estas algunas algo nosotros mis tu te ti tu tus ellas nosotras vosotros vosotras os mio mia mios mias tuyo tuya tuyos tuyas suyo suya suyos suyas nuestro nuestra nuestros nuestras vuestro vuestra vuestros vuestras esos esas estoy estas esta estamos estais estan sea son ser fue era hacer hace puede pueden debe hay'.split(' '));
+const stem = w => { if (w.length < 5) return w; w = w.replace(/(ciones|cion|mente|ando|iendo|ados|adas|idos|idas|ado|ada|ido|ida|ar|er|ir|es|s)$/, '').replace(/[aeo]$/, ''); return w.slice(0, 5); };
+const SYN = { 'sello': ['sellado', 'mordaza'], 'abierto': ['debil', 'fuga'], 'mancha': ['suciedad', 'scumming', 'tinta'], 'burbuja': ['inestable'], 'despega': ['delaminacion', 'adhesion'], 'arruga': ['pliegue', 'tunel'], 'grueso': ['espesor', 'calibre'], 'delgado': ['espesor', 'calibre'], 'olor': ['solvente'], 'oxigeno': ['barrera', 'otr'], 'seguridad': ['loto', 'bloqueo'], 'limpiar': ['limpieza', 'mantenimiento'] };
+const tok = s => norm(s).split(/\s+/).filter(w => w && !STOP.has(w)).map(stem);
+let DOCS = [], CH = [], DF = {}, AVG = 1;
+
+function userDocs() { return LS.get('al_kbx', []); }
+function allDocs() { return [...window.KB.map(d => Object.assign({ origen: 'ejemplo' }, d)), ...userDocs()]; }
+function build() {
+  DOCS = allDocs(); CH = []; DF = {};
+  DOCS.forEach(d => {
+    const parts = String(d.texto).split(/\n?## /).filter(x => x.trim());
+    parts.forEach((p, i) => {
+      const nl = p.indexOf('\n'), head = d.texto.trimStart().startsWith('## ') || i > 0 ? (nl < 0 ? p : p.slice(0, nl)) : '', body = head ? (nl < 0 ? '' : p.slice(nl + 1)) : p;
+      const text = (head ? head + '\n' : '') + body.trim();
+      const t = tok(d.titulo + ' ' + d.titulo + ' ' + head + ' ' + head + ' ' + d.cat + ' ' + body);
+      const tf = {}; t.forEach(w => tf[w] = (tf[w] || 0) + 1);
+      CH.push({ doc: d, head: head || 'Resumen', text, tf, len: t.length, i });
+    });
+  });
+  CH.forEach(c => Object.keys(c.tf).forEach(w => DF[w] = (DF[w] || 0) + 1));
+  AVG = CH.reduce((s, c) => s + c.len, 0) / Math.max(1, CH.length);
+}
+function search(q, k = 5) {
+  let qt = tok(q); const extra = [];
+  norm(q).split(/\s+/).forEach(w => { Object.keys(SYN).forEach(s => { if (w.startsWith(s) || (s.length > 4 && w.startsWith(s.slice(0, 5)))) SYN[s].forEach(x => extra.push(stem(x))); }); });
+  qt = [...qt, ...extra.map(x => x)];
+  const N = CH.length, k1 = 1.4, b = .75; const seen = new Set(qt);
+  const sc = CH.map(c => {
+    let s = 0;
+    seen.forEach(w => { const f = c.tf[w]; if (!f) return; const idf = Math.log(1 + (N - DF[w] + .5) / (DF[w] + .5)); const wgt = extra.includes(w) && !tok(q).includes(w) ? .45 : 1; s += wgt * idf * (f * (k1 + 1)) / (f + k1 * (1 - b + b * c.len / AVG)); });
+    return { c, s };
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  const max = sc[0] ? sc[0].s : 0;
+  // normaliza a 0..1 aproximado según cantidad de términos de la pregunta
+  const norm1 = Math.min(1, max / (Math.max(1, seen.size) * 3.1));
+  return { hits: sc.slice(0, k), conf: norm1 };
+}
+
+/* ====================== uso (preguntas) ====================== */
+const Log = { get: () => LS.get('al_kb_log', []), add(r) { const l = Log.get(); l.push(r); LS.set('al_kb_log', l.slice(-300)); } };
+const Esc = { get: () => LS.get('al_kb_esc', []), set: v => LS.set('al_kb_esc', v) };
+
+/* ====================== chat ====================== */
+const QUICK = [
+  ['🔥', '¿Qué resistencia de sello debo exigir y cómo la mido?'],
+  ['🧻', 'Delaminación después de 48 h de curado: ¿causas y qué pruebas hago?'],
+  ['🧪', '¿Qué valor de dinas necesito para imprimir sobre PE y cómo lo verifico?'],
+  ['🫧', 'Geles en la película: ¿cómo distingo contaminación de degradación?'],
+  ['☕', '¿Qué estructura barrera recomiendas para café con válvula desgasificadora?'],
+  ['🥡', 'Paredes delgadas en bandejas termoformadas: ¿qué ajusto primero?'],
+  ['⚠️', '¿Cómo hago el bloqueo y etiquetado (LOTO) antes de intervenir la selladora?'],
+  ['🌐', '¿Una tinta base agua es compatible con laminación sin solvente? (fuera de la base)']
+];
+$('#quick').innerHTML = QUICK.map(([i, t]) => `<button class="q" data-q="${esc(t)}"><span class="i">${i}</span><span>${esc(t)}</span></button>`).join('');
+$('#quick').onclick = e => { const b = e.target.closest('[data-q]'); if (b) ask(b.dataset.q); };
+const msgs = $('#msgs'); let last = null;
+function bubble(cls, html) { const d = document.createElement('div'); d.className = 'm ' + cls; d.innerHTML = html; msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d; }
+function mdLite(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+let asking = false;
+async function ask(q) {
+  q = (q || '').trim(); if (!q || asking) return; asking = true;
+  $('#quick').style.display = 'none'; bubble('u', esc(q)); $('#q').value = '';
+  const { hits, conf } = search(q, 5);
+  const wait = bubble('a', '<span class="spin"></span> Buscando en la base de conocimiento…');
+  const rec = { id: AL.uid(), ts: new Date().toISOString(), sesion: AL.cfg.sesion, titulo: q, estado: 'respondida', json: '' };
+  let answer = '', via = 'IA';
+  const found = hits.length && conf >= .28;
+  if (!found) {
+    wait.remove(); asking = false;
+    bubble('a', '<span class="lv n1">NIVEL 1 · Base de Alico</span><br>No encuentro esto en la base interna, así que no lo invento. <b>Paso al nivel 2: investigar en fuentes técnicas confiables.</b>');
+    Log.add(Object.assign(rec, { estado: 'sin_respuesta', via: 'sin-fuentes' })); renderKpis();
+    return investigar(q);
+  } else if (AL.hasIA()) {
+    const ctx = hits.map((h, i) => `[${i + 1}] (${h.c.doc.titulo} · ${h.c.head} · ${h.c.doc.origen === 'ejemplo' ? 'EJEMPLO/referencia general' : h.c.doc.origen})\n${h.c.text}`).join('\n\n');
+    const sys = AL.SYS + `\nEres el Agente de conocimiento técnico de planta. Responde SOLO con base en los FRAGMENTOS. Estructura: 1 frase de diagnóstico probable, luego pasos numerados y cortos (máx. 6), y al final, si aplica, qué medir. Cita siempre con [1], [2] los fragmentos usados. Si los fragmentos no contienen la respuesta, di exactamente «No encuentro esto en la base» y sugiere escalar. Si la acción implica meter las manos en una máquina, recuerda parar y aplicar LOTO. Los documentos marcados EJEMPLO son referencia general: indica que se debe validar con la ficha de Alico. Usa **negrita** solo para lo clave. Máx. 170 palabras.`;
+    try { answer = await AL.claude(sys, `FRAGMENTOS:\n${ctx}\n\nPREGUNTA DEL TÉCNICO: ${q}`, { max: 700, tag: 'conocimiento' }); }
+    catch (e) { answer = offline(hits) + '\n\n_(La IA no respondió: ' + String(e.message).slice(0, 80) + '. Te muestro los fragmentos más cercanos.)_'; via = 'respaldo'; }
+    if (/no encuentro esto en la base/i.test(answer)) rec.estado = 'sin_respuesta';
+  } else { answer = offline(hits); via = 'basico'; }
+  const cls = conf > .6 ? 'hi' : conf > .4 ? 'mid' : 'lo', lbl = conf > .6 ? 'Alta coincidencia' : conf > .4 ? 'Coincidencia media' : 'Coincidencia baja';
+  const used = found ? hits : [];
+  wait.innerHTML = `<span class="lv n1">NIVEL 1 · Base técnica de Alico</span> ` + (found ? `<span class="conf ${cls}">${lbl}</span><br>` : '') + mdLite(answer) +
+    (used.length ? `<div class="src">${used.map((h, i) => `<button data-d="${esc(h.c.doc.id)}" data-s="${h.c.i}">[${i + 1}] ${esc(h.c.head.slice(0, 34))} <small style="opacity:.7">· ${esc(h.c.doc.cat || '')}</small></button>`).join('')}</div>` : '') +
+    `<div class="act"><button class="btn gr sm" data-a="up">👍 Resolvió</button><button class="btn gr sm" data-a="dn">👎 No resolvió → investigar</button><button class="btn gr sm" data-a="say">🔊 Leer</button><button class="btn warn sm" data-a="esc">🧑‍🔬 Escalar al especialista</button></div>`;
+  if (used[0]) openDoc(used[0].c.doc.id, used[0].c.i);
+  last = { q, answer, rec, used }; wait._ctx = last;
+  rec.json = JSON.stringify({ q, via, conf: +conf.toFixed(2), fuentes: used.map(h => h.c.doc.id), respuesta: answer.slice(0, 700) });
+  Object.assign(rec, { via, conf: +conf.toFixed(2), fuentes: used.map(h => h.c.doc.id).join(',') });
+  Log.add(rec); AL.queue('pregunta', rec); AL.log('consulta', { caso_id: 'conocimiento', area: 'Soporte técnico · Paraguay', via, ok: rec.estado === 'respondida' ? 'si' : 'no', detalle: q.slice(0, 120) });
+  asking = false; renderKpis(); if (AL.cfg.voz && found) AL.say(answer.replace(/\[\d\]|\*\*/g, '').slice(0, 400));
+}
+function offline(hits) {
+  return 'Esto es lo más cercano que encontré en la base (modo básico, sin IA):\n\n' + hits.slice(0, 3).map((h, i) => `**[${i + 1}] ${h.c.head}** — ${h.c.doc.titulo}\n${h.c.text.split('\n').slice(1).join(' ').slice(0, 330)}…`).join('\n\n');
+}
+msgs.onclick = e => {
+  const s = e.target.closest('[data-d]'); if (s) return openDoc(s.dataset.d, +s.dataset.s);
+  const a = e.target.closest('[data-a]'); if (!a) return;
+  const ctx = a.closest('.m')._ctx; if (!ctx) return;
+  if (a.dataset.a === 'say') return AL.say(ctx.answer.replace(/\[\d\]|\*\*/g, ''));
+  if (a.dataset.a === 'esc') return escalar(ctx);
+  if (a.dataset.a === 'inv') return investigar(ctx.q);
+  const ok = a.dataset.a === 'up'; ctx.rec.util = ok ? 'si' : 'no'; Log.add(Object.assign({}, ctx.rec, { id: AL.uid(), titulo: '(feedback) ' + ctx.q, estado: ok ? 'util' : 'no_util' })); AL.queue('pregunta', Object.assign({}, ctx.rec, { estado: ok ? 'util' : 'no_util' }));
+  AL.toast(ok ? '¡Gracias! Eso ayuda a mejorar la base.' : 'Paso al nivel 2: investigo en fuentes confiables.'); a.parentElement.querySelectorAll('[data-a=up],[data-a=dn]').forEach(b => b.disabled = true); renderKpis();
+  if (!ok && !ctx.n2) investigar(ctx.q);
+};
+$('#send').onclick = () => ask($('#q').value);
+$('#q').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask($('#q').value); } };
+$('#mic').onclick = () => {
+  if (AL.listening()) return AL.stopListen();
+  const ok = AL.listen({ onText: t => { $('#q').value = t; $('#mic').classList.add('on'); }, onEnd: t => { $('#mic').classList.remove('on'); if (t) ask(t); } });
+  if (ok) $('#mic').classList.add('on');
+};
+
+function openDoc(id, sec) {
+  const d = DOCS.find(x => x.id === id); if (!d) return;
+  const parts = String(d.texto).split(/\n?## /).filter(x => x.trim());
+  const body = parts.map((p, i) => { const nl = p.indexOf('\n'), has = d.texto.trimStart().startsWith('## ') || i > 0; const h = has ? (nl < 0 ? p : p.slice(0, nl)) : '', b = has ? (nl < 0 ? '' : p.slice(nl + 1)) : p; return `<div class="sec ${i === sec ? 'hit' : ''}" id="sec${i}">${h ? `<h5>${esc(h)}</h5>` : ''}${esc(b.trim())}</div>`; }).join('');
+  $('#doc').innerHTML = `<h3>📄 Fuente</h3><h4>${esc(d.titulo)}</h4><div class="tags"><span class="tag">${esc(d.cat || 'Documento')}</span>${d.origen === 'ejemplo' ? '<span class="sample">EJEMPLO</span>' : `<span class="tag">${esc(d.origen)}</span>`}</div><div class="small muted" style="margin:.4rem 0">${esc(d.ref || '')}${d.url ? ` · <a href="${esc(d.url)}" target="_blank" rel="noopener">referencia externa ↗</a>` : ''}</div>${body}`;
+  const t = $('#sec' + sec); t && t.scrollIntoView({ block: 'nearest' });
+}
+
+/* ====================== NIVEL 2: investigar en fuentes confiables ====================== */
+const FUENTES = [
+  { k: 'sello sellado mordaza resistencia hot tack', t: 'ASTM F88 · Resistencia del sello en materiales flexibles', u: 'https://www.astm.org/f0088_f0088m-21.html' },
+  { k: 'hot tack sellado caliente', t: 'ASTM F1921 · Hot tack de películas termosellables', u: 'https://www.astm.org/f1921_f1921m-12r20.html' },
+  { k: 'dinas tratamiento corona tension superficial imprimir', t: 'ASTM D2578 · Tensión superficial (dinas) de películas de PE y PP', u: 'https://www.astm.org/d2578-17.html' },
+  { k: 'traccion elongacion pelicula', t: 'ASTM D882 · Propiedades de tracción de películas plásticas', u: 'https://www.astm.org/d0882-18.html' },
+  { k: 'barrera oxigeno otr cafe', t: 'ASTM D3985 · Transmisión de oxígeno (OTR) en películas', u: 'https://www.astm.org/d3985-17.html' },
+  { k: 'vapor agua wvtr barrera humedad', t: 'ASTM F1249 · Transmisión de vapor de agua (WVTR)', u: 'https://www.astm.org/f1249-20.html' },
+  { k: 'flexografia tinta impresion registro anilox', t: 'FTA · Flexographic Technical Association (FIRST)', u: 'https://www.flexography.org' },
+  { k: 'plastico laboratorio ensayo resina medellin', t: 'ICIPC · Instituto de Capacitación e Investigación del Plástico y del Caucho (Medellín)', u: 'https://www.icipc.org' },
+  { k: 'loto bloqueo etiquetado seguridad', t: 'OSHA 1910.147 · Control de energías peligrosas (LOTO)', u: 'https://www.osha.gov/control-hazardous-energy' },
+  { k: 'laminacion adhesivo curado delaminacion sin solvente tinta agua', t: 'AIMCAL · Asociación de laminado y recubrimiento (guías técnicas)', u: 'https://www.aimcal.org' },
+  { k: 'termoformado pared bandeja pet lamina', t: 'SPE Thermoforming Division · Recursos técnicos', u: 'https://www.thermoformingdivision.com' },
+  { k: 'contacto alimentos migracion inocuidad', t: 'INVIMA · Resolución 683/2012 materiales en contacto con alimentos', u: 'https://www.invima.gov.co' }
+];
+const fuentesPara = q => { const t = norm(q); return FUENTES.map(f => [f, f.k.split(' ').filter(w => t.includes(w)).length]).filter(x => x[1]).sort((a, b) => b[1] - a[1]).slice(0, 4).map(x => x[0]); };
+async function investigar(q) {
+  const w = bubble('a', '<span class="lv n2">NIVEL 2 · Investigando en fuentes técnicas</span><br><span class="spin"></span> Buscando en normas, fabricantes y literatura técnica…');
+  const ref = fuentesPara(q); let txt = '', web = [], via = 'curadas';
+  const SYS2 = AL.SYS + ' Eres ingeniero de procesos senior en empaques flexibles y termoformados. Responde para un técnico: diagnóstico probable, 3-5 pasos de verificación con valores típicos de la industria y qué norma o ensayo aplica. Cita las fuentes. Si no hay evidencia confiable, dilo y recomienda escalar al fabricante o proveedor. Máx. 170 palabras. Advierte que debe validarse con la ficha de Alico.';
+  if (AL.hasIA()) {
+    try {   /* búsqueda web real con citas (herramienta web_search de Claude) */
+      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': AL.cfg.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: AL.cfg.model, max_tokens: 1200, system: SYS2, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }], messages: [{ role: 'user', content: 'Pregunta técnica de planta: ' + q + '\nPrioriza fuentes de fabricantes de máquinas, proveedores de materias primas, normas ASTM/ISO y asociaciones técnicas.' }] }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error?.message || r.status);
+      (j.content || []).forEach(b => { if (b.type === 'text') { txt += b.text; (b.citations || []).forEach(c => c.url && web.push({ t: c.title || c.url, u: c.url })); } if (b.type === 'web_search_tool_result' && Array.isArray(b.content)) b.content.forEach(x => x.url && web.push({ t: x.title, u: x.url })); });
+      via = 'web';
+    } catch (e) {
+      try { txt = await AL.claude(SYS2, 'Pregunta técnica de planta: ' + q + '\nNo tienes búsqueda web: responde con conocimiento técnico general, indícalo y sugiere qué norma o fabricante consultar.', { max: 600, tag: 'conocimiento-n2' }); via = 'modelo'; } catch (e2) { txt = ''; }
+    }
+  }
+  const seen = new Set(); web = web.filter(x => !seen.has(x.u) && seen.add(x.u)).slice(0, 6);
+  if (!txt) txt = ref.length ? 'Sin IA conectada no puedo investigar a fondo, pero estas son las fuentes técnicas que aplican a tu pregunta. Revísalas o escala al especialista.' : 'No encontré fuentes confiables para esto. Lo correcto es escalarlo al especialista (nivel 3).';
+  const fuentes = web.length ? web : ref.map(f => ({ t: f.t, u: f.u }));
+  w.innerHTML = `<span class="lv n2">NIVEL 2 · Fuentes técnicas ${via === 'web' ? 'consultadas en la web' : via === 'modelo' ? '(conocimiento general de la IA, verificar)' : 'de referencia'}</span><br>${mdLite(txt)}${fuentes.length ? `<div class="web" style="margin-top:.6rem"><b class="small">Fuentes:</b>${fuentes.map(f => `<a href="${esc(f.u)}" target="_blank" rel="noopener">🔗 ${esc(f.t)}</a>`).join('')}</div>` : ''}
+    <div class="act"><button class="btn gr sm" data-a="up">👍 Resolvió</button><button class="btn gr sm" data-a="say">🔊 Leer</button><button class="btn ok sm" data-a="learn">🌱 Guardar en la base</button><button class="btn warn sm" data-a="esc">🧑‍🔬 Escalar al especialista</button></div>`;
+  w._ctx = { q, answer: txt, rec: { id: AL.uid(), ts: new Date().toISOString(), sesion: AL.cfg.sesion, titulo: q, estado: 'nivel2' }, used: [], n2: true, fuentes };
+  Log.add(Object.assign({}, w._ctx.rec, { via: 'nivel2-' + via, fuentes: fuentes.map(f => f.u).join(',') })); AL.queue('pregunta', Object.assign({}, w._ctx.rec, { json: JSON.stringify({ q, via, fuentes }) }));
+  renderKpis(); if (AL.cfg.voz && txt) AL.say(txt.replace(/\*\*|\[\d\]/g, '').slice(0, 380));
+}
+msgs.addEventListener('click', e => { const a = e.target.closest('[data-a=learn]'); if (!a) return; const c = a.closest('.m')._ctx; aprender({ titulo: c.q, texto: c.answer + (c.fuentes ? '\n\nFuentes: ' + c.fuentes.map(f => f.t + ' (' + f.u + ')').join('; ') : ''), origen: 'Investigación nivel 2 (validar)' }); a.disabled = true; });
+function aprender({ titulo, texto, origen, cat = 'Aprendido' }) {
+  const u = userDocs(); u.push({ id: 'u-' + AL.uid(), cat, titulo: titulo.slice(0, 90), origen, ref: origen + ' · ' + new Date().toLocaleDateString('es-CO'), texto: '## Solución\n' + texto }); LS.set('al_kbx', u);
+  AL.hub.push('aprendizaje', { titulo, origen }); build(); renderKpis(); AL.toast('🌱 La base aprendió: la próxima vez responde en el nivel 1');
+}
+
+/* ====================== NIVEL 3: escalar al especialista ====================== */
+const ESPECIALISTAS = [
+  ['fab', '🏭 Fabricante de la máquina', 'Servicio técnico del fabricante (selladora, impresora, extrusora, termoformadora)'],
+  ['prov', '🧪 Proveedor de materia prima', 'Soporte técnico de resina, película, tinta o adhesivo'],
+  ['lab', '🔬 Laboratorio / centro tecnológico', 'Ensayos y análisis de falla (ej.: ICIPC, Medellín)'],
+  ['int', '👷 Especialista interno de Alico', 'Ingeniería de procesos, I+D o Calidad']
+];
+function escalar(ctx) {
+  AL.modal(`<h2>🧑‍🔬 Nivel 3 · Escalar al especialista</h2><p class="muted" style="margin:.3rem 0 .8rem">Se crea un ticket con la pregunta y lo que respondió el agente. Cuando se resuelva, la respuesta puede pasar a la base de conocimiento.</p>
+  <div class="field"><label>Pregunta</label><textarea id="e-q">${esc(ctx.q)}</textarea></div>
+  <div class="field"><label>¿A quién se escala? (se sugiere según la pregunta)</label><div class="esp">${ESPECIALISTAS.map(([k, n, d], i) => `<label><input type="radio" name="e-w" value="${k}" ${i === (/tinta|resina|adhesivo|pelicula|lamina|material/.test(norm(ctx.q)) ? 1 : /ensayo|analisis|norma|laboratorio/.test(norm(ctx.q)) ? 2 : 0) ? 'checked' : ''}><span><b>${n}</b><small>${d}</small></span></label>`).join('')}</div></div>
+  <div class="two"><div class="field"><label>Prioridad</label><select id="e-p"><option>Normal</option><option>Alta (parada de línea)</option><option>Baja</option></select></div><div class="field"><label>Tu nombre y turno</label><input id="e-n" placeholder="Ej.: Marta · Turno 2"></div></div>
+  <div style="display:flex;gap:.6rem;justify-content:flex-end"><button class="btn gr" onclick="AL.closeModal()">Cancelar</button><button class="btn" id="e-ok">Crear ticket</button></div>`);
+  $('#e-ok').onclick = () => {
+    const w = (document.querySelector('[name=e-w]:checked') || {}).value || 'int', E = ESPECIALISTAS.find(x => x[0] === w);
+    const t = { id: 'T-' + AL.uid().toUpperCase().slice(-5), ts: new Date().toISOString(), sesion: AL.cfg.sesion, titulo: $('#e-q').value, estado: 'abierto', prioridad: $('#e-p').value, quien: $('#e-n').value, especialista: E[1], niveles: ctx.n2 ? 'N1 sin respuesta · N2 investigado' : 'N1 respondido parcialmente', respuesta_agente: ctx.answer.slice(0, 600), fuentes: (ctx.used || []).map(h => h.c.doc.id).join(',') };
+    const l = Esc.get(); l.unshift(t); Esc.set(l); t.json = JSON.stringify(t); AL.queue('escalado', t); AL.closeModal(); AL.toast('Ticket ' + t.id + ' creado'); renderKpis();
+  };
+}
+function renderEsc() {
+  const l = Esc.get();
+  $('#t-esc').innerHTML = `<div class="card"><h3>🎫 Consultas escaladas a expertos</h3>${l.length ? `<table class="tb"><tr><th>Ticket</th><th>Pregunta</th><th>Prioridad</th><th>Estado</th><th></th></tr>${l.map((t, i) => `<tr><td><b>${esc(t.id)}</b><br><span class="small muted">${new Date(t.ts).toLocaleString('es-CO')}</span></td><td>${esc(t.titulo)}<div class="small muted">${esc(t.quien || '')}${t.especialista ? ' · escalado a ' + esc(t.especialista) : ''}${t.niveles ? ' · ' + esc(t.niveles) : ''}</div></td><td>${esc(t.prioridad)}</td><td><span class="chip ${t.estado === 'resuelto' ? 'ok' : 'warn'}">${esc(t.estado)}</span></td><td>${t.estado === 'resuelto' ? '' : `<button class="btn sm ok" data-r="${i}">Resolver y agregar a la base</button>`}</td></tr>`).join('')}</table>` : '<p class="muted">Aún no hay tickets. Cuando el agente no sepa algo, escálalo desde el chat.</p>'}</div>`;
+  $('#t-esc').querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.r, t = Esc.get()[i];
+    AL.modal(`<h2>✅ Resolver ${esc(t.id)}</h2><p class="muted small">Escribe la solución del experto. Se agrega a la base como documento nuevo y el agente la usará desde ya.</p><div class="field"><label>Solución del experto</label><textarea id="r-s" style="min-height:9rem"></textarea></div><div style="display:flex;gap:.6rem;justify-content:flex-end"><button class="btn gr" onclick="AL.closeModal()">Cancelar</button><button class="btn ok" id="r-ok">Guardar en la base</button></div>`);
+    $('#r-ok').onclick = () => {
+      const s = $('#r-s').value.trim(); if (!s) return AL.toast('Escribe la solución');
+      aprender({ titulo: 'Caso resuelto: ' + t.titulo.slice(0, 80), texto: s, origen: (t.especialista || 'Experto') + ' (ticket ' + t.id + ')', cat: 'Casos resueltos' });
+      const l = Esc.get(); l[i].estado = 'resuelto'; l[i].solucion = s; Esc.set(l); AL.queue('escalado', Object.assign({}, l[i], { json: JSON.stringify(l[i]) }));
+      build(); AL.closeModal(); renderEsc(); renderLib(); renderKpis(); AL.toast('Agregado a la base: el agente ya lo conoce');
+    };
+  });
+}
+
+/* ====================== diagnóstico guiado ====================== */
+let dpath = [];
+function renderDiag(node) {
+  const el = $('#t-diag'); const D = window.DIAG;
+  if (!node) {
+    dpath = [];
+    el.innerHTML = `<div class="card"><h3>🩺 ¿Qué problema tienes?</h3><p class="muted" style="margin-bottom:1rem">Responde unas preguntas cortas y el agente te lleva a la causa más probable y a la guía correcta. No necesitas escribir nada.</p><div class="dg">${['sello', 'tinta', 'delam', 'espesor'].map(k => `<button class="dgc" data-n="${k}"><span class="i">${D[k].ico}</span><b>${D[k].t}</b></button>`).join('')}</div></div>`;
+    el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { dpath.push(D[b.dataset.n].t); renderDiag(b.dataset.n); }); return;
+  }
+  const n = D[node];
+  el.innerHTML = `<div class="card"><div class="crumb">${dpath.map(esc).join(' › ')}</div><h3>${esc(n.q)}</h3>${n.o.map((o, i) => `<button class="opt" data-i="${i}">${esc(o.l)}</button>`).join('')}<button class="btn gr sm" id="d-back" style="margin-top:.6rem">← Empezar de nuevo</button></div>`;
+  $('#d-back').onclick = () => renderDiag();
+  el.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
+    const o = n.o[+b.dataset.i]; dpath.push(o.l);
+    if (o.n) return renderDiag(o.n);
+    const f = o.f;
+    AL.log('diagnostico', { caso_id: 'conocimiento', area: 'Soporte técnico · Paraguay', detalle: dpath.join(' > ').slice(0, 200), ok: 'si' });
+    AL.queue('pregunta', { id: AL.uid(), ts: new Date().toISOString(), sesion: AL.cfg.sesion, titulo: 'Diagnóstico: ' + dpath.join(' > '), estado: 'diagnostico', json: JSON.stringify({ ruta: dpath, causa: f.c }) });
+    Log.add({ id: AL.uid(), ts: new Date().toISOString(), titulo: 'Diagnóstico: ' + dpath[0], estado: 'diagnostico', via: 'guiado' });
+    el.innerHTML = `<div class="card"><div class="crumb">${dpath.map(esc).join(' › ')}</div><div class="res"><h3>✅ Causa más probable</h3><p style="font-size:1.1rem;font-weight:700;margin:.2rem 0 .6rem">${esc(f.c)}</p><b>Qué hacer, en orden:</b><ol>${f.a.map(x => `<li>${esc(x)}</li>`).join('')}</ol><div class="small">⚠️ Antes de intervenir la máquina: pararla y aplicar bloqueo y etiquetado (LOTO).</div></div>
+    <h4 style="margin:1rem 0 .4rem">📚 Para profundizar</h4><div class="tags">${f.d.map(id => { const d = DOCS.find(x => x.id === id); return d ? `<button class="tag" data-od="${esc(id)}" style="border:0;cursor:pointer">${esc(d.titulo)}</button>` : ''; }).join('')}</div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap"><button class="btn" id="d-new">🩺 Otro problema</button><button class="btn tl" id="d-ask">💬 Preguntarle al agente</button><button class="btn warn" id="d-esc">🎫 No se resolvió: escalar</button></div></div>`;
+    $('#d-new').onclick = () => renderDiag(); $('#d-ask').onclick = () => { tab('chat'); ask(dpath.join(': ') + '. ¿Qué hago?'); };
+    $('#d-esc').onclick = () => escalar({ q: 'Diagnóstico sin resolver — ' + dpath.join(' › '), answer: 'Causa sugerida: ' + f.c + '. Acciones: ' + f.a.join('; '), used: f.d.map(id => ({ c: { doc: { id } } })) });
+    el.querySelectorAll('[data-od]').forEach(b => b.onclick = () => { tab('chat'); openDoc(b.dataset.od, 0); });
+  });
+}
+
+/* ====================== biblioteca ====================== */
+let cat = 'Todas';
+function renderLib() {
+  const cats = ['Todas', ...new Set(DOCS.map(d => d.cat || 'Otros'))];
+  $('#cats').innerHTML = cats.map(c => `<button class="tab ${c === cat ? 'on' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  $('#cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; renderLib(); } };
+  $('#lib').innerHTML = DOCS.filter(d => cat === 'Todas' || (d.cat || 'Otros') === cat).map(d => `<div class="card" data-d="${esc(d.id)}"><div class="tags"><span class="tag">${esc(d.cat || 'Otros')}</span>${d.origen === 'ejemplo' ? '<span class="sample">EJEMPLO</span>' : '<span class="tag">propio</span>'}</div><h4>${esc(d.titulo)}</h4><div class="small muted">${esc((d.ref || d.origen || ''))}</div></div>`).join('');
+  $('#lib').onclick = e => { const c = e.target.closest('[data-d]'); if (c) { tab('chat'); openDoc(c.dataset.d, 0); } };
+}
+async function addFile(f) {
+  let text = '';
+  if (/\.pdf$/i.test(f.name)) {
+    if (!window.pdfjsLib) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = PDFJS; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+    for (let i = 1; i <= pdf.numPages; i++) { const pg = await pdf.getPage(i), c = await pg.getTextContent(); text += '## Página ' + i + '\n' + c.items.map(x => x.str).join(' ') + '\n'; }
+  } else text = await f.text();
+  if (!/^\s*## /m.test(text)) text = text.replace(/\r/g, '').split(/\n{2,}/).reduce((a, p, i) => a + (i % 4 === 0 ? '\n## Sección ' + (i / 4 + 1) + '\n' : '\n') + p, '');
+  const u = userDocs(); u.push({ id: 'u-' + AL.uid(), cat: 'Mis documentos', titulo: f.name.replace(/\.\w+$/, ''), origen: 'Subido: ' + f.name, ref: 'Documento cargado por el usuario', texto: text.slice(0, 400000) });
+  try { LS.set('al_kbx', u); } catch (e) { AL.toast('No cupo en el navegador. Prueba con un archivo más pequeño.'); }
+}
+$('#pick').onclick = () => $('#file').click();
+$('#file').onchange = async e => { for (const f of e.target.files) { try { await addFile(f); AL.toast('Agregado: ' + f.name); } catch (er) { AL.toast('No pude leer ' + f.name); } } e.target.value = ''; build(); renderLib(); renderKpis(); };
+const drop = $('#drop'); ['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', async e => { for (const f of e.dataTransfer.files) { try { await addFile(f); AL.toast('Agregado: ' + f.name); } catch (er) {} } build(); renderLib(); renderKpis(); });
+$('#drive').onclick = async () => {
+  const r = $('#driveRes'); if (!AL.hasCloud()) { r.textContent = 'Conecta la nube en Ajustes ⚙️'; return; }
+  r.innerHTML = '<span class="spin"></span> Leyendo Drive…';
+  try { const j = await AL.cloudGet({ action: 'docs' }); const u = userDocs().filter(d => d.cat !== 'Drive'); (j.docs || []).forEach(d => u.push({ id: 'dr-' + norm(d.name).replace(/ /g, '-'), cat: 'Drive', titulo: d.name, origen: 'Google Drive', ref: 'Carpeta Conocimiento', texto: d.text.includes('## ') ? d.text : '## Contenido\n' + d.text })); LS.set('al_kbx', u); build(); renderLib(); renderKpis(); r.textContent = '✅ ' + (j.docs || []).length + ' documentos sincronizados'; }
+  catch (e) { r.textContent = '❌ No pude leer Drive: ' + e.message; }
+};
+
+/* ====================== uso ====================== */
+function renderUso() {
+  const l = Log.get().filter(x => !/^\(feedback\)/.test(x.titulo || '') && x.estado !== 'diagnostico');
+  const sin = l.filter(x => x.estado === 'sin_respuesta'), fb = Log.get().filter(x => /^util|no_util/.test(x.estado || '')), ok = fb.filter(x => x.estado === 'util').length;
+  const byDoc = {}; l.forEach(x => String(x.fuentes || '').split(',').filter(Boolean).forEach(id => byDoc[id] = (byDoc[id] || 0) + 1));
+  const top = Object.entries(byDoc).sort((a, b) => b[1] - a[1]).slice(0, 6), mx = top[0] ? top[0][1] : 1;
+  $('#t-uso').innerHTML = `<div class="two"><div class="card"><h3>📈 Documentos más consultados</h3>${top.length ? top.map(([id, n]) => { const d = DOCS.find(x => x.id === id); return `<div class="bar"><span class="lb" title="${esc(d ? d.titulo : id)}">${esc(d ? d.titulo : id)}</span><span class="tr"><i class="fl" style="width:${n / mx * 100}%"></i></span><span class="vl">${n}</span></div>`; }).join('') : '<p class="muted">Aún no hay consultas. Haz algunas preguntas y vuelve.</p>'}
+  <p class="small muted" style="margin-top:.8rem">Sirve para saber qué problemas se repiten en planta y dónde reforzar capacitación o mantenimiento.</p></div>
+  <div class="card"><h3>🕳️ Lo que la base aún no sabe</h3>${sin.length ? sin.slice(-8).reverse().map(x => `<div style="padding:.4rem 0;border-bottom:1px solid var(--line)">❓ ${esc(x.titulo)}</div>`).join('') : '<p class="muted">Todo lo preguntado hasta ahora tuvo respuesta.</p>'}<p class="small muted" style="margin-top:.8rem">Cada pregunta sin respuesta es una oportunidad: se escala a un experto y la solución entra a la base.</p></div></div>
+  <div class="card" style="margin-top:1rem"><h3>👍 Utilidad percibida</h3><p style="font-size:1.6rem;font-weight:800">${fb.length ? Math.round(ok / fb.length * 100) + '%' : '–'} <span class="small muted" style="font-weight:500">de ${fb.length} valoraciones</span></p></div>`;
+}
+function renderKpis() {
+  const l = Log.get().filter(x => !/^\(feedback\)/.test(x.titulo || '') && x.estado !== 'diagnostico'), r = l.filter(x => x.estado === 'respondida').length;
+  $('#kpis').innerHTML = `<div class="kpi"><small>Documentos en la base</small><b>${DOCS.length}</b><em>${CH.length} fragmentos indexados</em></div><div class="kpi"><small>🌱 Aprendió</small><b>${userDocs().filter(d => /Aprendido|Casos resueltos|Lecciones/.test(d.cat)).length}</b><em>soluciones validadas nuevas</em></div><div class="kpi"><small>Preguntas hechas</small><b>${l.length}</b><em>en este equipo</em></div><div class="kpi"><small>Respondidas con fuente</small><b>${l.length ? Math.round(r / l.length * 100) + '%' : '–'}</b><em>el resto se escala</em></div><div class="kpi"><small>Tickets abiertos</small><b>${Esc.get().filter(t => t.estado !== 'resuelto').length}</b><em>con expertos</em></div>`;
+}
+
+/* ====================== pestañas ====================== */
+function tab(t) {
+  document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  ['chat', 'diag', 'lib', 'esc', 'uso'].forEach(k => $('#t-' + k).hidden = k !== t);
+  if (t === 'diag') renderDiag(); if (t === 'lib') renderLib(); if (t === 'esc') renderEsc(); if (t === 'uso') renderUso();
+}
+$('#tabs').onclick = e => { const b = e.target.closest('[data-t]'); if (b) tab(b.dataset.t); };
+
+/* ====================== aprendizaje desde la línea (visión artificial → base) ====================== */
+function leccionLinea(key) {
+  const PL = window.PLANTA; let r = null, txt = '', tit = '';
+  if (key.startsWith('def:')) { const d = PL.defecto(key.slice(4)); tit = 'Lección de planta: ' + d.n; txt = `Patrón detectado por visión artificial en los informes de calidad.\nDefecto: ${d.n} (procesos: ${d.proc.join(', ')}).\nCausas probables: ${d.causas.map(c => PL.CAUSAS[c[0]].n + ' – ' + c[1] + ' (' + c[2] + '%)').join('; ')}.\nAcción inmediata: ${d.acc}.`; }
+  else { r = AL.hub.list('inspeccion').find(x => x.id === key) || PL.historial().piezas.find(x => x.id === key); if (!r) return; const d = PL.defecto(r.def);
+    tit = `Lección de planta: ${r.defecto} en ${PL.linea(r.linea).n}`; txt = `Rechazo detectado por visión artificial el ${new Date(r.ts).toLocaleString('es-CO')}.\nProducto: ${r.producto} (${r.sku}) · lote ${r.lote} · máquina ${r.maquina} · turno ${r.turno}.\nCausa probable: ${PL.CAUSAS[r.causa]?.n || ''} – ${r.causa_txt}.\nAcción inmediata: ${d.acc}.${r.ia ? '\nAnálisis de la IA: ' + r.ia : ''}\nVerificación sugerida: confirmar la causa en máquina y registrar el ajuste que lo resolvió.`; }
+  AL.modal(`<h2>🌱 Aprendizaje desde la línea de producción</h2><p class="muted small" style="margin:.3rem 0 .8rem">La visión artificial encontró esto. Si Calidad lo valida, entra a la base y el agente lo usará para responder a los técnicos.</p>
+  <div class="field"><label>Título</label><input id="l-t" value="${esc(tit)}"></div><div class="field"><label>Lección (edítala con lo que confirmó el técnico)</label><textarea id="l-x" style="min-height:10rem">${esc(txt)}</textarea></div>
+  <div style="display:flex;gap:.6rem;justify-content:flex-end"><button class="btn gr" onclick="AL.closeModal()">Ahora no</button><button class="btn ok" id="l-ok">🌱 Validar y agregar a la base</button></div>`);
+  $('#l-ok').onclick = () => { aprender({ titulo: $('#l-t').value, texto: $('#l-x').value, origen: 'Visión artificial + validación de Calidad', cat: 'Lecciones de planta' }); AL.closeModal(); tab('lib'); };
+}
+const hm = location.hash.match(/aprender=([^&]+)/); if (hm) setTimeout(() => leccionLinea(decodeURIComponent(hm[1])), 300);
+build(); renderKpis();
+AL.bar({ id: 'conocimiento', publico: 'Técnicos, ingeniería de procesos, Calidad, I+D y Soporte', area: 'Soporte técnico · Paraguay', iniciativa: 'Agente de conocimiento técnico con escalamiento por niveles',
+  narra: 'Agente de conocimiento técnico. Es para técnicos, ingenieros y calidad. Primero busca en la base técnica de Alico y responde con la fuente exacta. Si no está, investiga en fuentes confiables: normas, fabricantes y proveedores, y las cita. Si aún no hay solución, escala al especialista: el fabricante de la máquina, el proveedor de la materia prima o un laboratorio. Y cuando se resuelve, la solución entra a la base: el agente sigue aprendiendo. También aprende de los defectos que encuentra la visión artificial en la línea.',
+  help: [
+  { ico: '💬', t: 'Pregunta como a un compañero', p: 'Escribe o habla con el micrófono. También puedes tocar uno de los problemas frecuentes.' },
+  { ico: '📄', t: 'Siempre con fuente', p: 'La respuesta trae el documento y el fragmento exacto. Si no sabe, lo dice y no inventa.' },
+  { ico: '🎫', t: 'Lo que no sabe, se escala', p: 'Un experto lo resuelve y la solución entra a la base para el próximo turno.' }] });
+window.__kb = { search, ask, build };
+})();
+</script>
+</body>
+</html>
