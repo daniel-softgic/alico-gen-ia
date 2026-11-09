@@ -16,6 +16,9 @@
  */
 const SECRET = 'CAMBIA_ESTA_CLAVE';
 const CARPETA = 'Alico-Taller-IA';
+const CORREOS = true;                 // envía al cliente un correo al crear su reclamo y cada vez que cambia de estado
+const COPIA_EQUIPO = '';              // opcional: correo del equipo de servicio que recibe copia (ej. servicio@alico-sa.com)
+const REMITENTE = 'Servicio al Cliente · Alico (demo Softgic)';
 
 const COLS = {
   Eventos: ['id', 'ts', 'sesion', 'tipo', 'caso_id', 'area', 'via', 'ok', 'ms', 'min', 'operario', 'turno', 'detalle', 'ejemplo'],
@@ -79,6 +82,12 @@ function doPost(e) {
         const f = carpeta_('Modelos'), files = f.getFilesByName(d.name);
         if (files.hasNext()) files.next().setContent(d.content); else f.createFile(d.name, d.content, d.mime || 'application/json');
         n++;
+      } else if (it.kind === 'reclamo') {
+        const sh = sheet_('Reclamos', GENERICA), prev = buscar_(sh, d.id);
+        upsert_(sh, GENERICA, Object.assign({ ts: new Date().toISOString() }, d, { json: JSON.stringify(d) })); n++;
+        if (CORREOS && !d.ejemplo) {
+          if (!prev) avisar_(d, 'nuevo'); else if (prev.estado !== d.estado) avisar_(d, 'estado');
+        }
       } else if (/^[a-z_]{3,24}$/.test(it.kind)) {
         const nombre = cap_(it.kind) + 's';
         upsert_(sheet_(nombre, GENERICA), GENERICA, Object.assign({ ts: new Date().toISOString() }, d, { json: JSON.stringify(d) })); n++;
@@ -94,11 +103,11 @@ function doGet(e) {
     const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reclamos');
     if (!sh || sh.getLastRow() < 2) return out_({ ok: true, reclamo: null });
     const rows = sh.getRange(2, 1, sh.getLastRow() - 1, GENERICA.length).getValues();
-    for (let i = rows.length - 1; i >= 0; i--) if (String(rows[i][0]) === String(p.id)) { try { const r = JSON.parse(rows[i][5]); return out_({ ok: true, reclamo: { id: r.id, tipo: r.tipo, producto: r.producto, estado: r.estado } }); } catch (err) {} }
+    for (let i = rows.length - 1; i >= 0; i--) if (String(rows[i][0]) === String(p.id)) { try { const r = JSON.parse(rows[i][5]); return out_({ ok: true, reclamo: { id: r.id, tipo: r.tipo, producto: r.producto, estado: r.estado, upd: r.upd, respuesta: r.estado === 'respondido' || r.estado === 'cerrado' ? r.respuesta : '', hist: (r.hist || []).slice(-6) } }); } catch (err) {} }
     return out_({ ok: true, reclamo: null });
   }
   if (p.secret !== SECRET) return out_({ ok: false, error: 'auth' });
-  if (p.action === 'ping') return out_({ ok: true, ts: new Date().toISOString() });
+  if (p.action === 'ping') { let q = null; try { q = MailApp.getRemainingDailyQuota() + ' disponibles hoy'; } catch (err) {} return out_({ ok: true, ts: new Date().toISOString(), correo: q }); }
 
   if (p.action === 'casos') {                       // fichas de Maestro
     const sh = sheet_('Casos', COLS.Casos), last = sh.getLastRow();
@@ -141,6 +150,32 @@ function doGet(e) {
   return out_({ ok: false, error: 'accion' });
 }
 
+/* ---------- correos al cliente ---------- */
+function buscar_(sh, id) {
+  const last = sh.getLastRow(); if (last < 2) return null;
+  const rows = sh.getRange(2, 1, last - 1, GENERICA.length).getValues();
+  for (let i = rows.length - 1; i >= 0; i--) if (String(rows[i][0]) === String(id)) { try { return JSON.parse(rows[i][5]); } catch (err) { return { estado: rows[i][4] }; } }
+  return null;
+}
+const ESTADOS_ = { nuevo: 'Recibido', triage: 'En análisis', investigacion: 'Buscando la causa', decision: 'En decisión', ejecutado: 'Solución en proceso', respondido: 'Respondido', cerrado: 'Cerrado' };
+const ORDEN_ = ['nuevo', 'triage', 'investigacion', 'decision', 'ejecutado', 'respondido', 'cerrado'];
+function avisar_(r, motivo) {
+  const para = String(r.contacto || '').trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(para)) return;               // solo si dejó un correo válido
+  const est = ESTADOS_[r.estado] || r.estado, k = ORDEN_.indexOf(r.estado);
+  const pasos = ORDEN_.map(function (e, i) { const on = i <= k; return '<td style="padding:6px 4px;text-align:center;font:12px Arial;color:' + (on ? '#1c9a5b' : '#9a9a9a') + '"><div style="width:22px;height:22px;border-radius:50%;margin:0 auto 4px;background:' + (on ? '#1c9a5b' : '#e6e0d6') + ';color:#fff;line-height:22px">' + (on ? '✓' : '') + '</div>' + ESTADOS_[e] + '</td>'; }).join('');
+  const asunto = motivo === 'nuevo' ? 'Recibimos tu reclamo ' + r.id + ' · Alico' : 'Tu reclamo ' + r.id + ' cambió a «' + est + '» · Alico';
+  const intro = motivo === 'nuevo' ? 'Gracias por avisarnos. Ya registramos tu caso y el equipo lo está revisando.' : 'Tu caso avanzó. Este es su estado actual:';
+  const resp = (r.estado === 'respondido' || r.estado === 'cerrado') && r.respuesta ? '<div style="background:#f2fbfd;border:1px solid #b9eaf1;border-radius:12px;padding:14px;margin:14px 0;white-space:pre-wrap;font:14px Arial;color:#2b2e30">' + esc_(r.respuesta) + '</div>' : '';
+  const link = r.seguimiento ? '<p style="text-align:center;margin:18px 0"><a href="' + r.seguimiento + '" style="background:#EE7623;color:#fff;text-decoration:none;font:bold 15px Arial;padding:12px 22px;border-radius:12px;display:inline-block">Ver el estado de mi reclamo</a></p>' : '';
+  const html = '<div style="max-width:560px;margin:auto;font-family:Arial,sans-serif;color:#2b2e30"><div style="background:#EE7623;color:#fff;padding:18px 22px;border-radius:14px 14px 0 0"><div style="font-size:13px;opacity:.9">Servicio al Cliente · Alico</div><div style="font-size:22px;font-weight:bold">Reclamo ' + r.id + '</div></div>' +
+    '<div style="border:1px solid #f0e2d0;border-top:0;border-radius:0 0 14px 14px;padding:18px 22px"><p style="font-size:15px">Hola ' + esc_(r.cliente || '') + ',</p><p style="font-size:15px">' + intro + '</p>' +
+    '<p style="font-size:15px"><b>Estado:</b> ' + est + '<br><b>Producto:</b> ' + esc_(r.producto_n || r.producto || '') + '<br><b>Pedido:</b> ' + esc_(r.pedido || '') + '</p><table style="width:100%;border-collapse:collapse"><tr>' + pasos + '</tr></table>' + resp + link +
+    '<p style="font-size:12px;color:#888">Este correo hace parte de una demostración del Centro de inteligencia del cliente (Softgic para Alico). Si no reconoces este reclamo, ignóralo.</p></div></div>';
+  try { MailApp.sendEmail({ to: para, cc: COPIA_EQUIPO || undefined, subject: asunto, htmlBody: html, name: REMITENTE }); } catch (err) { console.log('correo: ' + err); }
+}
+function esc_(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
 /** Clave del portal del cliente: se deriva del SECRET (el PC la calcula igual) y solo permite crear reclamos. */
 function portalKey_() {
   const d = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'portal:' + SECRET, Utilities.Charset.UTF_8);
@@ -150,5 +185,6 @@ function portalKey_() {
 /** Ejecuta esta función una vez para autorizar Hojas y Drive. */
 function autorizar() {
   SpreadsheetApp.getActiveSpreadsheet().getName();
+  MailApp.getRemainingDailyQuota();                   // pide el permiso para enviar correos a los clientes
   carpeta_('Conocimiento'); carpeta_('Modelos');
 }

@@ -121,7 +121,7 @@ function pushCloud(rec) {
   const c = Object.assign({}, rec); delete c.foto; c.titulo = (TIPOS[rec.tipo] ? TIPOS[rec.tipo].n : rec.tipo) + ' · ' + prodN(rec.producto); c.sesion = rec.sesion || AL.cfg.sesion;
   AL.queue('reclamo', c);
 }
-function touch(rec, txt) { rec.upd = Date.now(); (rec.hist = rec.hist || []).push({ ts: new Date().toISOString(), txt }); save(); pushCloud(rec); }
+function touch(rec, txt) { rec.upd = Date.now(); (rec.hist = rec.hist || []).push({ ts: new Date().toISOString(), txt }); save(); pushCloud(rec); try { avisarCelular(rec); } catch (e) {} }
 async function pull() {
   if (!AL.hasCloud()) return;
   try {
@@ -189,7 +189,8 @@ function vCli() {
   <div class="${PHONE ? '' : 'cust'}" style="width:100%">
     <div class="guide"><span class="gi">👤</span><div><b>Cuéntanos qué pasó con tu pedido</b><span>Toma 1 minuto. Con una foto lo resolvemos más rápido y te avisamos cada paso.</span></div></div>
     <div class="card" id="cform">
-      <div class="two"><div class="field"><label>Empresa</label><input id="c-emp" list="dl-emp" placeholder="Ej.: Alimentos Cordillera SpA"><datalist id="dl-emp">${CLIENTES.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div><div class="field"><label>Correo o WhatsApp</label><input id="c-con" placeholder="nombre@empresa.cl"></div></div>
+      <div class="two"><div class="field"><label>Empresa</label><input id="c-emp" list="dl-emp" placeholder="Ej.: Alimentos Cordillera SpA"><datalist id="dl-emp">${CLIENTES.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div><div class="field"><label>Tu correo (te enviamos cada avance)</label><input id="c-con" type="email" inputmode="email" autocomplete="email" placeholder="nombre@empresa.com"></div></div>
+      <div class="field"><label>WhatsApp (opcional)</label><input id="c-wa" type="tel" inputmode="tel" placeholder="+57 300 000 0000"></div>
       <div class="two"><div class="field"><label>N.º de pedido o factura</label><input id="c-ped" placeholder="PV-7421"></div><div class="field"><label>Producto</label><select id="c-prod">${PRODUCTOS.map(p => `<option value="${p.id}">${esc(p.n)}</option>`).join('')}</select></div></div>
       <div class="field"><label>¿Qué pasó?</label><div class="pick" id="c-tipo">${Object.entries(TIPOS).map(([k, t], i) => `<button type="button" class="pk ${i ? '' : 'on'}" data-k="${k}">${esc(t.n)}</button>`).join('')}</div></div>
       <div class="two"><div class="field"><label>Cantidad afectada (unidades)</label><input id="c-qty" type="number" min="1" value="500"></div><div class="field"><label>Foto (opcional)</label><input id="c-foto" type="file" accept="image/*" capture="environment"></div></div>
@@ -205,10 +206,12 @@ function vCli() {
   $('#c-tipo').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; tipo = b.dataset.k; $$('#c-tipo .pk').forEach(x => x.classList.toggle('on', x === b)); };
   $('#c-send').onclick = async () => {
     const emp = $('#c-emp').value.trim(), con = $('#c-con').value.trim(), desc = $('#c-desc').value.trim();
-    if (!emp || !con || !desc) return AL.toast('Completa empresa, contacto y qué pasó');
+    if (!emp || !con || !desc) return AL.toast('Completa empresa, correo y qué pasó');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(con)) return AL.toast('Escribe un correo válido: ahí te llega tu número de reclamo');
     if (!$('#c-ok').checked) return AL.toast('Falta autorizar el tratamiento de datos');
     const f = $('#c-foto').files[0], foto = f ? await shrink(f) : null;
-    const rec = { id: 'R-' + (2400 + R.length + Math.floor(Math.random() * 90)), ts: new Date().toISOString(), upd: Date.now(), cliente: emp, contacto: con, pais: 'Chile', pedido: $('#c-ped').value || 'sin dato', producto: $('#c-prod').value, tipo, cantidad: +$('#c-qty').value || 1, desc, canal: PHONE ? 'Celular (QR)' : 'Portal', estado: 'nuevo', hist: [], sesion: AL.cfg.sesion };
+    const rec = { id: 'R-' + (2400 + R.length + Math.floor(Math.random() * 90)), ts: new Date().toISOString(), upd: Date.now(), cliente: emp, contacto: con, pais: 'Chile', pedido: $('#c-ped').value || 'sin dato', producto: $('#c-prod').value, tipo, cantidad: +$('#c-qty').value || 1, desc, whatsapp: ($('#c-wa').value || '').trim(), canal: PHONE ? 'Celular (QR)' : 'Portal', estado: 'nuevo', hist: [], sesion: AL.cfg.sesion };
+    rec.producto_n = prodN(rec.producto); rec.seguimiento = (PHONE ? location.href.split('&id=')[0] : qrLink()) + '&id=' + rec.id;
     if (foto) { rec.foto = foto; rec.fotoRef = 'reclamo-' + rec.id + '.foto'; if (AL.hasCloud()) AL.saveFile(rec.fotoRef, foto, 'text/plain'); }
     if (PHONE && (PH.cloud || PH.relay)) {
       $('#c-send').disabled = true; $('#c-send').innerHTML = '<span class="spin"></span> Enviando…';
@@ -218,13 +221,14 @@ function vCli() {
     } else { R.unshift(rec); touch(rec, 'Reclamo recibido por ' + rec.canal); }
     AL.log('reclamo_nuevo', { caso_id: 'reclamos', area: 'Servicio al cliente · Chile', detalle: rec.id + ' ' + tipo, ok: 'si' });
     $('#cform').hidden = true; lastCreated = rec;
+    if (PHONE) { misRec(rec); verEstado(rec.id); return; }
     $('#cres').innerHTML = `<div class="card big-ok"><div class="e">✅</div><h2>¡Recibimos tu reclamo!</h2><p class="muted">Tu código es</p><p style="font-size:2.2rem;font-weight:800;color:var(--or-d)">${rec.id}</p><div style="text-align:left">${stepper({ estado: 'nuevo' })}</div><div id="auto" class="box ai" style="text-align:left"><span class="spin"></span> Preparando tu respuesta…</div><button class="btn gr" id="again">Reportar otro</button></div>`;
     $('#again').onclick = () => { $('#cres').innerHTML = ''; $('#cform').hidden = false; $('#c-desc').value = ''; };
     const tr = PHONE ? basicTriage(rec) : AL.hasIA() ? await triage(rec) : (rec.triage = basicTriage(rec), rec.estado = 'triage', touch(rec, 'Triage por reglas'), rec.triage);
     $('#auto').innerHTML = `<h4>Lo que ya hicimos por ti</h4><p>${esc(tr.resumen || '')}</p><div style="white-space:pre-wrap;margin-top:.5rem">${esc(tr.respuesta || draft(rec, tr.res))}</div>`;
   };
   $('#c-find').onclick = async () => {
-    const code = $('#c-code').value.trim().toUpperCase(); let r = byId(code);
+    const code = $('#c-code').value.trim().toUpperCase(); if (PHONE) { $('#cform').hidden = true; return verEstado(code); } let r = byId(code);
     if (!r && AL.hasCloud()) { try { (await AL.rows('reclamo', 300)).forEach(x => { if (x.id === code) r = x; }); } catch (e) {} }
     if (!r && PHONE && PH.cloud && PH.key) { try { const j = await (await fetch(PH.cloud + '?action=estado&portal=' + PH.key + '&id=' + encodeURIComponent(code))).json(); if (j.ok && j.reclamo) r = j.reclamo; } catch (e) {} }
     $('#c-st').innerHTML = r ? `<div style="margin-top:.8rem"><b>${esc(TIPOS[r.tipo].n)}</b> · ${esc(prodN(r.producto))}<div class="chip or" style="margin-left:.5rem">${EST_N[r.estado]}</div>${stepper(r)}</div>` : '<p class="muted" style="margin-top:.6rem">No encontré ese código.</p>';
@@ -263,7 +267,7 @@ async function pollRelay() {
     const t = await (await fetch('https://ntfy.sh/' + RELAY + '/json?poll=1&since=' + since)).text(); let ch = false;
     t.split('\n').filter(Boolean).forEach(l => { let m; try { m = JSON.parse(l); } catch (e) { return; } if (m.event !== 'message') return; since = m.id;
       if (/^FOTO:/.test(m.message || '') && m.attachment) { const x = byId(m.message.slice(5)); if (x) { x.foto = m.attachment.url; ch = true; } return; }
-      let x; try { x = JSON.parse(m.message); } catch (e) { return; } if (!x.id || byId(x.id)) return; x.hist = x.hist || []; R.unshift(x); ch = true; entrante(x); });
+      let x; try { x = JSON.parse(m.message); } catch (e) { return; } if (x.t || !x.id || byId(x.id)) return; x.hist = x.hist || []; R.unshift(x); ch = true; entrante(x); });
     LS.set('al_relay_since', since); if (ch) { save(); refresh(); }
   } catch (e) {}
 }
@@ -273,6 +277,40 @@ function entrante(x) {
   sel = x.id; if (view !== 'agt') tab('agt');
   if (x.estado === 'nuevo') setTimeout(async () => { await triage(x); if (view === 'agt') vAgt(); }, 600);
 }
+/* ===== el cliente sigue su reclamo en el celular: se actualiza solo ===== */
+function misRec(r) { const l = LS.get('mis_rec', []).filter(x => x.id !== r.id); l.unshift({ id: r.id, ts: r.ts, cliente: r.cliente, contacto: r.contacto, tipo: r.tipo, producto: r.producto, estado: r.estado, hist: r.hist || [] }); LS.set('mis_rec', l.slice(0, 10)); }
+let segT = null;
+const EST_C = { nuevo: 'Recibido', triage: 'En análisis', investigacion: 'Buscando la causa', decision: 'En decisión', ejecutado: 'Solución en proceso', respondido: 'Respondido', cerrado: 'Cerrado' };
+async function estadoRemoto(id) {
+  if (PH && PH.cloud && PH.key) { try { const j = await (await fetch(PH.cloud + '?action=estado&portal=' + PH.key + '&id=' + encodeURIComponent(id))).json(); if (j.ok && j.reclamo) return j.reclamo; } catch (e) {} }
+  if (PH && PH.relay) {
+    const mine = LS.get('mis_rec', []).find(x => x.id === id), since = mine ? Math.floor(new Date(mine.ts) / 1000) - 60 : '12h';
+    try { const t = await (await fetch('https://ntfy.sh/' + PH.relay + '/json?poll=1&since=' + since)).text(); let last = null;
+      t.split('\n').filter(Boolean).forEach(l => { try { const m = JSON.parse(l), x = JSON.parse(m.message || '{}'); if (x.t === 'estado' && x.id === id) last = x; } catch (e) {} });
+      if (last) return last; } catch (e) {}
+  }
+  return null;
+}
+async function verEstado(id) {
+  clearTimeout(segT); const box = $('#cres'); if (!box) return;
+  const mine = LS.get('mis_rec', []).find(x => x.id === id);
+  let r = await estadoRemoto(id); if (r && mine) { Object.assign(mine, { estado: r.estado, respuesta: r.respuesta || mine.respuesta }); misRec(mine); }
+  r = Object.assign({}, mine || {}, r || {}); if (!r.estado) { box.innerHTML = '<div class="card"><p class="muted">No encontré ese código todavía. Revisa que esté bien escrito.</p></div>'; $('#cform').hidden = false; return; }
+  const cerrado = r.estado === 'cerrado';
+  box.innerHTML = `<div class="card big-ok"><div class="e">${cerrado ? '🎉' : '✅'}</div><h2>${r.estado === 'nuevo' ? '¡Recibimos tu reclamo!' : 'Tu reclamo avanza'}</h2><p class="muted">Código</p><p style="font-size:2.2rem;font-weight:800;color:var(--or-d)">${esc(id)}</p>
+    <div class="chip or" style="font-size:.95rem;margin:.3rem 0">${EST_C[r.estado] || r.estado}</div><div style="text-align:left">${stepper(r)}</div>
+    ${r.respuesta ? `<div class="box ai" style="text-align:left"><h4>✉️ Respuesta de Alico</h4><div style="white-space:pre-wrap">${esc(r.respuesta)}</div></div>` : `<div class="box ai" style="text-align:left"><h4>¿Qué sigue?</h4><p>El equipo de Servicio al Cliente ya tiene tu caso. Esta pantalla se actualiza sola${PH && PH.cloud ? ' y te enviamos cada avance a <b>' + esc(r.contacto || mine?.contacto || 'tu correo') + '</b>' : ''}.</p></div>`}
+    <p class="small muted" style="margin:.6rem 0"><span class="spin" style="width:.8rem;height:.8rem;border-width:2px"></span> Actualizando en vivo · ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
+    <button class="btn gr" id="again">Reportar otro caso</button></div>`;
+  $('#again').onclick = () => { clearTimeout(segT); box.innerHTML = ''; $('#cform').hidden = false; $('#c-desc').value = ''; history.replaceState(null, '', location.href.split('&id=')[0]); };
+  if (!cerrado) segT = setTimeout(() => verEstado(id), 6000);
+}
+/* el equipo avisa al celular cada cambio (relevo sin nube) */
+function avisarCelular(rec) {
+  if (PHONE || AL.hasCloud() || !/Celular/.test(rec.canal || '')) return;
+  fetch('https://ntfy.sh/' + RELAY, { method: 'POST', body: JSON.stringify({ t: 'estado', id: rec.id, estado: rec.estado, respuesta: rec.respuesta || '', upd: rec.upd }) }).catch(() => {});
+}
+
 /* aviso preventivo desde la planta: la visión artificial retiró piezas de un lote */
 function proactivo() {
   const lote = decodeURIComponent((location.hash.match(/lote=([^&]+)/) || [])[1] || ''); if (!lote || R.some(r => r.lote === lote)) return '';
@@ -298,7 +336,7 @@ function vAgt() {
   const el = $('#v-agt'); if (!sel || !byId(sel)) sel = (R.slice().sort((x, y) => new Date(y.ts) - new Date(x.ts))[0] || {}).id;
   const L = R.slice().sort((x, y) => new Date(y.ts) - new Date(x.ts)).filter(r => (flt.e === 'todos' || (flt.e === 'abiertos' ? r.estado !== 'cerrado' : r.estado === flt.e)) && (!flt.q || (r.id + r.cliente + r.desc + prodN(r.producto)).toLowerCase().includes(flt.q.toLowerCase())));
   const open = R.filter(r => r.estado !== 'cerrado'), venc = open.filter(r => slaInfo(r).over).length;
-  el.innerHTML = `<div class="inc"><span class="dot"></span><b>Escuchando reclamos entrantes</b><span class="small" style="opacity:.8">${canalTxt()}</span><span class="sp"></span><button class="btn sm" id="goqr">📱 Mostrar QR</button></div>${proactivo()}
+  el.innerHTML = `<div class="inc"><span class="dot"></span><b>Escuchando reclamos entrantes</b><span class="small" style="opacity:.8">${canalTxt()} · ${AL.hasCloud() ? '✉️ correos al cliente activos' : '✉️ correos al cliente: conecta la nube en Ajustes'}</span><span class="sp"></span><button class="btn sm" id="goqr">📱 Mostrar QR</button></div>${proactivo()}
   <div class="kstrip"><span><b>${open.length}</b>abiertos</span><span><b>${R.filter(r => r.estado === 'nuevo').length}</b>sin triage</span><span><b style="color:${venc ? 'var(--bad)' : 'var(--ok)'}">${venc}</b>fuera de SLA</span><span><b>${AL.money(open.reduce((s, r) => s + r.cantidad * prodP(r.producto), 0))}</b>en disputa</span></div>
   <div class="split"><div class="card"><div style="display:flex;gap:.4rem;margin-bottom:.6rem"><input class="inp" id="f-q" placeholder="Buscar cliente, código…" value="${esc(flt.q)}"><select class="inp" id="f-e" style="width:9rem"><option value="todos">Todos</option><option value="abiertos">Abiertos</option>${EST.map(e => `<option value="${e}">${EST_N[e]}</option>`).join('')}</select></div>
   <div class="list">${L.map(r => { const s = slaInfo(r); return `<button class="it ${r.id === sel ? 'on' : ''}" data-id="${r.id}"><b><span class="sev s${s.t}"></span>${r.id} · ${esc(r.cliente)} ${r.ejemplo ? '<span class="sample">EJEMPLO</span>' : ''}</b><small>${esc(TIPOS[r.tipo].n)} · ${r.cantidad} uds</small><br><small>${EST_N[r.estado]} · ${fecha(r.ts)}${r.estado !== 'cerrado' && s.over ? ' · <b style="color:var(--bad)">vencido</b>' : ''}</small></button>`; }).join('') || '<p class="muted">Sin resultados.</p>'}</div></div>
@@ -387,6 +425,7 @@ AL.bar({ id: 'reclamos', publico: 'Servicio al cliente, Calidad, Logística, Ven
   { ico: '🤖', t: 'La IA hace el trabajo pesado', p: 'Clasifica, mide severidad, propone causas raíz y redacta la respuesta. Las personas deciden.' },
   { ico: '🏭', t: 'Se resuelve y se aprende', p: 'La decisión se ejecuta en Epicor (simulado) y cada caso cerrado alimenta el tablero de Gerencia.' }] });
 tab(PHONE ? 'cli' : 'agt'); pull(); pollRelay();
+if (PHONE) { const id = HP.get('id'); if (id) { $('#cform').hidden = true; verEstado(id); } else { const m = LS.get('mis_rec', []); if (m.length) $('#cres').insertAdjacentHTML('beforebegin', `<div class="card" style="margin-bottom:1rem"><h3>📋 Mis reclamos</h3>${m.slice(0, 4).map(x => `<button class="it" data-mr="${esc(x.id)}" style="margin:.3rem 0"><b>${esc(x.id)}</b><small>${esc(EST_C[x.estado] || x.estado)} · ${fecha(x.ts)}</small></button>`).join('')}</div>`); document.querySelectorAll('[data-mr]').forEach(b => b.onclick = () => { $('#cform').hidden = true; verEstado(b.dataset.mr); }); } }
 window.__rec = { R: () => R, triage, basicTriage };
 })();
 </script>

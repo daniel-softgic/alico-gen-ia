@@ -45,6 +45,16 @@ body.pres .side{display:none}
 .stage video,.stage canvas.ov{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
 .noCam{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--mut)}
 .noCam b{color:var(--txt);font-size:20px;display:block;margin-bottom:8px}
+.noCam .bigcam{font-size:22px;padding:18px 34px;border-radius:18px;background:var(--cy);color:#00222A;border:0;font-weight:700;cursor:pointer;box-shadow:0 0 0 0 #00BED688;animation:pls 1.8s infinite;margin:14px 0 10px}
+@keyframes pls{70%{box-shadow:0 0 0 18px #00BED600}}
+.noCam .err{max-width:560px;margin:12px auto 0;background:#4A0F10E0;border:1px solid var(--bad);border-radius:14px;padding:12px 16px;color:#FFD6D6;text-align:left;font-size:14px;line-height:1.5}
+.noCam .err b{display:inline;font-size:inherit;margin:0;color:#fff}.noCam .err .et{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.coach{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(680px,92%);background:#0B1B22F2;border:2px solid var(--cy);border-radius:18px;padding:14px 18px;display:none;gap:14px;align-items:center;z-index:5;backdrop-filter:blur(6px)}
+.coach.on{display:flex}
+.coach .st{font-size:12px;color:var(--cy);font-weight:700;letter-spacing:.5px}
+.coach .tx{font-size:16px;line-height:1.4}.coach .tx b{color:#fff}
+.coach .go{margin-left:auto;background:var(--cy);color:#00222A;border:0;border-radius:14px;padding:12px 20px;font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap}
+.coach .dots{display:flex;gap:5px;margin-top:6px}.coach .dots i{width:26px;height:5px;border-radius:9px;background:#ffffff33}.coach .dots i.on{background:var(--cy)}
 .badge{position:absolute;top:12px;left:12px;background:#000A;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--mut);backdrop-filter:blur(6px)}
 .badge.sim{color:var(--amb);border-color:var(--amb)}
 .banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);min-width:340px;max-width:70%;text-align:center;border-radius:18px;padding:12px 28px;
@@ -179,7 +189,8 @@ table.tt td{padding:6px;border-bottom:1px solid #ffffff0d;vertical-align:top}tab
     <div class="stage s-idle" id="stage">
       <video id="vid" playsinline muted></video>
       <canvas class="ov" id="ov"></canvas>
-      <div class="noCam" id="noCam"><div><b>Conecta la cámara del PC</b>Pulsa «Activar cámara» y acepta el permiso.<br>Sin cámara, usa «Modo simulación».</div></div>
+      <div class="noCam" id="noCam"><div><b>Paso 1 · Enciende la cámara</b>Cuando el navegador pregunte, elige <b style="display:inline;font-size:inherit">Permitir</b>.<br><button class="bigcam" id="bigCam">📷 Activar cámara</button><br><a href="#" id="bigSim" style="color:var(--amb)">¿No hay cámara? Usa la línea simulada</a><div id="camErr"></div></div></div>
+      <div class="coach" id="coach"></div>
       <div class="badge" id="badge">Cámara apagada</div>
       <div class="banner" id="banner"><div class="t" id="bT">Esperando cámara</div><div class="u" id="bU"></div></div>
     </div>
@@ -285,14 +296,46 @@ async function listCams() {
 }
 function stopStream() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } if (simTimer) { clearInterval(simTimer); simTimer = null; } }
 async function startCamera(deviceId) {
-  stopStream(); S.sim = false; $('#simbar').classList.remove('on'); $('#btnSim').textContent = 'Modo simulación';
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { toast('Este navegador no permite usar la cámara. Abre el archivo con Chrome o Edge.'); return; }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId ? { exact: deviceId } : undefined, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
-    vid.srcObject = stream; await vid.play(); attached('Cámara en vivo', false); listCams();
-  } catch (e) {
-    toast('No se pudo abrir la cámara: ' + (e.name === 'NotAllowedError' ? 'permiso denegado' : e.message), 4000);
+  stopStream(); S.sim = false; $('#simbar').classList.remove('on'); $('#btnSim').textContent = 'Modo simulación'; $('#camErr').innerHTML = '';
+  if (!window.isSecureContext) return camError('inseguro');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return camError('navegador');
+  $('#bigCam').textContent = '⏳ Esperando permiso…'; $('#btnCam').textContent = '⏳ Abriendo…';
+  /* se intenta de lo más específico a lo más simple: así funciona con cámaras USB, integradas y virtuales */
+  const tries = [deviceId ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } } : null, { width: { ideal: 1280 }, height: { ideal: 720 } }, true].filter(Boolean);
+  let last = null;
+  for (const v of tries) {
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: v, audio: false }); break; }
+    catch (e) { last = e; stream = null; if (e.name === 'NotAllowedError' || e.name === 'SecurityError') break; }
   }
+  $('#bigCam').textContent = '📷 Activar cámara'; $('#btnCam').textContent = 'Activar cámara';
+  if (!stream) return camError(last ? last.name : 'desconocido', last);
+  try { vid.srcObject = stream; await vid.play(); } catch (e) {}
+  await new Promise(r => { if (vid.videoWidth) r(); else { vid.onloadedmetadata = () => r(); setTimeout(r, 2500); } });
+  attached('Cámara en vivo', false); listCams(); coach();
+}
+function camError(kind, e) {
+  const M = {
+    NotAllowedError: ['El permiso de cámara está bloqueado', 'Haz clic en el <b>candado 🔒</b> (o el ícono de cámara 📷 tachado) a la izquierda de la dirección web → <b>Cámara: Permitir</b> → recarga la página (F5).'],
+    SecurityError: ['El navegador bloqueó la cámara', 'Abre el portal desde el enlace <b>https://daniel-softgic.github.io/…</b> y permite la cámara en el candado 🔒.'],
+    NotReadableError: ['La cámara está ocupada', 'Otra aplicación la está usando: cierra <b>Teams, Zoom, Meet, WhatsApp o la app Cámara</b> y vuelve a intentar.'],
+    TrackStartError: ['La cámara está ocupada', 'Cierra Teams, Zoom, Meet o la app Cámara y vuelve a intentar.'],
+    NotFoundError: ['No encontré ninguna cámara', 'Conecta una cámara USB o revisa que la del portátil no esté desactivada (tecla de cámara o tapa física). Mientras tanto usa la línea simulada.'],
+    OverconstrainedError: ['Esa cámara no respondió', 'Elige otra cámara en la lista de arriba o vuelve a intentar.'],
+    inseguro: ['Hay que abrir el portal por https', 'La cámara solo funciona desde el enlace publicado (https://daniel-softgic.github.io/alico-gen-ia/) o abriendo el archivo directamente.'],
+    navegador: ['Este navegador no permite la cámara', 'Usa <b>Microsoft Edge</b> o <b>Google Chrome</b> actualizados.']
+  }, m = M[kind] || ['No se pudo abrir la cámara', (e && e.message ? AL.esc(e.message) + '. ' : '') + 'Prueba de nuevo, revisa el permiso en el candado 🔒 o usa la línea simulada.'];
+  $('#noCam').style.display = ''; $('#camErr').innerHTML = `<div class="err"><div class="et">⚠️ ${m[0]}</div>${m[1]}<div style="margin-top:8px"><button class="btn sm" onclick="document.getElementById('bigCam').click()">Intentar de nuevo</button></div></div>`;
+  setStatus('idle', 'Cámara apagada', m[0]);
+}
+/* asistente dentro del video: dice qué hacer en cada momento */
+function coach() {
+  const c = $('#coach'); if (!c) return;
+  if (!S.cam) { c.classList.remove('on'); return; }
+  const bg = cl('bg').samples.length, ok = cl('ok').samples.length, dots = n => `<div class="dots">${[1, 2, 3].map(k => `<i class="${k <= n ? 'on' : ''}"></i>`).join('')}</div>`;
+  if (capturing) { c.classList.add('on'); c.innerHTML = `<div><div class="st">APRENDIENDO…</div><div class="tx">Quédate quieto unos segundos.</div></div>`; return; }
+  if (!bg) { c.classList.add('on'); c.innerHTML = `<div><div class="st">PASO 2 DE 3 · ENSEÑAR EL FONDO</div><div class="tx">Retira todo de la zona marcada y deja la banda <b>vacía</b>.</div>${dots(2)}</div><button class="go" id="cgo">Capturar fondo vacío</button>`; $('#cgo').onclick = () => capture('bg', 25, 60); return; }
+  if (!ok) { c.classList.add('on'); c.innerHTML = `<div><div class="st">PASO 3 DE 3 · ENSEÑAR UNA PIEZA BUENA</div><div class="tx">Pon una pieza <b>buena</b> dentro del recuadro y muévela suave mientras aprende.</div>${dots(3)}</div><button class="go" id="cgo">Capturar pieza buena</button>`; $('#cgo').onclick = () => capture('ok', 60, 70); return; }
+  if (!coach.done) { coach.done = true; $('#banner').style.display = ''; c.classList.add('on'); c.innerHTML = `<div><div class="st">✅ LISTO</div><div class="tx">Acerca piezas: <b style="color:var(--ok)">verde</b> pasa, <b style="color:#FF8082">rojo</b> se retira con informe.</div></div><button class="go" id="cgo">Entendido</button>`; $('#cgo').onclick = () => c.classList.remove('on'); setTimeout(() => c.classList.remove('on'), 9000); return; }
 }
 function attached(label, sim) {
   S.cam = true; $('#noCam').style.display = 'none';
@@ -494,7 +537,7 @@ function classify(v) {
 let capturing = false;
 async function capture(id, frames, every) {
   if (capturing) return; if (!S.cam || !vid.videoWidth) { toast('Primero activa la cámara o el modo simulación'); return; }
-  const c = cl(id); capturing = true; S.mode = 'learn';
+  const c = cl(id); capturing = true; S.mode = 'learn'; coach();
   const btn = document.querySelector('[data-cap="' + id + '"]');
   const bar = btn && btn.querySelector('i');
   setStatus('learn', 'APRENDIENDO ' + (c.kind === 'bg' ? 'EL FONDO' : c.kind === 'ok' ? 'LO CONFORME' : 'EL DEFECTO'), 'Mantén el empaque quieto y dentro del recuadro');
@@ -509,11 +552,12 @@ async function capture(id, frames, every) {
   if (bar) setTimeout(() => bar.style.width = '0', 400);
   await new Promise(r => setTimeout(r, 20)); calibrate();
   S.votes = []; S.stable = null; S.piece = null; S.mode = 'run'; capturing = false;
-  render(); persist(); setStatus('idle', 'Esperando empaque', '');
+  render(); persist(); setStatus('idle', 'Esperando empaque', ''); coach();
 }
 
 /* ---------------- ciclo en vivo ---------------- */
 function setStatus(kind, t, u) {
+  const bn = $('#banner'); if (bn) bn.style.display = S.cam && !($('#coach') && $('#coach').classList.contains('on') && !coach.done) ? '' : 'none';
   stage.className = 'stage s-' + kind; $('#bT').textContent = t; $('#bU').textContent = u || '';
 }
 function snapshot() {
@@ -778,6 +822,8 @@ $('#addDef').onclick = () => { const n = S.classes.filter(c => c.kind === 'bad')
 $('#cBg').dataset.cap = 'bg'; $('#cOk').dataset.cap = 'ok';
 $('#cBg').onclick = () => capture('bg', 25, 60); $('#cOk').onclick = () => capture('ok', 60, 70);
 $('#btnCam').onclick = () => startCamera($('#camSel').value || null);
+$('#bigCam').onclick = () => startCamera($('#camSel').value || null);
+$('#bigSim').onclick = e => { e.preventDefault(); startSim().then(() => setTimeout(coach, 300)); };
 $('#camSel').onchange = () => startCamera($('#camSel').value);
 $('#btnSim').onclick = () => S.sim ? (stopStream(), S.cam = false, S.sim = false, vid.srcObject = null, $('#simbar').classList.remove('on'), $('#btnSim').textContent = 'Modo simulación', $('#noCam').style.display = '', $('#badge').textContent = 'Cámara apagada', $('#badge').classList.remove('sim'), setStatus('idle', 'Esperando cámara', '')) : startSim();
 document.querySelectorAll('[data-sim]').forEach(b => b.onclick = () => { autoLine(false); setSim(b.dataset.sim); });

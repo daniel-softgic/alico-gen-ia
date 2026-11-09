@@ -16,17 +16,18 @@ Sin nube ni clave el portal abre y se puede presentar, pero los datos quedan sol
 2. Sube todo el contenido de la carpeta (el `index.html` en la raíz).
 3. Settings → Pages → Branch `main` / root → Save. En 1–2 min tienes `https://TU-USUARIO.github.io/alico-planta/`.
 
-**B. Crear la nube (Google)**
-1. Crea una hoja de cálculo vacía → Extensiones → Apps Script.
-2. Pega el contenido de `apps-script/Code.gs`. Cambia `SECRET` por una clave tuya.
-3. Ejecuta la función `autorizar` y acepta permisos (Hojas y Drive).
-4. Implementar → Nueva implementación → Aplicación web → Ejecutar como «Yo» · Acceso «Cualquier usuario» → copia la URL que termina en `/exec`.
-5. En Drive aparecerá la carpeta `Alico-Taller-IA` con `Modelos` y `Conocimiento`.
+**B. Crear la nube (Google) — necesaria para los correos al cliente y para guardar todo**
+1. Entra a sheets.google.com con la cuenta de Google que enviará los correos (ej. una cuenta de Softgic) y crea una hoja vacía. Ponle nombre «Alico GEN IA».
+2. En la hoja: **Extensiones → Apps Script**. Borra lo que aparece y pega todo el contenido de `apps-script/Code.gs`.
+3. En la línea `const SECRET = 'CAMBIA_ESTA_CLAVE';` cambia el texto por una clave tuya (ej. `alico-taller-2026`). Opcional: en `COPIA_EQUIPO` pon el correo del equipo que recibe copia. Guarda (ícono de disquete).
+4. Arriba, en el selector de funciones, elige **autorizar** y pulsa **Ejecutar**. Google pedirá permisos (Hojas, Drive y **enviar correo**): «Revisar permisos» → tu cuenta → «Configuración avanzada» → «Ir a … (no seguro)» → **Permitir**. Es normal: el script es tuyo.
+5. **Implementar → Nueva implementación** → ícono de engranaje → **Aplicación web**. «Ejecutar como: **Yo**» y «Quién tiene acceso: **Cualquier usuario**» → Implementar → copia la **URL de la aplicación web** (termina en `/exec`).
+6. En el portal: **⚙️ Ajustes** → pega la URL en «URL de la nube» y la misma clave del paso 3 en «Clave de la nube» → **☁️ Probar nube** debe decir «✅ Nube conectada · correos activos».
 
-> Si ya tenías el Apps Script instalado: pega el `Code.gs` nuevo (trae el permiso del portal del cliente) y en Implementar → Administrar implementaciones → editar → **Nueva versión**. La URL `/exec` no cambia.
+Con esto, cada reclamo del caso 4 envía al cliente un correo con su número y uno nuevo cada vez que cambia de estado (límite de Google: 100 correos al día en cuentas gratuitas, 1.500 en Workspace).
 
 **C. Clave de IA**
-console.anthropic.com → API Keys → crea una clave **con límite de gasto** (ej. USD 10). Bórrala al terminar el taller.
+console.anthropic.com → inicia sesión → **Billing**: agrega créditos (ej. USD 10) → **API Keys → Create Key** → copia la clave (empieza por `sk-ant-`, solo se muestra una vez). Pégala en ⚙️ Ajustes → «Clave de la IA» → **🤖 Probar IA**. Bórrala al terminar el taller. Para el nivel 2 del caso 3 con búsqueda web: Settings → Privacy/Tools → habilitar **Web search** en la organización.
 
 **D. Conectar el portal (en el PC del taller)**
 Abre el link de GitHub → **Ajustes** → pega: nombre de sesión, clave de IA, URL `/exec` y clave de la nube → «Probar IA» y «Probar nube» deben salir ✅ → Guardar. Los ajustes quedan solo en ese navegador; repite en cada equipo (el celular del cliente no necesita nada).

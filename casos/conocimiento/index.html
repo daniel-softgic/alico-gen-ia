@@ -113,6 +113,7 @@
 </main>
 
 <script src="kb.js"></script>
+<script src="kb2.js"></script>
 <script>
 (() => {
 'use strict';
@@ -162,6 +163,23 @@ function search(q, k = 5) {
 /* ====================== uso (preguntas) ====================== */
 const Log = { get: () => LS.get('al_kb_log', []), add(r) { const l = Log.get(); l.push(r); LS.set('al_kb_log', l.slice(-300)); } };
 const Esc = { get: () => LS.get('al_kb_esc', []), set: v => LS.set('al_kb_esc', v) };
+/* casos reportados de EJEMPLO: se agregan una sola vez y NUNCA borran lo que ya registró el equipo */
+(function sembrarEjemplos() {
+  const d = n => new Date(Date.now() - n * 864e5).toISOString();
+  const T = [
+    { id: 'T-EJ104', ts: d(1), titulo: '¿La tinta base agua afecta la adhesión con laminación sin solvente en Flex Up?', estado: 'abierto', prioridad: 'Normal', quien: 'Ingeniería de procesos · Turno A', especialista: '🧪 Proveedor de materia prima', niveles: 'N1 sin respuesta · N2 investigado' },
+    { id: 'T-EJ105', ts: d(2), titulo: 'Geles en Bolsa Termoflex +B con el lote de resina R-2210', estado: 'abierto', prioridad: 'Alta (parada de línea)', quien: 'Calidad · Turno C', especialista: '🔬 Laboratorio / centro tecnológico', niveles: 'N1 respondido parcialmente' },
+    { id: 'T-EJ106', ts: d(4), titulo: 'Vibración en la extrusora EX-01 al pasar de 80 a 95 m/min', estado: 'abierto', prioridad: 'Normal', quien: 'Mantenimiento · Turno B', especialista: '🏭 Fabricante de la máquina', niveles: 'N1 sin respuesta · N2 investigado' },
+    { id: 'T-EJ101', ts: d(9), titulo: 'Sello débil en Bolsa QUADSEAL solo en el lado operador', estado: 'resuelto', prioridad: 'Alta (parada de línea)', quien: 'Supervisor Conversión 3', especialista: '👷 Especialista interno de Alico', solucion: 'Teflón de mordaza gastado (1.900 h). Ver caso resuelto en la biblioteca.' },
+    { id: 'T-EJ102', ts: d(15), titulo: 'Delaminación en Flex Up Negra Mate al abrir el zipper', estado: 'resuelto', prioridad: 'Normal', quien: 'Calidad', especialista: '🧪 Proveedor de materia prima', solucion: 'Curado incompleto por sala fría y húmeda. Liberar por T-peel.' },
+    { id: 'T-EJ103', ts: d(22), titulo: 'Fisuras en tapas termoformadas en el arranque del turno', estado: 'resuelto', prioridad: 'Baja', quien: 'Producción Termoformado 1', especialista: '👷 Especialista interno de Alico', solucion: 'Precalentar molde 35–40 °C antes de arrancar.' }
+  ].map(t => Object.assign({ sesion: 'EJEMPLO', ejemplo: true, respuesta_agente: '', fuentes: '' }, t));
+  const l = Esc.get(), ids = new Set(l.map(t => t.id)); const add = T.filter(t => !ids.has(t.id)); if (add.length) Esc.set(l.concat(add));
+  if (!LS.get('al_kb_log_ej', false)) {
+    const Q = [['¿Qué resistencia de sello debo exigir para la Bolsa QUADSEAL?', 'ins-sello', 'respondida'], ['Delaminación en Flex Up después de 24 h', 'ins-delam', 'respondida'], ['¿Cuántas dinas necesito para tinta base agua?', 'ins-dinas', 'respondida'], ['Geles ámbar en la película después de una parada', 'ins-geles', 'respondida'], ['Estructura para café de exportación con válvula', 'ins-cafe', 'respondida'], ['Paredes delgadas en el Contenedor Línea Nativa', 'ins-termo', 'respondida'], ['¿Cómo bloqueo la SC-03 para cambiar el teflón?', 'loto-sc03', 'respondida'], ['Sello abierto en el fondo de las bolsas', 'dia-01', 'respondida'], ['¿Tinta base agua con laminación sin solvente?', '', 'sin_respuesta'], ['Vibración de la extrusora a alta velocidad', '', 'sin_respuesta'], ['Tapa de la Línea Nativa no cierra', 'fic-nativa', 'respondida'], ['Manchas de tinta en impresión flexo', 'flx-01', 'respondida']];
+    const L = Log.get(); Q.forEach(([q, f, e], i) => L.unshift({ id: 'ej' + i, ts: d(1 + i % 9), sesion: 'EJEMPLO', ejemplo: true, titulo: q, estado: e, fuentes: f, via: 'ejemplo' })); LS.set('al_kb_log', L.slice(-300)); LS.set('al_kb_log_ej', true);
+  }
+})();
 
 /* ====================== chat ====================== */
 const QUICK = [
@@ -175,7 +193,9 @@ const QUICK = [
   ['🌐', '¿Una tinta base agua es compatible con laminación sin solvente? (fuera de la base)']
 ];
 $('#quick').innerHTML = QUICK.map(([i, t]) => `<button class="q" data-q="${esc(t)}"><span class="i">${i}</span><span>${esc(t)}</span></button>`).join('');
-$('#quick').onclick = e => { const b = e.target.closest('[data-q]'); if (b) ask(b.dataset.q); };
+$('#quick').onclick = e => { const b = e.target.closest('[data-q]'); if (!b) return; const q = b.dataset.q;
+  if (/fuera de la base/.test(q)) { const qq = q.replace(/\s*\(fuera de la base\)/, ''); $('#quick').style.display = 'none'; bubble('u', esc(qq)); bubble('a', '<span class="lv n1">NIVEL 1 · Base de Alico</span><br>Este tema no está documentado en la base de Alico. <b>Paso al nivel 2: investigar en fuentes técnicas confiables.</b>'); return investigar(qq); }
+  ask(q); };
 const msgs = $('#msgs'); let last = null;
 function bubble(cls, html) { const d = document.createElement('div'); d.className = 'm ' + cls; d.innerHTML = html; msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d; }
 function mdLite(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
@@ -309,7 +329,7 @@ function escalar(ctx) {
 }
 function renderEsc() {
   const l = Esc.get();
-  $('#t-esc').innerHTML = `<div class="card"><h3>🎫 Consultas escaladas a expertos</h3>${l.length ? `<table class="tb"><tr><th>Ticket</th><th>Pregunta</th><th>Prioridad</th><th>Estado</th><th></th></tr>${l.map((t, i) => `<tr><td><b>${esc(t.id)}</b><br><span class="small muted">${new Date(t.ts).toLocaleString('es-CO')}</span></td><td>${esc(t.titulo)}<div class="small muted">${esc(t.quien || '')}${t.especialista ? ' · escalado a ' + esc(t.especialista) : ''}${t.niveles ? ' · ' + esc(t.niveles) : ''}</div></td><td>${esc(t.prioridad)}</td><td><span class="chip ${t.estado === 'resuelto' ? 'ok' : 'warn'}">${esc(t.estado)}</span></td><td>${t.estado === 'resuelto' ? '' : `<button class="btn sm ok" data-r="${i}">Resolver y agregar a la base</button>`}</td></tr>`).join('')}</table>` : '<p class="muted">Aún no hay tickets. Cuando el agente no sepa algo, escálalo desde el chat.</p>'}</div>`;
+  $('#t-esc').innerHTML = `<div class="card"><h3>🎫 Consultas escaladas a expertos</h3>${l.length ? `<table class="tb"><tr><th>Ticket</th><th>Pregunta</th><th>Prioridad</th><th>Estado</th><th></th></tr>${l.map((t, i) => `<tr><td><b>${esc(t.id)}</b>${t.ejemplo ? ' <span class="sample">EJEMPLO</span>' : ''}<br><span class="small muted">${new Date(t.ts).toLocaleString('es-CO')}</span></td><td>${esc(t.titulo)}<div class="small muted">${esc(t.quien || '')}${t.especialista ? ' · escalado a ' + esc(t.especialista) : ''}${t.niveles ? ' · ' + esc(t.niveles) : ''}</div></td><td>${esc(t.prioridad)}</td><td><span class="chip ${t.estado === 'resuelto' ? 'ok' : 'warn'}">${esc(t.estado)}</span></td><td>${t.estado === 'resuelto' ? '' : `<button class="btn sm ok" data-r="${i}">Resolver y agregar a la base</button>`}</td></tr>`).join('')}</table>` : '<p class="muted">Aún no hay tickets. Cuando el agente no sepa algo, escálalo desde el chat.</p>'}</div>`;
   $('#t-esc').querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
     const i = +b.dataset.r, t = Esc.get()[i];
     AL.modal(`<h2>✅ Resolver ${esc(t.id)}</h2><p class="muted small">Escribe la solución del experto. Se agrega a la base como documento nuevo y el agente la usará desde ya.</p><div class="field"><label>Solución del experto</label><textarea id="r-s" style="min-height:9rem"></textarea></div><div style="display:flex;gap:.6rem;justify-content:flex-end"><button class="btn gr" onclick="AL.closeModal()">Cancelar</button><button class="btn ok" id="r-ok">Guardar en la base</button></div>`);
