@@ -220,7 +220,7 @@ async function loadCasos() {
   const map = new Map();
   seedCasos().forEach(c => map.set(c.id, c));
   if (location.protocol !== 'file:') try { const r = await fetch('casos.json', {cache: 'no-store'}); if (r.ok) (await r.json()).forEach(c => map.set(c.id, c)); } catch (e) {}
-  if (S.cfg.cloudUrl) {
+  if (S.cfg.cloudUrl && S.cfg.cloudSecret) {
     try {
       const r = await fetch(S.cfg.cloudUrl + '?action=casos&secret=' + encodeURIComponent(S.cfg.cloudSecret));
       const j = await r.json();
@@ -244,7 +244,7 @@ function logEvent(e) {
 }
 function queue(kind, data) { S.outbox.push({kind, data}); LS.set('m_outbox', S.outbox); clearTimeout(queue.t); queue.t = setTimeout(syncNow, 1200); }
 async function syncNow() {
-  if (!S.cfg.cloudUrl || !S.outbox.length) { paintStatus(); return; }
+  if (!(S.cfg.cloudUrl && S.cfg.cloudSecret) || !S.outbox.length) { paintStatus(); return; }
   const batch = S.outbox.slice(0, 40);
   try {
     const r = await fetch(S.cfg.cloudUrl, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({secret: S.cfg.cloudSecret, items: batch})});
@@ -373,8 +373,8 @@ function paintStatus() {
   ia.className = 'chip ' + (!hasIA() ? 'warn' : S.ia.ok === false ? 'bad' : 'ok');
   ia.textContent = !hasIA() ? '🤖 IA: modo botones' : S.ia.ok === false ? '🤖 IA: sin respuesta' : '🤖 IA conectada';
   const pend = S.outbox.length;
-  cl.className = 'chip ' + (!S.cfg.cloudUrl ? 'warn' : S.cloud.ok === false ? 'bad' : pend ? 'warn' : 'ok');
-  cl.textContent = !S.cfg.cloudUrl ? '☁️ Guardado: solo este equipo' : S.cloud.ok === false ? `☁️ Sin conexión (${pend} por enviar)` : pend ? `☁️ Enviando ${pend}…` : '☁️ Guardado en la nube';
+  cl.className = 'chip ' + (!(S.cfg.cloudUrl && S.cfg.cloudSecret) ? 'warn' : S.cloud.ok === false ? 'bad' : pend ? 'warn' : 'ok');
+  cl.textContent = !(S.cfg.cloudUrl && S.cfg.cloudSecret) ? '☁️ Guardado: solo este equipo' : S.cloud.ok === false ? `☁️ Sin conexión (${pend} por enviar)` : pend ? `☁️ Enviando ${pend}…` : '☁️ Guardado en la nube';
 }
 
 function render() {
@@ -707,7 +707,7 @@ VIEWS.panel = () => {
     </div>
     <div class="card"><h3>Salud del sistema</h3><div class="health">
       <div>🤖 IA<b>${!hasIA() ? 'Sin clave' : m.iaN ? (m.iaFail ? m.iaFail + ' errores' : 'Sin errores') : 'Lista'}</b>${m.iaN ? m.iaMs + ' ms promedio' : '&nbsp;'}</div>
-      <div>☁️ Nube<b>${!S.cfg.cloudUrl ? 'No conectada' : S.cloud.ok === false ? 'Sin conexión' : 'Conectada'}</b>${S.outbox.length} por enviar</div>
+      <div>☁️ Nube<b>${!(S.cfg.cloudUrl && S.cfg.cloudSecret) ? 'No conectada' : S.cloud.ok === false ? 'Sin conexión' : 'Conectada'}</b>${S.outbox.length} por enviar</div>
       <div>🎤 Voz<b>${(window.SpeechRecognition || window.webkitSpeechRecognition) ? 'Disponible' : 'No disponible'}</b>Chrome o Edge</div>
       <div>💾 Este equipo<b>${S.eventos.length} eventos</b>${S.casos.length} fichas</div></div>
       <button class="btn tl" style="margin-top:.9rem;width:100%" data-act="diag">🤖 Pídele a Maestro un diagnóstico</button>

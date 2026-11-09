@@ -65,6 +65,24 @@ svg text{font-family:Poppins,sans-serif}
 .live{display:flex;gap:.6rem;align-items:center;background:#1f2326;color:#fff;border-radius:16px;padding:.6rem 1rem;margin-bottom:1rem;font-size:.9rem}
 .live .dot{width:.7rem;height:.7rem;border-radius:50%;background:#2BD67B;box-shadow:0 0 0 0 #2BD67B88;animation:pl 1.6s infinite}
 @keyframes pl{70%{box-shadow:0 0 0 10px #2BD67B00}}
+/* módulo clientes y reclamos */
+.rch{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.8rem;flex-wrap:wrap}.rch h2{font-size:1.4rem;font-weight:800}
+.rcf{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-bottom:1rem}.rcf button{background:#fff;border:2px solid var(--line);border-radius:14px;padding:.5rem .4rem;text-align:center}.rcf button b{display:block;font-size:1.4rem}.rcf button small{font-size:.68rem;color:var(--gr);font-weight:600}.rcf button.on{border-color:var(--or);background:#fff4ea}
+.rcg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:1rem;align-items:start}
+.rct{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}.rct .inp{flex:1;min-width:9rem;border:1.5px solid var(--line);border-radius:12px;padding:.5rem .7rem;background:#fff}
+.rcli{max-height:44rem;overflow:auto;display:flex;flex-direction:column;gap:.35rem}
+.rci{display:grid;grid-template-columns:.6rem 1fr auto;gap:.6rem;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:.6rem .7rem;font-size:.82rem}.rci.on{border-color:var(--or);box-shadow:0 0 0 3px #ee762322}.rci small{display:block;color:var(--gr);font-size:.72rem}
+.sv{width:.6rem;border-radius:9px}.sv.s1{background:#d6403a}.sv.s2{background:#EE7623}.sv.s3{background:#e9a100}.sv.s4{background:#9aa5ab}
+.smp{font-size:.6rem;font-weight:800;background:#f3ece0;color:#8a7b62;border-radius:99px;padding:.05rem .4rem;letter-spacing:.05em}
+.est{display:inline-block;font-size:.7rem;font-weight:700;border-radius:99px;padding:.15rem .55rem;background:#eef6f8;color:var(--tl-d);white-space:nowrap}.est.e-nuevo{background:#fde6e5;color:var(--bad)}.est.e-cerrado{background:#e2f6ec;color:var(--ok)}.est.e-respondido{background:#e6f4ff;color:#1d6fb8}
+.rcd{max-height:56rem;overflow:auto}.rdh{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}.rdh h2{font-size:1.25rem;font-weight:800;margin-top:.1rem}
+.stp{display:grid;grid-template-columns:repeat(7,1fr);gap:.2rem;margin:.8rem 0 1rem}.stp div{text-align:center;font-size:.64rem;color:#a9a9a9;font-weight:600}.stp i{display:grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;margin:0 auto .2rem;background:#f1ece4;font-style:normal;font-weight:800;color:#a39a8b}.stp .ok{color:var(--ok)}.stp .ok i{background:var(--ok);color:#fff}.stp .now{color:var(--or-d)}.stp .now i{background:var(--or);color:#fff;box-shadow:0 0 0 4px #ee762333}
+.rcd section{margin:.7rem 0}.rcd h4{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--or-d);margin-bottom:.35rem}
+.rdg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.kv{display:flex;justify-content:space-between;gap:.6rem;font-size:.82rem;padding:.2rem 0;border-bottom:1px dashed var(--line)}.kv span{color:var(--gr)}.kv b{text-align:right;font-weight:600}
+.ml{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .6rem;border:1px solid var(--line);border-radius:12px;margin:.3rem 0;font-size:.82rem;background:#fffdf9}.ml small{display:block;color:var(--gr);font-size:.72rem}
+.tl2{border-left:2px solid var(--line);margin-left:.6rem;padding-left:.9rem}.tl2 div{position:relative;margin:.45rem 0;font-size:.8rem}.tl2 span{position:absolute;left:-1.55rem;top:0;background:#fff}.tl2 small{color:var(--gr);font-size:.7rem}.tl2 p{margin:0}
+.rtb{width:100%;border-collapse:collapse;font-size:.84rem}.rtb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gr);padding:.5rem;border-bottom:2px solid var(--line)}.rtb td{padding:.5rem;border-bottom:1px solid var(--line)}.rtb tr[data-cl]{cursor:pointer}.rtb tr[data-cl]:hover td{background:#fff8f0}
+@media (max-width:1100px){.rcg,.rdg{grid-template-columns:1fr}.rcf{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
@@ -78,7 +96,7 @@ svg text{font-family:Poppins,sans-serif}
     <button class="tab" data-t="cal">🏭 Producción y calidad</button>
     <button class="tab" data-t="dis">🚚 Distribución</button>
     <button class="tab" data-t="cad">📦 Cadena de suministro</button>
-    <button class="tab" data-t="cli">🎧 Clientes</button>
+    <button class="tab" data-t="cli">🎧 Clientes y reclamos</button>
     <button class="tab" data-t="sim">🎛️ Simulador</button>
     <button class="tab" data-t="ask">💬 Pregúntale a tus datos</button>
     <span class="sp"></span><span class="sample" style="align-self:center">PRODUCTOS REALES · CIFRAS DE EJEMPLO</span>
@@ -285,12 +303,94 @@ view.cad = () => {
    ${viz('s-prov', '🤝 Cumplimiento de proveedores', { labels: D.proveedores.map(p => p.proveedor), series: [{ n: 'Cumplimiento', v: D.proveedores.map(p => p.cumplimiento * 100), c: COL[1] }], colors: D.proveedores.map(p => p.riesgo === 'Alto' ? '#d6403a' : p.riesgo === 'Medio' ? '#e9a100' : '#1c9a5b'), fmt: v => v.toFixed(0) + '%', def: 'hbar', tipos: ['hbar', 'table'] })}</div>`;
 };
 
-view.cli = () => {
-  const rc = reclamos(), t = Object.entries(rc.tipos).sort((a, b) => b[1] - a[1]);
-  $('#v-cli').innerHTML = `<div class="kpis"><div class="kpi"><small>Reclamos registrados</small><b>${rc.n}</b><em>${rc.real ? 'en vivo desde el caso 4' : 'ejemplo'}</em></div><div class="kpi"><small>Abiertos</small><b>${rc.abiertos}</b></div><div class="kpi"><small>Fuera de SLA</small><b style="color:${rc.vencidos ? 'var(--bad)' : 'var(--ok)'}">${rc.vencidos}</b></div><div class="kpi"><small>Satisfacción (CSAT)</small><b>${rc.csat ? rc.csat.toFixed(1) : '–'}<span style="font-size:1rem"> /5</span></b></div></div>
-  <div class="g2">${viz('k-tip', '🧾 Reclamos por tipo', { labels: t.map(x => x[0]), series: [{ n: 'Reclamos', v: t.map(x => x[1]) }], fmt: v => AL.fmt(v), def: 'donut', tipos: ['donut', 'pie', 'hbar', 'table'] })}
-  <div class="card"><h3>🔗 Conexión con la planta</h3><p class="muted" style="margin-bottom:.6rem">Cuando la visión artificial retira piezas de un lote que ya se despachó, el Centro de inteligencia del cliente puede avisar al cliente antes de que reclame.</p>${AL.hub.list('inspeccion').slice(0, 4).map(r => `<div class="alc y"><span class="i">🔬</span><div><b>Lote ${esc(r.lote)}</b><span class="small">${esc(r.defecto)} · ${esc(r.producto)}</span></div><a class="btn gr sm" href="../reclamos/index.html#lote=${encodeURIComponent(r.lote)}" target="_blank">Revisar</a></div>`).join('') || '<p class="small muted">Sin rechazos en vivo todavía.</p>'}<a class="btn tl" style="margin-top:.6rem" href="../reclamos/index.html" target="_blank">Abrir el Centro de inteligencia del cliente ↗</a></div></div>`;
+/* ============================ 🎧 Clientes y reclamos: el mismo expediente del Centro de inteligencia del cliente ============================ */
+const RC = {
+  EST: ['nuevo', 'triage', 'investigacion', 'decision', 'ejecutado', 'respondido', 'cerrado'],
+  EST_N: { nuevo: 'Nuevo', triage: 'Triage listo', investigacion: 'Causa raíz', decision: 'Decisión', ejecutado: 'En Epicor', respondido: 'Respondido', cerrado: 'Cerrado' },
+  EST_C: { nuevo: 'Recibido', triage: 'En análisis', investigacion: 'Buscando la causa', decision: 'En decisión', ejecutado: 'Solución en proceso', respondido: 'Respondido', cerrado: 'Cerrado' },
+  TIPO: { calidad: 'Defecto de calidad', delam: 'Delaminación', faltante: 'Faltante en el despacho', equivocado: 'Producto equivocado', dano: 'Daño en transporte', tardia: 'Entrega tardía', medidas: 'Medidas fuera de tolerancia' },
+  RES: { reposicion: 'Reposición sin costo', nota_credito: 'Nota de crédito', devolucion: 'Devolución y cambio (RMA)', visita: 'Visita técnica', informar: 'Solo informar / disculpas' },
+  SLA: { 1: 4, 2: 8, 3: 24, 4: 48 }, SEV: { 1: 'Crítica', 2: 'Alta', 3: 'Media', 4: 'Baja' },
+  nube: [], f: { q: '', e: '', t: '', c: '' }, sel: null, sync: null
 };
+const rcList = () => {
+  const loc = AL.LS.get('al_rec', null) || [], m = new Map(loc.map(r => [r.id, r]));
+  RC.nube.forEach(x => { const l = m.get(x.id); if (!l || (x.upd || 0) > (l.upd || 0)) m.set(x.id, Object.assign({}, l || {}, x, { foto: l && l.foto })); });
+  return [...m.values()].sort((a, b) => new Date(b.ts) - new Date(a.ts));
+};
+const rcProd = r => r.producto_n || ((window.ALICO_CAT || []).find(x => x[0] === r.producto) || [0, r.producto])[1];
+const rcSla = r => { const t = r.triage ? r.triage.severidad : 3, lim = RC.SLA[t] * 36e5, used = (r.cierre ? r.cierre.ts : Date.now()) - new Date(r.ts); return { over: used > lim, left: lim - used, t, lim }; };
+const rcF = d => new Date(d).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const rcHrs = ms => { const h = Math.abs(ms) / 36e5; return h < 1 ? Math.round(h * 60) + ' min' : h < 48 ? h.toFixed(1) + ' h' : Math.round(h / 24) + ' días'; };
+/* correos al cliente: bitácora real (nube) o, en los ejemplos, la secuencia que se habría enviado */
+function rcCorreos(r) {
+  if (r.correos && r.correos.length) return r.correos;
+  if (!r.ejemplo) return [];
+  const k = RC.EST.indexOf(r.estado), t0 = new Date(r.ts).getTime(), t1 = Math.max(r.upd || t0, t0 + 36e5);
+  return RC.EST.slice(0, k + 1).map((e, i) => ({ ts: new Date(t0 + (t1 - t0) * (k ? i / k : 0)).toISOString(), para: r.contacto, motivo: i ? 'Cambio de estado' : 'Confirmación de recepción', asunto: i ? `Tu reclamo ${r.id} cambió a «${RC.EST_C[e]}» · Alico` : `Recibimos tu reclamo ${r.id} · Alico`, estado: e, ejemplo: true }));
+}
+function rcTimeline(r) {
+  const h = (r.hist || []).map(x => ({ ts: x.ts, ic: '🕘', t: x.txt }));
+  if (!h.length && r.ejemplo) { const k = RC.EST.indexOf(r.estado), t0 = new Date(r.ts).getTime(), t1 = Math.max(r.upd || t0, t0 + 36e5); RC.EST.slice(0, k + 1).forEach((e, i) => h.push({ ts: new Date(t0 + (t1 - t0) * (k ? i / k : 0)).toISOString(), ic: '🕘', t: i ? 'Pasó a ' + RC.EST_N[e] : 'Reclamo recibido por ' + (r.canal || 'portal') })); }
+  rcCorreos(r).forEach(c => h.push({ ts: c.ts, ic: '✉️', t: 'Correo al cliente: ' + c.asunto }));
+  return h.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+}
+async function rcPull() {
+  if (!AL.hasCloud()) return false;
+  try { RC.nube = await AL.rows('reclamo', 500); return true; } catch (e) { return false; }
+}
+view.cli = () => {
+  const L = rcList(), real = L.filter(r => !r.ejemplo), F = RC.f;
+  if (!L.length) { $('#v-cli').innerHTML = `<div class="card" style="text-align:center;padding:2.5rem"><div style="font-size:3rem">🎧</div><h2>Aún no hay reclamos en este computador</h2><p class="muted">El módulo lee los mismos reclamos del Centro de inteligencia del cliente (caso 4) y los de la nube.</p><a class="btn" href="../reclamos/index.html" target="_blank">Abrir el Centro de inteligencia del cliente ↗</a></div>`; return; }
+  const ab = L.filter(r => r.estado !== 'cerrado'), venc = ab.filter(r => rcSla(r).over), cer = L.filter(r => r.cierre), cs = cer.filter(r => r.cierre.csat);
+  const mails = L.reduce((s, r) => s + rcCorreos(r).length, 0), comp = L.reduce((s, r) => s + (r.decision ? +r.decision.valor || 0 : 0), 0);
+  const tCierre = cer.length ? cer.reduce((s, r) => s + (r.cierre.horas || 0), 0) / cer.length : 0;
+  const fl = L.filter(r => (!F.e || (F.e === 'abiertos' ? r.estado !== 'cerrado' : F.e === 'vencidos' ? r.estado !== 'cerrado' && rcSla(r).over : r.estado === F.e)) && (!F.t || r.tipo === F.t) && (!F.c || r.cliente === F.c) && (!F.q || AL.norm(JSON.stringify([r.id, r.cliente, r.contacto, r.pedido, r.desc, rcProd(r)])).includes(AL.norm(F.q))));
+  if (!RC.sel || !L.find(r => r.id === RC.sel)) RC.sel = (fl[0] || L[0]).id;
+  const cnt = e => L.filter(r => r.estado === e).length;
+  /* ficha por cliente */
+  const cli = {}; L.forEach(r => { const c = cli[r.cliente] = cli[r.cliente] || { n: 0, ab: 0, venc: 0, csat: [], valor: 0, ult: r.ts, tipos: {}, contacto: r.contacto, pais: r.pais }; c.n++; if (r.estado !== 'cerrado') { c.ab++; if (rcSla(r).over) c.venc++; } if (r.cierre && r.cierre.csat) c.csat.push(r.cierre.csat); c.valor += r.decision ? +r.decision.valor || 0 : 0; c.tipos[r.tipo] = (c.tipos[r.tipo] || 0) + 1; if (new Date(r.ts) > new Date(c.ult)) c.ult = r.ts; });
+  const CL = Object.entries(cli).sort((a, b) => b[1].ab - a[1].ab || b[1].n - a[1].n);
+  const tp = {}; L.forEach(r => tp[RC.TIPO[r.tipo] || r.tipo] = (tp[RC.TIPO[r.tipo] || r.tipo] || 0) + 1); const tpe = Object.entries(tp).sort((a, b) => b[1] - a[1]);
+  const pr = {}; L.forEach(r => { const k = rcProd(r); pr[k] = (pr[k] || 0) + 1; }); const pre = Object.entries(pr).sort((a, b) => b[1] - a[1]).slice(0, 7);
+  $('#v-cli').innerHTML = `
+  <div class="rch"><div><h2>🎧 Clientes y reclamos</h2><p class="muted small">El mismo expediente que gestiona el <b>Centro de inteligencia del cliente</b>: datos del cliente, triage de IA, decisión, Epicor, respuestas y correos. ${real.length ? `<span class="chip ok">● ${real.length} reales en vivo</span>` : '<span class="chip warn">Datos de ejemplo del caso 4</span>'} ${AL.hasCloud() ? '<span class="chip">☁️ Sincronizado con la nube</span>' : '<span class="chip warn">Solo este navegador</span>'}</p></div>
+    <div style="display:flex;gap:.5rem"><button class="btn gr sm" id="rc-up">↻ Actualizar</button><a class="btn tl sm" href="../reclamos/index.html" target="_blank">Centro de inteligencia ↗</a></div></div>
+  <div class="kpis"><div class="kpi"><small>Reclamos</small><b>${L.length}</b><em>${CL.length} clientes</em></div><div class="kpi"><small>Abiertos</small><b>${ab.length}</b></div><div class="kpi"><small>Fuera de SLA</small><b style="color:${venc.length ? 'var(--bad)' : 'var(--ok)'}">${venc.length}</b></div><div class="kpi"><small>Tiempo medio de cierre</small><b>${tCierre ? tCierre.toFixed(0) + ' h' : '—'}</b></div><div class="kpi"><small>Satisfacción (CSAT)</small><b>${cs.length ? (cs.reduce((s, r) => s + r.cierre.csat, 0) / cs.length).toFixed(1) : '—'}<span style="font-size:.9rem"> /5</span></b></div><div class="kpi"><small>Correos al cliente</small><b>${mails}</b></div><div class="kpi"><small>Compensaciones</small><b style="font-size:1.4rem">${AL.money(comp)}</b></div></div>
+  <div class="rcf">${RC.EST.map((e, i) => `<button data-fe="${e}" class="${F.e === e ? 'on' : ''}"><b>${cnt(e)}</b><small>${i + 1}. ${RC.EST_N[e]}</small></button>`).join('')}</div>
+  <div class="rcg"><div class="card rcl"><div class="rct"><input class="inp" id="rc-q" placeholder="🔎 Cliente, correo, código, pedido…" value="${esc(F.q)}"><select class="inp" id="rc-e"><option value="">Todos los estados</option><option value="abiertos" ${F.e === 'abiertos' ? 'selected' : ''}>Abiertos</option><option value="vencidos" ${F.e === 'vencidos' ? 'selected' : ''}>Fuera de SLA</option>${RC.EST.map(e => `<option value="${e}" ${F.e === e ? 'selected' : ''}>${RC.EST_N[e]}</option>`).join('')}</select><select class="inp" id="rc-t"><option value="">Todos los tipos</option>${Object.entries(RC.TIPO).map(([k, n]) => `<option value="${k}" ${F.t === k ? 'selected' : ''}>${n}</option>`).join('')}</select>${F.c ? `<button class="chip or" id="rc-cx">${esc(F.c)} ✕</button>` : ''}</div>
+    <div class="rcli">${fl.map(r => { const s = rcSla(r); return `<button class="rci ${r.id === RC.sel ? 'on' : ''}" data-rc="${r.id}"><span class="sv s${s.t}"></span><div><b>${r.id} · ${esc(r.cliente || '')}</b>${r.ejemplo ? ' <span class="smp">EJEMPLO</span>' : ''}<small>${esc(RC.TIPO[r.tipo] || r.tipo)} · ${esc(rcProd(r))}</small><small>${rcF(r.ts)} · ${esc(r.canal || '')}</small></div><div style="text-align:right"><span class="est e-${r.estado}">${RC.EST_N[r.estado] || r.estado}</span><small style="color:${r.estado !== 'cerrado' && s.over ? 'var(--bad)' : 'var(--gr)'}">${r.estado === 'cerrado' ? '✓ cerrado' : s.over ? '⚠ vencido ' + rcHrs(-s.left) : 'quedan ' + rcHrs(s.left)}</small><small>✉️ ${rcCorreos(r).length}</small></div></button>`; }).join('') || '<p class="muted small" style="padding:1rem">Ningún reclamo con esos filtros.</p>'}</div></div>
+    <div class="card rcd" id="rc-d"></div></div>
+  <div class="card" style="margin-top:1rem"><h3>👥 Ficha por cliente</h3><div style="overflow:auto"><table class="rtb"><thead><tr><th>Cliente</th><th>Contacto</th><th>Reclamos</th><th>Abiertos</th><th>Fuera de SLA</th><th>CSAT</th><th>Compensado</th><th>Tipo más frecuente</th><th>Último</th></tr></thead><tbody>${CL.map(([n, c]) => { const tt = Object.entries(c.tipos).sort((a, b) => b[1] - a[1])[0]; return `<tr data-cl="${esc(n)}"><td><b>${esc(n)}</b><br><span class="small muted">${esc(c.pais || '')}</span></td><td class="small">${esc(c.contacto || '')}</td><td>${c.n}</td><td>${c.ab}</td><td style="color:${c.venc ? 'var(--bad)' : ''}">${c.venc}</td><td>${c.csat.length ? (c.csat.reduce((a, b) => a + b, 0) / c.csat.length).toFixed(1) : '—'}</td><td>${AL.money(c.valor)}</td><td class="small">${esc(RC.TIPO[tt[0]] || tt[0])}</td><td class="small">${rcF(c.ult)}</td></tr>`; }).join('')}</tbody></table></div></div>
+  <div class="g2" style="margin-top:1rem">${viz('k-tip', '🧾 Reclamos por tipo', { labels: tpe.map(x => x[0]), series: [{ n: 'Reclamos', v: tpe.map(x => x[1]) }], fmt: v => AL.fmt(v), def: 'donut', tipos: ['donut', 'pie', 'hbar', 'table'] })}${viz('k-prd', '📦 Reclamos por producto', { labels: pre.map(x => x[0]), series: [{ n: 'Reclamos', v: pre.map(x => x[1]), c: COL[1] }], fmt: v => AL.fmt(v), def: 'hbar', tipos: ['hbar', 'bar', 'table'] })}</div>
+  <div class="card"><h3>🔗 Conexión con la planta</h3><p class="muted" style="margin-bottom:.6rem">Cuando la visión artificial retira piezas de un lote que ya se despachó, el Centro de inteligencia del cliente puede avisar al cliente antes de que reclame.</p>${AL.hub.list('inspeccion').slice(0, 4).map(r => `<div class="alc y"><span class="i">🔬</span><div><b>Lote ${esc(r.lote)}</b><span class="small">${esc(r.defecto)} · ${esc(r.producto)}</span></div><a class="btn gr sm" href="../reclamos/index.html#lote=${encodeURIComponent(r.lote)}" target="_blank">Revisar</a></div>`).join('') || '<p class="small muted">Sin rechazos en vivo todavía.</p>'}</div>`;
+  rcDetalle(L.find(r => r.id === RC.sel));
+  const set = (k, v) => { RC.f[k] = v; view.cli(); };
+  $$('[data-fe]').forEach(b => b.onclick = () => set('e', F.e === b.dataset.fe ? '' : b.dataset.fe));
+  $$('[data-rc]').forEach(b => b.onclick = () => { RC.sel = b.dataset.rc; $$('[data-rc]').forEach(x => x.classList.toggle('on', x === b)); rcDetalle(L.find(r => r.id === RC.sel)); });
+  $$('[data-cl]').forEach(t => t.onclick = () => { RC.f.c = t.dataset.cl; view.cli(); $('#v-cli').scrollIntoView({ behavior: 'smooth' }); });
+  $('#rc-q').oninput = e => { clearTimeout(RC.qt); RC.qt = setTimeout(() => { set('q', e.target.value); const i = $('#rc-q'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 350); };
+  $('#rc-e').onchange = e => set('e', e.target.value); $('#rc-t').onchange = e => set('t', e.target.value); if ($('#rc-cx')) $('#rc-cx').onclick = () => set('c', '');
+  $('#rc-up').onclick = async () => { $('#rc-up').textContent = '↻ …'; await rcPull(); view.cli(); AL.toast('Reclamos actualizados'); };
+};
+function rcDetalle(r) {
+  const el = $('#rc-d'); if (!el) return; if (!r) { el.innerHTML = '<p class="muted">Elige un reclamo.</p>'; return; }
+  const s = rcSla(r), tg = r.triage, k = RC.EST.indexOf(r.estado), C = rcCorreos(r), row = (a, b) => b ? `<div class="kv"><span>${a}</span><b>${b}</b></div>` : '';
+  el.innerHTML = `<div class="rdh"><div><small class="muted">${rcF(r.ts)} · ${esc(r.canal || '')}${r.ejemplo ? ' · <span class="smp">EJEMPLO</span>' : ''}</small><h2>${r.id} · ${esc(r.cliente || '')}</h2></div><div style="text-align:right"><span class="est e-${r.estado}" style="font-size:.85rem">${RC.EST_N[r.estado]}</span><div class="small" style="margin-top:.3rem;color:${r.estado !== 'cerrado' && s.over ? 'var(--bad)' : 'var(--gr)'}">SLA ${RC.SLA[s.t]} h · ${r.estado === 'cerrado' ? 'cerrado' : s.over ? 'vencido hace ' + rcHrs(-s.left) : 'quedan ' + rcHrs(s.left)}</div></div></div>
+  <div class="stp">${RC.EST.map((e, i) => `<div class="${i < k ? 'ok' : i === k ? 'now' : ''}"><i>${i < k ? '✓' : i + 1}</i><small>${RC.EST_N[e]}</small></div>`).join('')}</div>
+  <div class="rdg"><section><h4>👤 Cliente</h4>${row('Empresa', esc(r.cliente || ''))}${row('Correo', r.contacto ? `<a href="mailto:${esc(r.contacto)}">${esc(r.contacto)}</a>` : '')}${row('WhatsApp', esc(r.whatsapp || ''))}${row('País', esc(r.pais || ''))}${row('Pedido', esc(r.pedido || ''))}${row('Canal', esc(r.canal || ''))}${row('Datos personales', r.ejemplo ? 'ejemplo' : 'Autorizó tratamiento (Ley 1581)')}${r.seguimiento ? `<a class="btn gr sm" style="margin-top:.4rem" href="${esc(r.seguimiento)}" target="_blank">Ver lo que ve el cliente ↗</a>` : ''}</section>
+  <section><h4>📦 Reclamo</h4>${row('Tipo', esc(RC.TIPO[r.tipo] || r.tipo))}${row('Producto', esc(rcProd(r)))}${row('Cantidad', AL.fmt(r.cantidad || 0) + ' uds')}<p class="small" style="margin:.4rem 0">«${esc(r.desc || '')}»</p>${r.foto ? `<img src="${r.foto}" style="width:100%;max-height:9rem;object-fit:cover;border-radius:12px">` : ''}</section></div>
+  ${tg ? `<section class="box ai"><h4>🤖 Triage con IA</h4><p class="small" style="margin:.2rem 0 .5rem">${esc(tg.resumen || '')}</p><div class="rdg" style="gap:.6rem">${row('Severidad', RC.SEV[tg.severidad] || tg.severidad)}${row('Área responsable', esc(tg.area || ''))}${row('Acción sugerida', esc(tg.accion || ''))}${row('Casos similares (90 días)', tg.similares != null ? tg.similares : '')}</div>${(tg.causas || []).length ? `<div class="small" style="margin-top:.4rem"><b>Causas probables:</b> ${tg.causas.map(c => `${esc(c.causa)} (${c.prob}%)`).join(' · ')}</div>` : ''}</section>` : '<section class="box"><h4>🤖 Triage con IA</h4><p class="small muted">Pendiente: el Centro de inteligencia lo clasifica al abrirlo.</p></section>'}
+  <div class="rdg">${r.causa ? `<section><h4>🔎 Causa raíz</h4><p class="small">${esc(typeof r.causa === 'string' ? r.causa : r.causa.causa || JSON.stringify(r.causa))}</p></section>` : ''}${r.decision ? `<section><h4>⚖️ Decisión</h4>${row('Resolución', esc(RC.RES[r.decision.res] || r.decision.res))}${row('Valor', AL.money(r.decision.valor || 0))}${row('Aprobó', esc(r.decision.por || ''))}${r.epicor ? row('Epicor', esc(r.epicor.num)) : ''}</section>` : ''}${r.cierre ? `<section><h4>⭐ Cierre</h4>${row('Satisfacción', r.cierre.csat ? '⭐'.repeat(r.cierre.csat) + ' ' + r.cierre.csat + '/5' : '—')}${row('Tiempo total', (r.cierre.horas || 0) + ' h')}</section>` : ''}</div>
+  ${r.respuesta ? `<section class="box"><h4>💬 Respuesta enviada al cliente</h4><p class="small" style="white-space:pre-wrap">${esc(r.respuesta)}</p></section>` : ''}
+  <section><h4>✉️ Correos enviados al cliente (${C.length})</h4>${C.map(c => `<div class="ml"><span>✉️</span><div><b>${esc(c.asunto)}</b><small>${rcF(c.ts)} · para ${esc(c.para || '')} · ${esc(c.motivo)}${c.ejemplo ? ' · ejemplo' : ''}</small></div></div>`).join('') || `<p class="small muted">${r.contacto ? 'Sin correos registrados. Se envían automáticamente cuando el portal está conectado a la nube.' : 'El cliente no dejó correo.'}</p>`}</section>
+  <section><h4>🕘 Trazabilidad completa</h4><div class="tl2">${rcTimeline(r).map(h => `<div><span>${h.ic}</span><small>${rcF(h.ts)}</small><p>${esc(h.t)}</p></div>`).join('')}</div></section>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem"><a class="btn sm" href="../reclamos/index.html#ver=${encodeURIComponent(r.id)}" target="_blank">Gestionar en el Centro de inteligencia ↗</a></div>`;
+}
+/* en vivo: otra pestaña del mismo navegador (caso 4) o la nube */
+addEventListener('storage', e => { if (e.key && e.key.includes('al_rec') && cur === 'cli') view.cli(); });
+setInterval(async () => { if (cur !== 'cli' || document.hidden) return; if (await rcPull()) { const d = $('#rc-d'), st = d ? d.scrollTop : 0; if (!document.activeElement || document.activeElement.id !== 'rc-q') { view.cli(); if ($('#rc-d')) $('#rc-d').scrollTop = st; } } }, 15000);
+rcPull().then(ok => ok && cur === 'cli' && view.cli());
 
 view.sim = () => {
   const base = D.ventas.filter(x => x.tri === 'T0'), V0 = sum(base, 'venta') / 3, m0 = sum(base, 'margen') / sum(base, 'venta'), mp = .52;

@@ -121,12 +121,20 @@ function pushCloud(rec) {
   const c = Object.assign({}, rec); delete c.foto; c.titulo = (TIPOS[rec.tipo] ? TIPOS[rec.tipo].n : rec.tipo) + ' · ' + prodN(rec.producto); c.sesion = rec.sesion || AL.cfg.sesion;
   AL.queue('reclamo', c);
 }
-function touch(rec, txt) { rec.upd = Date.now(); (rec.hist = rec.hist || []).push({ ts: new Date().toISOString(), txt }); save(); pushCloud(rec); try { avisarCelular(rec); } catch (e) {} }
+/* bitácora de correos: la nube envía uno al crear el reclamo y otro en cada cambio de estado; aquí queda el registro visible (Torre de control) */
+const okMail = m => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m || '');
+function regCorreo(rec) {
+  if (rec.ejemplo || !AL.hasCloud() || !okMail(rec.contacto) || rec._mailEst === rec.estado) return;
+  const nuevo = !rec._mailEst, est = { nuevo: 'Recibido', triage: 'En análisis', investigacion: 'Buscando la causa', decision: 'En decisión', ejecutado: 'Solución en proceso', respondido: 'Respondido', cerrado: 'Cerrado' }[rec.estado] || rec.estado;
+  (rec.correos = rec.correos || []).push({ ts: new Date().toISOString(), para: rec.contacto, motivo: nuevo ? 'Confirmación de recepción' : 'Cambio de estado', asunto: nuevo ? `Recibimos tu reclamo ${rec.id} · Alico` : `Tu reclamo ${rec.id} cambió a «${est}» · Alico`, estado: rec.estado, respuesta: (rec.estado === 'respondido' || rec.estado === 'cerrado') && rec.respuesta ? String(rec.respuesta).slice(0, 600) : '' });
+  rec._mailEst = rec.estado;
+}
+function touch(rec, txt) { rec.upd = Date.now(); (rec.hist = rec.hist || []).push({ ts: new Date().toISOString(), txt }); regCorreo(rec); save(); pushCloud(rec); try { avisarCelular(rec); } catch (e) {} }
 async function pull() {
   if (!AL.hasCloud()) return;
   try {
     const rows = await AL.rows('reclamo', 300); let ch = false;
-    rows.forEach(x => { const l = byId(x.id); if (!l) { R.unshift(x); ch = true; } else if ((x.upd || 0) > (l.upd || 0)) { Object.assign(l, x, { foto: l.foto }); ch = true; } });
+    rows.forEach(x => { const l = byId(x.id); if (!l) { if (!x._mailEst && okMail(x.contacto) && !x.ejemplo) { x.correos = x.correos || [{ ts: x.ts, para: x.contacto, motivo: 'Confirmación de recepción', asunto: `Recibimos tu reclamo ${x.id} · Alico`, estado: 'nuevo' }]; x._mailEst = 'nuevo'; } R.unshift(x); ch = true; } else if ((x.upd || 0) > (l.upd || 0)) { Object.assign(l, x, { foto: l.foto }); ch = true; } });
     if (ch) { save(); refresh(); }
   } catch (e) {}
 }
@@ -425,6 +433,7 @@ AL.bar({ id: 'reclamos', publico: 'Servicio al cliente, Calidad, Logística, Ven
   { ico: '🤖', t: 'La IA hace el trabajo pesado', p: 'Clasifica, mide severidad, propone causas raíz y redacta la respuesta. Las personas deciden.' },
   { ico: '🏭', t: 'Se resuelve y se aprende', p: 'La decisión se ejecuta en Epicor (simulado) y cada caso cerrado alimenta el tablero de Gerencia.' }] });
 tab(PHONE ? 'cli' : 'agt'); pull(); pollRelay();
+{ const v = (location.hash.match(/^#ver=([\w-]+)/) || [])[1]; if (v && !PHONE) { sel = v; tab('agt'); setTimeout(() => { if (!byId(v)) AL.toast('Ese reclamo aún no llega a este computador: espera unos segundos'); }, 9000); } }
 if (PHONE) { const id = HP.get('id'); if (id) { $('#cform').hidden = true; verEstado(id); } else { const m = LS.get('mis_rec', []); if (m.length) $('#cres').insertAdjacentHTML('beforebegin', `<div class="card" style="margin-bottom:1rem"><h3>📋 Mis reclamos</h3>${m.slice(0, 4).map(x => `<button class="it" data-mr="${esc(x.id)}" style="margin:.3rem 0"><b>${esc(x.id)}</b><small>${esc(EST_C[x.estado] || x.estado)} · ${fecha(x.ts)}</small></button>`).join('')}</div>`); document.querySelectorAll('[data-mr]').forEach(b => b.onclick = () => { $('#cform').hidden = true; verEstado(b.dataset.mr); }); } }
 window.__rec = { R: () => R, triage, basicTriage };
 })();
