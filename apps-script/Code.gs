@@ -1,6 +1,6 @@
 /**
  * Taller de IA · Alico — backend en Google Apps Script (Sheets + Drive)
- * Un solo script atiende los 5 casos:
+ * Un solo script atiende los dos portales (GEN IA y «Empaquemos estas memorias»):
  *   Eventos, Turnos, Casos  → Maestro
  *   Reclamos                → Centro de inteligencia del cliente
  *   Preguntas, Inspecciones → Agente técnico y Visión artificial
@@ -15,6 +15,8 @@
  * 5) Copia la URL (termina en /exec) en Ajustes del taller > «URL de la nube».
  */
 const SECRET = 'CAMBIA_ESTA_CLAVE';
+const HOJA_ID = '';                  // opcional: ID de la hoja si el script NO está creado desde la hoja (Extensiones › Apps Script)
+function ss_() { return HOJA_ID ? SpreadsheetApp.openById(HOJA_ID) : SpreadsheetApp.getActiveSpreadsheet(); }
 const CARPETA = 'Alico-Taller-IA';
 const CORREOS = true;                 // envía al cliente un correo al crear su reclamo y cada vez que cambia de estado
 const COPIA_EQUIPO = '';              // opcional: correo del equipo de servicio que recibe copia (ej. servicio@alico-sa.com)
@@ -26,12 +28,14 @@ const COLS = {
   Turnos:  ['id', 'ts', 'sesion', 'operario', 'turno', 'maquina', 'paros_min', 'resumen_audio', 'alertas', 'pendientes', 'texto_original']
 };
 const GENERICA = ['id', 'ts', 'sesion', 'titulo', 'estado', 'json'];
+/* portal «Empaquemos estas memorias»: una fila legible por respuesta (este es el informe del evento) */
+COLS.Respuestas = ['id', 'fecha', 'sesion', 'grupo', 'participante', 'rol', 'area', 'p1_categoria', 'p1_tarea_texto', 'p2_horas_semana', 'p2_personas', 'horas_equipo_semana', 'p3_caso', 'p3_por_que', 'p4_ayuda', 'p4_texto', 'p5_necesita', 'p5_preparacion_1a5', 'p5_texto', 'idea', 'historia_usuario', 'impacto', 'prioridad', 'primer_paso', 'padrino', 'consentimiento', 'json'];
 
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function cap_(s) { s = String(s || '').replace(/[^A-Za-z0-9_]/g, ''); return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function sheet_(name, cols) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = ss_();
   let sh = ss.getSheetByName(name);
   if (!sh) {
     sh = ss.insertSheet(name);
@@ -82,6 +86,8 @@ function doPost(e) {
         const f = carpeta_('Modelos'), files = f.getFilesByName(d.name);
         if (files.hasNext()) files.next().setContent(d.content); else f.createFile(d.name, d.content, d.mime || 'application/json');
         n++;
+      } else if (it.kind === 'respuesta') {
+        upsert_(sheet_('Respuestas', COLS.Respuestas), COLS.Respuestas, Object.assign({}, d, { json: JSON.stringify(d._r || d) })); n++;
       } else if (it.kind === 'reclamo') {
         const sh = sheet_('Reclamos', GENERICA), prev = buscar_(sh, d.id);
         upsert_(sh, GENERICA, Object.assign({ ts: new Date().toISOString() }, d, { json: JSON.stringify(d) })); n++;
@@ -100,7 +106,7 @@ function doPost(e) {
 function doGet(e) {
   const p = (e && e.parameter) || {};
   if (p.action === 'estado' && p.portal && p.portal === portalKey_()) {   // el cliente consulta SU reclamo por código
-    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reclamos');
+    const sh = ss_().getSheetByName('Reclamos');
     if (!sh || sh.getLastRow() < 2) return out_({ ok: true, reclamo: null });
     const rows = sh.getRange(2, 1, sh.getLastRow() - 1, GENERICA.length).getValues();
     for (let i = rows.length - 1; i >= 0; i--) if (String(rows[i][0]) === String(p.id)) { try { const r = JSON.parse(rows[i][5]); return out_({ ok: true, reclamo: { id: r.id, tipo: r.tipo, producto: r.producto, estado: r.estado, upd: r.upd, respuesta: r.estado === 'respondido' || r.estado === 'cerrado' ? r.respuesta : '', hist: (r.hist || []).slice(-6) } }); } catch (err) {} }
@@ -118,10 +124,16 @@ function doGet(e) {
   }
   if (p.action === 'rows') {                        // cualquier hoja genérica (Reclamos, Preguntas…)
     const nombre = cap_(p.sheet) + (/s$/.test(p.sheet) ? '' : 's');
-    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(nombre);
+    const sh = ss_().getSheetByName(nombre);
     if (!sh || sh.getLastRow() < 2) return out_({ ok: true, rows: [] });
     const last = sh.getLastRow(), n = Math.min(parseInt(p.n || '500', 10), last - 1);
     const rows = sh.getRange(last - n + 1, 1, n, GENERICA.length).getValues().map(function (r) { try { return JSON.parse(r[5]); } catch (err) { return null; } }).filter(Boolean);
+    return out_({ ok: true, rows: rows });
+  }
+  if (p.action === 'respuestas') {                  // portal de memorias: trae todas las respuestas
+    const sh = ss_().getSheetByName('Respuestas');
+    if (!sh || sh.getLastRow() < 2) return out_({ ok: true, rows: [] });
+    const c = COLS.Respuestas.length, rows = sh.getRange(2, 1, sh.getLastRow() - 1, c).getValues().map(function (r) { try { return JSON.parse(r[c - 1]); } catch (err) { return null; } }).filter(Boolean);
     return out_({ ok: true, rows: rows });
   }
   if (p.action === 'eventos') {
@@ -184,7 +196,7 @@ function portalKey_() {
 
 /** Ejecuta esta función una vez para autorizar Hojas y Drive. */
 function autorizar() {
-  SpreadsheetApp.getActiveSpreadsheet().getName();
+  ss_().getName();
   MailApp.getRemainingDailyQuota();                   // pide el permiso para enviar correos a los clientes
   carpeta_('Conocimiento'); carpeta_('Modelos');
 }
